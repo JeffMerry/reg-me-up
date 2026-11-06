@@ -1,6 +1,6 @@
 # RegMeUp — System-Level Software Design Specification
 
-Version 0.1 — 2026-11-06 (Asia/Bangkok). Selected design direction adopted by user; **pending teammate review**. This is a pre-implementation design, not an implemented architecture or tested result. [SRS](srs.md) defines requirements/decisions; feature contracts refine endpoint behavior.
+Version 0.2 — 2026-11-06 (Asia/Bangkok). Selected design direction adopted by user; **pending teammate review**. This is a pre-implementation design, not an implemented architecture or tested result. [SRS](srs.md) defines requirements/decisions; feature contracts refine endpoint behavior.
 
 ## 1. Architecture and stack
 
@@ -21,7 +21,7 @@ flowchart LR
 
 One deployable application is sufficient; logical layers do not require multiple servers. Planned structure: `client/`, `server/`, `server/db/migrations/`, `server/tests/`, `e2e/`. Controllers map HTTP; services implement rules/transaction boundaries; repositories accept the transaction client. Never take identity/ownership from client-supplied role/user IDs.
 
-Local Vite proxies `/api` to backend. Release design serves static frontend build and API through one origin, with persistent database storage outside temporary app filesystem. Docker/CI/GCP provisioning happens in Lab 5; no container/cloud resource exists from this document. Exact runtime/package versions are ENG-01: select compatible versions on both machines and record them/lockfile before implementation; no installed versions are asserted here.
+Local Vite proxies `/api` to backend. Release design serves static frontend build and API through one origin, with persistent database storage outside temporary app filesystem. Docker/CI/GCP provisioning happens in Lab 5; no container/cloud resource exists from this document. ENG-01 target versions are now selected in [dependency versions](dependency-versions.md): Node22.23.4, npm10.9.9, PostgreSQL17.11 and exact direct dependencies. Actual provisioning/install/lockfile/build verification on both machines remains pending; [SYS-01 preparation](sprints/sprint-1/sys-01.md) defines its scope and test design.
 
 ## 2. Conceptual model and Sprint 1 dictionary
 
@@ -167,8 +167,9 @@ D1: local working release, setup/build/tests and reviewed main release. Lab 5: D
 
 ## 8. Review and limitations
 
-No code/package/schema/test/migration/container deployed or executed by this document. Version pinning, actual GitHub settings, named author/reviewer assignments and contract commit IDs remain ENG-01/02. Technical v0.1 additions (encoding/limits/hash/timeouts/errors) are explicit design choices for teammate review, not invented stakeholder statements. UI source retains its original pending review; this SDS does not assert teammate acceptance.
+No code/package/schema/test/migration/container deployed or executed by this document. Exact target versions are documented; install/lockfile/environment verification remains ENG-01. GitHub CLI confirmed JeffMerry admin and THN4 write access; actual board/settings/review approvals and feature-specific assignments remain ENG-02. Technical v0.1 additions (encoding/limits/hash/timeouts/errors) are explicit design choices for teammate review, not invented stakeholder statements. UI source retains its original pending review; this SDS does not assert teammate acceptance.
 
 | Version | Date | Change | Review |
 |---|---|---|---|
 | 0.1 | 2026-11-06 | Selected stack/no ORM, model, atomic registration, session/CSRF, DTO/API/UI/config and delivery design | Pending teammate review; correctness NOT VERIFIED |
+| 0.2 | 2026-11-06 | Linked exact dependency targets and SYS-01 acceptance/test design; distinguished selection from installation/build evidence | Pending teammate review; application tests NOT RUN |

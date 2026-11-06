@@ -1,6 +1,6 @@
 # RegMeUp — Three-sprint plan
 
-Version 0.3 — 2026-11-06 (Asia/Bangkok). Planning baseline; pending teammate review. User selected Feature → develop → main. No feature completion or test execution claimed.
+Version 0.4 — 2026-11-06 (Asia/Bangkok). Planning baseline; pending teammate review. User selected Feature → develop → main. No feature completion or test execution claimed.
 
 ## 1. Goals, scope and dependencies
 
@@ -29,7 +29,7 @@ Dates are transcribed from [G](../references/group_work_specs_v1.md) and [D1](..
 | Step | Work / output | Gate before proceeding | Actual state |
 |---|---|---|---|
 | A | SRS/features/traceability/SDS/plan + F-01–04 contracts/STS/DoD | User direction recorded; teammate reviews behavior/design and logs real findings | Documents v0.1 prepared; review pending |
-| B | Assign Issues/leads/reviewers; select/pin compatible runtime/dependency versions; establish local/test DB and migration setup | ENG-01/02 resolved; contract/test design recorded in Git before corresponding implementation | NOT STARTED |
+| B | Assign Issues/leads/reviewers; select/pin compatible runtime/dependency versions; establish local/test DB and migration setup | ENG-01/02 resolved for affected work; contract/test design recorded in Git before corresponding implementation | PREPARATION: [SYS-01 #1](https://github.com/JeffMerry/reg-me-up/issues/1) assigned JeffMerry, THN4 designated reviewer; [versions](../dependency-versions.md) and [foundation AC/tests](sprint-1/sys-01.md) selected; install/provisioning/lockfile/tests NOT STARTED |
 | C | F-01 identity/session + shared access foundation | Meaningful auth tests, hash/lifecycle/CSRF, teammate review | NOT STARTED |
 | D | F-02 publish/discovery/own-event UI/API/DB | Validation/public privacy/owner rules and selected UI checks pass | NOT STARTED |
 | E | F-03 register/own retrieval | Atomic concurrency/duplicates/restart tests pass; reviewed transaction implementation | NOT STARTED |
@@ -37,7 +37,7 @@ Dates are transcribed from [G](../references/group_work_specs_v1.md) and [D1](..
 | G | Integrate staging, acceptance/regression/build, README/seed review, release PR to main/tag | [DoD](sprint-1/dod.md) evidence complete; disclose failures/skips/limitations | NOT STARTED |
 | H | Assemble actual PDF A–F with page navigation/evidence | Release commit and real results/screenshots/reviews/contributions present | NOT STARTED |
 
-UI reference layouts/components can be designed alongside contract review, but feature implementation and executable rule tests follow that feature's versioned design. This documentation-only task does not start steps B–H automatically.
+UI reference layouts/components can be designed alongside contract review, but feature implementation and executable rule tests follow that feature's versioned design. The authorized documentation/SYS-01 preparation task starts planning portions of B only; it does not provision the environment or start implementation steps C–H.
 
 ## 4. Two-person workflow
 
@@ -47,7 +47,7 @@ Use `develop` as sprint staging and `main` as accepted release. Proposed naming:
 
 Issue → contract/test-design version → feature branch from current staging → failing intended-behavior test for meaningful rule work → implementation → passing checks/diff inspection → PR into develop reviewed by the other teammate → staging integration/system/acceptance checks → reviewed release PR to main → immutable release reference. Preserve contract revision reasons and real red/green versions.
 
-No self-approval. Record a specific check/question/finding/reason for teammate approval. Both members must participate in requirements/design, tests, implementation, review/integration and later delivery/maintenance; do not assign permanent docs-only/code-only roles. Authors/reviewers are currently UNASSIGNED; actual names and evidence go into Issues/PRs when work occurs.
+No self-approval. Record a specific check/question/finding/reason for teammate approval. Both members must participate in requirements/design, tests, implementation, review/integration and later delivery/maintenance; do not assign permanent docs-only/code-only roles. SYS-01 Issue #1 is assigned JeffMerry with THN4 designated reviewer; remaining feature assignments and actual review approvals are pending and recorded only when they occur.
 
 Before Lab 5, retain local build/test output against the tested commit. Completed CI/Docker/GCP belongs to Lab 5; use CI earlier if implemented, but never claim it exists from a plan. Main default branch does not itself establish protected checks/review policy; inspect GitHub settings separately.
 
@@ -72,3 +72,4 @@ No fixed hour/day estimates or contribution counts have been agreed. At each int
 | 0.1 | 2026-11-06 | Three-sprint allocation, assessment boundaries, Sprint 1 sequence/team workflow and honest current status | Pending teammate review |
 | 0.2 | 2026-11-06 | Linked explicit foundation/feature/fix branches and peer-reviewed PR/release plan | Pending teammate review; workflow not executed |
 | 0.3 | 2026-11-06 | Recorded user selection of Feature → develop → main, with develop as staging | Teammate review pending; workflow not executed |
+| 0.4 | 2026-11-06 | Recorded SYS-01 Issue/lead, exact targets and bounded foundation acceptance/test preparation | Pending teammate review; installation/implementation/tests not started |

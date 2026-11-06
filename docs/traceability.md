@@ -1,6 +1,6 @@
 # RegMeUp — Requirements and verification traceability
 
-Version 0.1 — 2026-11-06. Pending teammate review. Sources: [SRS](srs.md), [features](features.md), [System SDS](system-sds.md), [UI baseline](ui-spec.md), [Sprint 1 STS](sprints/sprint-1/sts.md).
+Version 0.2 — 2026-11-06. Pending teammate review. Sources: [SRS](srs.md), [features](features.md), [System SDS](system-sds.md), [UI baseline](ui-spec.md), [Sprint 1 STS](sprints/sprint-1/sts.md).
 
 **Every actual test result is NOT RUN; actual test files/names, tested commits, command output and evidence are not available.** Planned coverage below does not mean implementation or coverage measurements exist. No baseline requirement removed.
 
@@ -46,7 +46,7 @@ Version 0.1 — 2026-11-06. Pending teammate review. Sources: [SRS](srs.md), [fe
 | NFR-02 | F-03/05/07; SYS-01 durability | 1–3 + Lab 5 | AC-10 → TEST-10 app restart; later cancellation/attendance and cloud redeploy checks | S1 designed; later checks pending; NOT RUN |
 | NFR-03 | F-03/05/06 | 1–2 | AC-06/07 → TEST-06/07 real DB contention; later cancel/capacity interactions | S1 designed; later contracts pending; NOT RUN |
 | NFR-04 | F-01 | 1 | AC-02/12 → TEST-02/12 lifecycle/hashed storage/log/response verification | Hashing gap addressed by design; NOT RUN |
-| NFR-05 | SYS-01 | 1–3 + Lab 5 | AC-13 → TEST-13 fresh setup/migrate/seed/build/tests; later Docker/CI/deploy/reproduce | Local design; executable commands not present; NOT RUN |
+| NFR-05 | SYS-01 | 1–3 + Lab 5 | AC-13 → TEST-13 full setup; foundation SYS-AC-01–07 → SYS-TEST-01–07 in [SYS-01](sprints/sprint-1/sys-01.md); later Docker/CI/deploy/reproduce | Exact targets selected; foundation/full tests NOT RUN; executable commands not present |
 | NFR-06 | F-01–09 applicable UI | 1–3 | AC-14 → TEST-14.A–N ↔ UIV-01–14; later feature states added per sprint | S1 cases designed; later contracts pending; NOT RUN |
 | NFR-07 | F-09 | 2–3 | Future AC/STS: assignment restart + anonymous/wrong-role/unassigned reads denied | Pending Q-07/08 and F-09 contract; NOT RUN |
 
@@ -76,7 +76,7 @@ STS §5 maps every UIV-01–14 to TEST-14.A–N and API/DB supplements. Screen c
 
 [STS execution register](sprints/sprint-1/sts.md) is the single actual-test record: planned ID/AC, actual file/name, automated/manual method, result, tested commit and evidence. Every current actual field is empty/NOT RUN. When executed, retain command/output/counts/failed/skipped cases and manual tester/version. PR/review/release evidence belongs to [DoD](sprints/sprint-1/dod.md), currently NOT RECORDED.
 
-Known remaining work: implement and run all S1 tests; pin versions and produce actual setup; record contracts/test-design commit before implementation; real teammate review/Issues/integration; elaborate Sprint 2–3 AC/STS after Q-04–09. A row linked to planned tests is not a completed requirement. No evidence of coverage percentage exists.
+Known remaining work: implement and run all S1 tests; install/lock/verify [selected versions](dependency-versions.md) and produce actual setup; record contract/test-design commits before implementation; real teammate review/Issues/integration; elaborate Sprint 2–3 AC/STS after Q-04–09. Foundation-specific SYS-AC/SYS-TEST design supplements full AC-13/TEST-13; its actual results remain NOT RUN. A row linked to planned tests is not a completed requirement. No evidence of coverage percentage exists.
 
 | Change | Rationale / authority | Affected artifacts | Status |
 |---|---|---|---|
@@ -91,3 +91,4 @@ No instructor-approved scope changes or teammate approvals have been recorded; t
 | Version | Date | Change | Review |
 |---|---|---|---|
 | 0.1 | 2026-11-06 | All baseline requirements allocated; S1 AC/test/UI links; explicit later gaps and empty actual evidence | Pending teammate review |
+| 0.2 | 2026-11-06 | Linked foundation-specific SYS-AC/SYS-TEST design and selected versions without claiming execution | Pending teammate review; all tests NOT RUN |

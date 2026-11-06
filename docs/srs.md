@@ -2,7 +2,7 @@
 
 | Item | Value |
 |---|---|
-| Version / date | 0.1 / 2026-11-06 (Asia/Bangkok) |
+| Version / date | 0.2 / 2026-11-06 (Asia/Bangkok) |
 | Product | กิจกรรมอบรมและเวิร์กช็อปภายในมหาวิทยาลัย — CPE334 Topic 3 |
 | Baseline authority | บริบทที่ผู้ใช้ยืนยันและคำสั่งให้นำข้อเสนอทางเทคนิคลงเอกสาร |
 | Review / implementation | Pending teammate review / not implemented |
@@ -115,8 +115,8 @@ Text limits ใน SDS เป็น technical design limits จาก proposal �
 | Q-07 | Instructor count, changes/removal และ assignment history | OPEN — F-09 contract, Sprint 2 |
 | Q-08 | Instructor multi-role และ overlapping teaching events | OPEN — F-09 contract, Sprint 2 |
 | Q-09 | Check-in window/corrections และ report counting | OPEN — F-07/08 contracts, Sprint 3 |
-| ENG-01 | Exact compatible runtime/package versions และ local PostgreSQL provisioning | OPEN — executable setup; record versions/lockfile before implementation, do not guess installed versions |
-| ENG-02 | Feature authors/reviewers, GitHub board/Issues, branch settings และ actual review findings | OPEN — assign/check actual GitHub state before feature workflow |
+| ENG-01 | Exact compatible runtime/package versions และ local PostgreSQL provisioning | TARGETS SELECTED — [versions](dependency-versions.md); actual install/lockfile/provisioning/build validation pending SYS-01; selection is not compatibility test evidence |
+| ENG-02 | Feature authors/reviewers, GitHub board/Issues, branch settings และ actual review findings | PARTIAL — CLI verified JeffMerry admin/THN4 write and proposed SYS-01 roles; actual review approvals/board/protection and other feature assignments pending |
 | ENG-03 | GCP components/resource access/cost/configuration จาก Lab 5 guidance | OPEN — Lab 5; architecture must support durable DB now |
 
 ## 8. Sources and discrepancies
@@ -139,3 +139,4 @@ No source baseline requirement removed. No implementation/approval/test evidence
 | Version | Date | Change | Review |
 |---|---|---|---|
 | 0.1 | 2026-11-06 | Extracted baseline FR/BR/NFR; recorded user-adopted design direction and remaining questions | Pending teammate review; actual reviewer/Issue/commit not yet recorded |
+| 0.2 | 2026-11-06 | Recorded exact version target selection and verified collaborator access for SYS-01 preparation | Pending teammate review; no install/application verification |

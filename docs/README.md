@@ -1,6 +1,6 @@
 # RegMeUp engineering baseline
 
-Version 0.1 — 6 November 2026 (Asia/Bangkok)
+Version 0.2 — 6 November 2026 (Asia/Bangkok)
 
 เอกสารชุดนี้จัดทำตามคำสั่งผู้ใช้ให้นำข้อเสนอที่คุยกันมาสรุปลงเอกสาร ใช้เป็น baseline สำหรับ design และการ review ก่อน implementation **ยังไม่มี teammate approval, application implementation หรือ test execution**
 
@@ -13,6 +13,7 @@ Version 0.1 — 6 November 2026 (Asia/Bangkok)
 | E | [F-01](sprints/sprint-1/f-01.md), [F-02](sprints/sprint-1/f-02.md), [F-03](sprints/sprint-1/f-03.md), [F-04](sprints/sprint-1/f-04.md) | Pre-implementation contracts v0.1 |
 | E | [STS](sprints/sprint-1/sts.md), [Definition of Done](sprints/sprint-1/dod.md) | Test design จัดทำแล้ว; ทุก verification NOT RUN |
 | UI | [UI specification](ui-spec.md) | Baseline เดิม; teammate review ยัง pending |
+| SYS-01 | [Foundation preparation](sprints/sprint-1/sys-01.md), [Dependency versions](dependency-versions.md), [Issue #1](https://github.com/JeffMerry/reg-me-up/issues/1) | Scope/acceptance/test design และเวอร์ชันเป้าหมายจัดทำแล้ว; JeffMerry เป็น assignee, THN4 designated reviewer; ยังไม่ติดตั้งหรือ implementation |
 
 เลือก React/TypeScript/Vite + Tailwind, Express/TypeScript, PostgreSQL ผ่าน `pg` และ SQL migrations โดย **ไม่ใช้ ORM** การรับแนวทางในแชตเป็นคนละรายการกับ teammate review/PR approval ไม่มีการใส่ชื่อ reviewer หรือ Issue/PR ที่ยังไม่เกิดขึ้น
 
