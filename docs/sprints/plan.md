@@ -1,6 +1,6 @@
 # RegMeUp — Three-sprint plan
 
-Version 0.1 — 2026-11-06 (Asia/Bangkok). Planning baseline; pending teammate review. No feature completion or test execution claimed.
+Version 0.3 — 2026-11-06 (Asia/Bangkok). Planning baseline; pending teammate review. User selected Feature → develop → main. No feature completion or test execution claimed.
 
 ## 1. Goals, scope and dependencies
 
@@ -41,6 +41,8 @@ UI reference layouts/components can be designed alongside contract review, but f
 
 ## 4. Two-person workflow
 
+The user selected **Feature → develop → main**, with develop as sprint staging and teammate-reviewed PRs before merging features. Detailed branch/PR sequence, foundation scope, proposed review allocation and GitHub merge controls are in the [Sprint 1 branch plan](sprint-1/branch-plan.md). This records the selected workflow; it does not create branches/Issues/PRs or assert current GitHub protection settings.
+
 Use `develop` as sprint staging and `main` as accepted release. Proposed naming: `feature/f-01-identity`, `feature/f-02-events`, `feature/f-03-registration`, `feature/f-04-owner-list`; fixes get bounded linked Issues. Branch names are conventions, not branches already created.
 
 Issue → contract/test-design version → feature branch from current staging → failing intended-behavior test for meaningful rule work → implementation → passing checks/diff inspection → PR into develop reviewed by the other teammate → staging integration/system/acceptance checks → reviewed release PR to main → immutable release reference. Preserve contract revision reasons and real red/green versions.
@@ -68,3 +70,5 @@ No fixed hour/day estimates or contribution counts have been agreed. At each int
 | Version | Date | Change | Review |
 |---|---|---|---|
 | 0.1 | 2026-11-06 | Three-sprint allocation, assessment boundaries, Sprint 1 sequence/team workflow and honest current status | Pending teammate review |
+| 0.2 | 2026-11-06 | Linked explicit foundation/feature/fix branches and peer-reviewed PR/release plan | Pending teammate review; workflow not executed |
+| 0.3 | 2026-11-06 | Recorded user selection of Feature → develop → main, with develop as staging | Teammate review pending; workflow not executed |
