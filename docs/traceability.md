@@ -82,7 +82,7 @@ Known remaining work: implement and run all S1 tests; install/lock/verify [selec
 |---|---|---|---|
 | Mapping clarification | R omitted NFR-01 coverage in F-02/03/09; original security rule already applies | Features/traceability/SDS/contracts | Documented, pending teammate review |
 | AC/TEST-11–15 | Close R discovery/hash/setup/UI/own-event verification gaps under user-adopted proposal | Contracts/STS/DoD/traceability | Designed; NOT RUN |
-| No ORM; selected technical direction | User explicitly chose no ORM and instructed proposals be documented | SRS DEC-08–13, SDS/contracts | Baseline for documentation; teammate review pending |
+| Prisma ORM replaces earlier no-ORM choice | User selected Prisma ORM on 2026-11-10; DEC-08 remains historical and DEC-14 supersedes it | SRS DEC-14, SDS, F-03, SYS-01, versions | Design updated; exact Prisma versions, teammate review and execution pending |
 
 No instructor-approved scope changes or teammate approvals have been recorded; this table is not a fabricated approval log. Later changes need reason/affected requirement IDs/version/actual decision source and must retain baseline unfinished work.
 
@@ -92,3 +92,4 @@ No instructor-approved scope changes or teammate approvals have been recorded; t
 |---|---|---|---|
 | 0.1 | 2026-11-06 | All baseline requirements allocated; S1 AC/test/UI links; explicit later gaps and empty actual evidence | Pending teammate review |
 | 0.2 | 2026-11-06 | Linked foundation-specific SYS-AC/SYS-TEST design and selected versions without claiming execution | Pending teammate review; all tests NOT RUN |
+| 0.3 | 2026-11-10 | Traced DEC-14 Prisma decision and affected design artifacts | Pending teammate review; all tests NOT RUN |

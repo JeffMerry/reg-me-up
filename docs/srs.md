@@ -82,7 +82,7 @@ Sprint 1 ไม่รวม editing/deleting/draft controls, Instructor pages, c
 
 ## 6. Decisions and assumptions
 
-DEC-01–07 คงความหมายจาก R และคำยืนยันผู้ใช้; DEC-08–13 บันทึกทางเลือกจาก proposal ที่ผู้ใช้ให้สรุปลงเอกสารวันที่ 6 พ.ย. 2026 การยืนยันนี้ไม่ใช่ teammate review หรือ test result
+DEC-01–07 คงความหมายจาก R และคำยืนยันผู้ใช้; DEC-08–13 บันทึกแนวทางเดิมวันที่ 6 พ.ย. 2026 และ DEC-14 บันทึกการเปลี่ยนแนวทางฐานข้อมูลวันที่ 10 พ.ย. การยืนยันนี้ไม่ใช่ teammate review หรือ test result
 
 | ID | Decision / rationale | Authority / status |
 |---|---|---|
@@ -93,12 +93,13 @@ DEC-01–07 คงความหมายจาก R และคำยืน�
 | DEC-05 | Required event fields/time range/positive integer capacity; description optional | User context confirmed |
 | DEC-06 | Published list/detail public; registration authenticated | User context confirmed |
 | DEC-07 | Participant-only registration; Organizer direct API denied | User context confirmed |
-| DEC-08 | ไม่ใช้ ORM; `pg` + parameterized SQL + versioned SQL migrations | User explicitly confirmed |
+| DEC-08 | เดิมเลือกไม่ใช้ ORM; `pg` + parameterized SQL + versioned SQL migrations | Historical decision, superseded by DEC-14 on 2026-11-10 |
 | DEC-09 | React/TypeScript/Vite + Tailwind, Express/TypeScript, PostgreSQL, Vitest/Playwright; backend เดียว | Proposal adopted for documentation; skills of both members not independently verified |
 | DEC-10 | PostgreSQL server sessions, Argon2id, absolute 8-hour login, CSRF/cookie protections, server logout invalidation | Proposal adopted; exact lifecycle in SDS/F-01 |
 | DEC-11 | READ COMMITTED + event row lock + unique active pair; duplicate before full; remaining derived from rows | Proposal adopted; correctness NOT VERIFIED |
 | DEC-12 | REST/JSON, safe error policy, UTC API/DB instants + Asia/Bangkok UI, English UI copy, deterministic paginated lists | Proposal adopted; details in SDS |
 | DEC-13 | Bounded text fields, immediate publication, no automatic mutation retry/idempotency store, no start/end cutoff in Sprint 1 | Proposal adopted; cutoff is scope choice, not deadline policy for Sprint 2 |
+| DEC-14 | PostgreSQL + Prisma ORM/Prisma Migrate; parameterized SQL เฉพาะจุดที่ต้องใช้ เช่น event row lock; คง DEC-11 และ backend authorization | User selected 2026-11-10; design and Prisma exact versions pending teammate review and installation verification |
 
 Text limits ใน SDS เป็น technical design limits จาก proposal ไม่ใช่ข้อกำหนดดั้งเดิมของวิชา รายละเอียดเติมเพื่อให้ contract ชัด (Unicode counting/hash/lock timeout) ระบุเป็น design v0.1 และยัง pending teammate review
 
@@ -115,7 +116,7 @@ Text limits ใน SDS เป็น technical design limits จาก proposal �
 | Q-07 | Instructor count, changes/removal และ assignment history | OPEN — F-09 contract, Sprint 2 |
 | Q-08 | Instructor multi-role และ overlapping teaching events | OPEN — F-09 contract, Sprint 2 |
 | Q-09 | Check-in window/corrections และ report counting | OPEN — F-07/08 contracts, Sprint 3 |
-| ENG-01 | Exact compatible runtime/package versions และ local PostgreSQL provisioning | TARGETS SELECTED — [versions](dependency-versions.md); actual install/lockfile/provisioning/build validation pending SYS-01; selection is not compatibility test evidence |
+| ENG-01 | Exact compatible runtime/package versions และ local PostgreSQL provisioning | PARTIAL — existing targets selected, Prisma exact versions/compatibility remain open; see [versions](dependency-versions.md); install/lockfile/provisioning/build validation pending SYS-01 |
 | ENG-02 | Feature authors/reviewers, GitHub board/Issues, branch settings และ actual review findings | PARTIAL — CLI verified JeffMerry admin/THN4 write and proposed SYS-01 roles; actual review approvals/board/protection and other feature assignments pending |
 | ENG-03 | GCP components/resource access/cost/configuration จาก Lab 5 guidance | OPEN — Lab 5; architecture must support durable DB now |
 
@@ -140,3 +141,4 @@ No source baseline requirement removed. No implementation/approval/test evidence
 |---|---|---|---|
 | 0.1 | 2026-11-06 | Extracted baseline FR/BR/NFR; recorded user-adopted design direction and remaining questions | Pending teammate review; actual reviewer/Issue/commit not yet recorded |
 | 0.2 | 2026-11-06 | Recorded exact version target selection and verified collaborator access for SYS-01 preparation | Pending teammate review; no install/application verification |
+| 0.3 | 2026-11-10 | Recorded user-selected Prisma ORM in DEC-14, superseding DEC-08; reopened exact Prisma version selection | Pending teammate review; NOT RUN |
