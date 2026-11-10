@@ -9,7 +9,7 @@ Version 0.3 — 10 November 2026 (Asia/Bangkok)
 | A | [SRS](srs.md) | Requirements และ decision register จัดทำแล้ว; pending teammate review |
 | B | [Feature inventory](features.md), [Traceability](traceability.md) | ครบ baseline allocation; actual results ยัง NOT RUN |
 | C | [System SDS](system-sds.md) | Selected design พร้อม parameters/API/data conventions; pending teammate review |
-| D | [Three-sprint plan](sprints/plan.md), [Sprint 1 branch/PR plan](sprints/sprint-1/branch-plan.md) | ผู้ใช้เลือก Feature → develop → main; teammate review และการดำเนิน workflow ยัง pending |
+| D | [Three-sprint plan](sprints/plan.md), [Sprint 1 branch/PR plan](sprints/sprint-1/branch-plan.md) | ผู้ใช้เลือก Feature → sprint/01-staging → main; teammate review และการดำเนิน workflow ยัง pending |
 | E | [F-01](sprints/sprint-1/f-01.md), [F-02](sprints/sprint-1/f-02.md), [F-03](sprints/sprint-1/f-03.md), [F-04](sprints/sprint-1/f-04.md) | Pre-implementation contracts v0.1 |
 | E | [STS](sprints/sprint-1/sts.md), [Definition of Done](sprints/sprint-1/dod.md) | Test design จัดทำแล้ว; ทุก verification NOT RUN |
 | UI | [UI specification](ui-spec.md) | Baseline เดิม; teammate review ยัง pending |

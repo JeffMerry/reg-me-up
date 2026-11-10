@@ -1,6 +1,6 @@
 # RegMeUp — Three-sprint plan
 
-Version 0.4 — 2026-11-06 (Asia/Bangkok). Planning baseline; pending teammate review. User selected Feature → develop → main. No feature completion or test execution claimed.
+Version 0.5 — 2026-11-10 (Asia/Bangkok). Planning baseline; pending teammate review. User selected Feature → sprint/01-staging → main. No feature completion or test execution claimed.
 
 ## 1. Goals, scope and dependencies
 
@@ -41,11 +41,11 @@ UI reference layouts/components can be designed alongside contract review, but f
 
 ## 4. Two-person workflow
 
-The user selected **Feature → develop → main**, with develop as sprint staging and teammate-reviewed PRs before merging features. Detailed branch/PR sequence, foundation scope, proposed review allocation and GitHub merge controls are in the [Sprint 1 branch plan](sprint-1/branch-plan.md). This records the selected workflow; it does not create branches/Issues/PRs or assert current GitHub protection settings.
+The user selected **Feature → sprint/01-staging → main**, with sprint/01-staging as sprint staging and teammate-reviewed PRs before merging features. Detailed branch/PR sequence, foundation scope, proposed review allocation and GitHub merge controls are in the [Sprint 1 branch plan](sprint-1/branch-plan.md). The documentation PR and SYS-01 Issue exist; this plan does not assert feature branches, approvals or GitHub protection settings.
 
-Use `develop` as sprint staging and `main` as accepted release. Proposed naming: `feature/f-01-identity`, `feature/f-02-events`, `feature/f-03-registration`, `feature/f-04-owner-list`; fixes get bounded linked Issues. Branch names are conventions, not branches already created.
+Use `sprint/01-staging` as sprint staging and `main` as accepted release. Proposed naming: `feature/f-01-identity`, `feature/f-02-events`, `feature/f-03-registration`, `feature/f-04-owner-list`; fixes get bounded linked Issues. Branch names are conventions, not branches already created.
 
-Issue → contract/test-design version → feature branch from current staging → failing intended-behavior test for meaningful rule work → implementation → passing checks/diff inspection → PR into develop reviewed by the other teammate → staging integration/system/acceptance checks → reviewed release PR to main → immutable release reference. Preserve contract revision reasons and real red/green versions.
+Issue → contract/test-design version → feature branch from current staging → failing intended-behavior test for meaningful rule work → implementation → passing checks/diff inspection → PR into sprint/01-staging reviewed by the other teammate → staging integration/system/acceptance checks → reviewed release PR to main → immutable release reference. Preserve contract revision reasons and real red/green versions.
 
 No self-approval. Record a specific check/question/finding/reason for teammate approval. Both members must participate in requirements/design, tests, implementation, review/integration and later delivery/maintenance; do not assign permanent docs-only/code-only roles. SYS-01 Issue #1 is assigned JeffMerry with THN4 designated reviewer; remaining feature assignments and actual review approvals are pending and recorded only when they occur.
 
@@ -73,3 +73,4 @@ No fixed hour/day estimates or contribution counts have been agreed. At each int
 | 0.2 | 2026-11-06 | Linked explicit foundation/feature/fix branches and peer-reviewed PR/release plan | Pending teammate review; workflow not executed |
 | 0.3 | 2026-11-06 | Recorded user selection of Feature → develop → main, with develop as staging | Teammate review pending; workflow not executed |
 | 0.4 | 2026-11-06 | Recorded SYS-01 Issue/lead, exact targets and bounded foundation acceptance/test preparation | Pending teammate review; installation/implementation/tests not started |
+| 0.5 | 2026-11-10 | Updated workflow after develop was renamed sprint/01-staging | Pending teammate review |

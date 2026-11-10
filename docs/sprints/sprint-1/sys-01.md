@@ -1,6 +1,6 @@
 # SYS-01 — Local project foundation: implementation preparation
 
-Version 0.2 — 2026-11-10 (Asia/Bangkok)
+Version 0.3 — 2026-11-10 (Asia/Bangkok)
 
 **State: READY FOR DESIGN REVIEW; IMPLEMENTATION NOT STARTED; ALL FOUNDATION TESTS NOT RUN.** This prepares step2 only. It does not create the implementation branch, package manifests, migration scripts, database or test suite.
 
@@ -8,8 +8,8 @@ Version 0.2 — 2026-11-10 (Asia/Bangkok)
 |---|---|
 | Requirement | NFR-05, supports NFR-02 and F-01–04 shared schema; AC-13/TEST-13 full fresh-setup target |
 | Sources | [SDS](../../system-sds.md), [versions](../../dependency-versions.md), [branch plan](branch-plan.md), [STS](sts.md), [DoD](dod.md) |
-| Intended implementation branch | `chore/sys-01-foundation` from reviewed/current develop after documentation PR merge |
-| Implementation PR target | develop; peer approval before merge |
+| Intended implementation branch | `chore/sys-01-foundation` from reviewed/current sprint/01-staging after documentation PR merge |
+| Implementation PR target | sprint/01-staging; peer approval before merge |
 | Lead / reviewer | JeffMerry assigned lead; THN4 designated design reviewer through documentation PR; no approval claimed |
 | GitHub Issue / documentation PR | [SYS-01 Issue #1](https://github.com/JeffMerry/reg-me-up/issues/1); documentation PR link is maintained in that Issue after publication |
 | Version selection | Node22.23.4 / npm10.9.9 / PostgreSQL17.11 and prior package targets in versions document; exact Prisma v7 package versions pending selection/validation |
@@ -60,10 +60,10 @@ Create meaningful commits: runtime/workspace setup; client/server configuration;
 
 ## 5. Before implementation and completion gates
 
-- [ ] Documentation PR merged into develop after THN4's substantive review; actual approval/date recorded.
+- [ ] Documentation PR merged into sprint/01-staging after THN4's substantive review; actual approval/date recorded.
 - [x] [SYS-01 GitHub Issue #1](https://github.com/JeffMerry/reg-me-up/issues/1) created with scope, seven SYS-AC/test designs, selected versions, assigned JeffMerry lead and designated THN4 reviewer. This is planning evidence only.
 - [ ] Teammate reviews schema/migration ownership and environment/cleanup test design before implementation.
-- [ ] Create `chore/sys-01-foundation` from current develop and link implementation PR to SYS-01 Issue; do not close the implementation Issue from this docs-only PR.
+- [ ] Create `chore/sys-01-foundation` from current sprint/01-staging and link implementation PR to SYS-01 Issue; do not close the implementation Issue from this docs-only PR.
 - [ ] Actual foundation checks execute with commands/files/commit/counts; disclosed failures/limitations; full Sprint1 results remain NOT RUN until implemented/tested.
 - [ ] THN4 reviews implementation PR; merge only after accepted changes/checks, without author self-approval.
 
@@ -83,3 +83,4 @@ Create meaningful commits: runtime/workspace setup; client/server configuration;
 |---|---|---|---|
 | 0.1 | 2026-11-06 | Prepared SYS-01 scope, migration ownership, exact version handoff and seven acceptance/test designs before implementation | Pending teammate review; NOT RUN |
 | 0.2 | 2026-11-10 | Switched foundation design to Prisma Client/Migrate and revised migration verification and reset safety; Prisma versions pending | Pending teammate review; NOT RUN |
+| 0.3 | 2026-11-10 | Updated foundation source branch and PR base after staging branch rename | Pending teammate review; NOT RUN |

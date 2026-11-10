@@ -1,29 +1,29 @@
 # RegMeUp — Sprint 1 branch and pull request plan
 
-Version 0.4 — 2026-11-10 (Asia/Bangkok)
+Version 0.5 — 2026-11-10 (Asia/Bangkok)
 
-Status: **USER-SELECTED WORKFLOW / PENDING TEAMMATE REVIEW**. On 6 November 2026 the user selected **Feature → develop → main**, with develop serving as Sprint 1 staging. Feature PRs target develop and require teammate review before merge; the release PR targets main after integration checks. The user subsequently authorized documentation publication and SYS-01 preparation: `docs/sprint-1-branch-plan` now holds the documentation changes and [SYS-01 Issue #1](https://github.com/JeffMerry/reg-me-up/issues/1) is open, assigned to JeffMerry with THN4 designated reviewer. No implementation branch, review approval or GitHub protection configuration is claimed. Other feature assignments remain open; existing contracts/STS stay the pre-implementation baseline.
+Status: **USER-SELECTED WORKFLOW / PENDING TEAMMATE REVIEW**. On 6 November 2026 the user selected Feature → develop → main. On 10 November 2026, GitHub and the local branch were renamed from `develop` to `sprint/01-staging`; the current flow is **Feature → sprint/01-staging → main**. Feature PRs target sprint/01-staging and require teammate review before merge; the release PR targets main after integration checks. The user subsequently authorized documentation publication and SYS-01 preparation: `docs/sprint-1-branch-plan` now holds the documentation changes and [SYS-01 Issue #1](https://github.com/JeffMerry/reg-me-up/issues/1) is open, assigned to JeffMerry with THN4 designated reviewer. No implementation branch, review approval or GitHub protection configuration is claimed. Other feature assignments remain open; existing contracts/STS stay the pre-implementation baseline.
 
 ## 1. Current repository and branch responsibilities
 
-Inspected local refs: `develop` and `origin/develop` at `0581bdf`; `main` and `origin/main` at `a8cbbb5`; clean working tree before writing this plan. These are local/tracking refs, not a fresh query of GitHub settings or active PRs. The eight documentation commits already on develop are a documentation baseline, not teammate-reviewed implementation.
+On 10 November 2026 GitHub and local `sprint/01-staging` pointed to `0581bdf` after the rename; `main` remained at `a8cbbb5`. PR #2 base changed to `sprint/01-staging` and teammate review remained pending. These are observed refs at that time, not a guarantee of current settings. The eight documentation commits already on sprint/01-staging are a documentation baseline, not teammate-reviewed implementation.
 
 | Branch | Role | Source / PR target |
 |---|---|---|
-| `main` | Accepted Sprint 1 release with recorded integration/acceptance evidence | Release PR from `develop` after all feature PRs/integration checks reviewed |
-| `develop` | Sprint staging/integration | Receives reviewed foundation/feature/fix/documentation PRs |
+| `main` | Accepted Sprint 1 release with recorded integration/acceptance evidence | Release PR from `sprint/01-staging` after all feature PRs/integration checks reviewed |
+| `sprint/01-staging` | Sprint staging/integration | Receives reviewed foundation/feature/fix/documentation PRs |
 
-New work branches are created from **current develop when dependencies have merged**, not all from today's baseline. One feature branch covers applicable UI/API/DB/tests/docs as one bounded feature. Both members understand all layers and review each other's work.
+New work branches are created from **current sprint/01-staging when dependencies have merged**, not all from today's baseline. One feature branch covers applicable UI/API/DB/tests/docs as one bounded feature. Both members understand all layers and review each other's work.
 
 ## 2. Planned work branches and PR boundaries
 
 | Order | Branch to create | Scope / linked work | Required predecessor | PR base / readiness |
 |---|---|---|---|---|
-| 1 | `chore/sys-01-foundation` | SYS-01: pinned runtime/dependencies, client/server skeleton, Tailwind tokens/shared base setup, local/test PostgreSQL config, Prisma schema/Migrate and shared schema/seed plan, test runner setup, actual README commands; no completed domain workflow claimed | Baseline/design review; ENG-01 selections recorded | `develop`; fresh setup/build and meaningful setup checks actually run, teammate approves |
-| 2 | `feature/f-01-identity` | F-01 contract: login/logout/me, hash/session/CSRF, backend role foundation, UI-01/navigation/guards, TEST-01/02/12 and applicable shared cases | Foundation merged | `develop`; auth/UI lifecycle checks, contract/review evidence and tests |
-| 3 | `feature/f-02-events` | F-02: publish/public list/detail/own-event list, validation/timezone/privacy, UI-02/03/05/06, TEST-03/11/15 + shared cases | F-01 merged; shared registration relation available for counts | `develop`; public/owner/validation API+DB and selected UI checks |
-| 4 | `feature/f-03-registration` | F-03: atomic register, own list/detail/status, UI-03 registration + UI-04/04-D, TEST-04–07/10 + shared cases | F-02 merged | `develop`; real DB concurrency/uniqueness/privacy/restart verification required |
-| 5 | `feature/f-04-owner-list` | F-04: owner-only event registrations/summary/pagination, UI-07 and UI-05 links, TEST-08 + shared cases | F-03 merged | `develop`; owner positive/negative controls, safe DTOs/counts and Organizer journey |
+| 1 | `chore/sys-01-foundation` | SYS-01: pinned runtime/dependencies, client/server skeleton, Tailwind tokens/shared base setup, local/test PostgreSQL config, Prisma schema/Migrate and shared schema/seed plan, test runner setup, actual README commands; no completed domain workflow claimed | Baseline/design review; ENG-01 selections recorded | `sprint/01-staging`; fresh setup/build and meaningful setup checks actually run, teammate approves |
+| 2 | `feature/f-01-identity` | F-01 contract: login/logout/me, hash/session/CSRF, backend role foundation, UI-01/navigation/guards, TEST-01/02/12 and applicable shared cases | Foundation merged | `sprint/01-staging`; auth/UI lifecycle checks, contract/review evidence and tests |
+| 3 | `feature/f-02-events` | F-02: publish/public list/detail/own-event list, validation/timezone/privacy, UI-02/03/05/06, TEST-03/11/15 + shared cases | F-01 merged; shared registration relation available for counts | `sprint/01-staging`; public/owner/validation API+DB and selected UI checks |
+| 4 | `feature/f-03-registration` | F-03: atomic register, own list/detail/status, UI-03 registration + UI-04/04-D, TEST-04–07/10 + shared cases | F-02 merged | `sprint/01-staging`; real DB concurrency/uniqueness/privacy/restart verification required |
+| 5 | `feature/f-04-owner-list` | F-04: owner-only event registrations/summary/pagination, UI-07 and UI-05 links, TEST-08 + shared cases | F-03 merged | `sprint/01-staging`; owner positive/negative controls, safe DTOs/counts and Organizer journey |
 
 Initial baseline contracts: [F-01](f-01.md), [F-02](f-02.md), [F-03](f-03.md), [F-04](f-04.md), [STS](sts.md), [DoD](dod.md). Review the relevant subset before each implementation; if details change, record revised design/test intent first on that branch before code.
 
@@ -35,11 +35,11 @@ SYS-01 now has a [bounded preparation contract](sys-01.md), [dependency targets]
 
 1. Create a real GitHub Issue with SYS/F ID, linked requirements/contract/AC/STS, scope, dependency, lead and a different teammate reviewer. SYS-01 is [Issue #1](https://github.com/JeffMerry/reg-me-up/issues/1), assigned JeffMerry; THN4 has verified write access and is designated reviewer. F-01–04 Issues/assignments remain uncreated/unassigned.
 2. Before code, teammate reviews the current contract/UI/test design in that Issue with a substantive check/question/finding/reason. Record actual date/person; existing baseline commits do not count as historical approval. If revision is needed, use a real docs PR or contract-first commit on the work branch.
-3. Create work branch from updated develop after its predecessor merges. Retain specification/test-design version before corresponding implementation. For meaningful rule work record actual intended-behavior red test and green correction versions.
+3. Create work branch from updated sprint/01-staging after its predecessor merges. Retain specification/test-design version before corresponding implementation. For meaningful rule work record actual intended-behavior red test and green correction versions.
 4. Implement only the bounded feature, update actual test results/traceability/docs and commit meaningful increments. Red intermediate commits may exist on the work branch; the PR candidate must pass required verification before merge.
-5. Push that branch and open a feature PR with **base develop**, linked Issue and feature/AC/TEST IDs. Request the other teammate as reviewer on GitHub when ready. Do not count an AI review or author self-review as teammate approval.
+5. Push that branch and open a feature PR with **base sprint/01-staging**, linked Issue and feature/AC/TEST IDs. Request the other teammate as reviewer on GitHub when ready. Do not count an AI review or author self-review as teammate approval.
 6. Reviewer inspects behavior/assertions/schema/privacy and reproduces the relevant checks. Submit actual Approve/Request changes with specific reasoning. Author fixes comments on the same branch; changes affecting the diff receive review again.
-7. Merge only after approval, resolved discussions and actual relevant checks. Record merge/tested commits and update Issue/board. Create the next feature branch from the updated develop. Remove completed temporary branch only after confirming merge; PR/history remain evidence.
+7. Merge only after approval, resolved discussions and actual relevant checks. Record merge/tested commits and update Issue/board. Create the next feature branch from the updated sprint/01-staging. Remove completed temporary branch only after confirming merge; PR/history remain evidence.
 
 Planned PR titles: `SYS-01: establish local project foundation`, `F-01: implement identity and access`, `F-02: publish and discover events`, `F-03: register and retrieve own registrations`, `F-04: list registrations for owned events`. These are title suggestions, not PRs already opened.
 
@@ -62,14 +62,14 @@ Only SYS-01 has an actual assigned lead; the Member A/B feature rows remain allo
 
 | Pattern | When / target |
 |---|---|
-| `docs/sprint-1-<issue>-<short-description>` | Real contract/design/test-plan correction; branch from develop, reviewed PR back to develop. No empty PR merely to simulate a past review |
-| `fix/sprint-1-<issue>-<short-description>` | Integration/acceptance defect after feature merge; branch from current develop, regression test + fix + reviewed PR to develop |
+| `docs/sprint-1-<issue>-<short-description>` | Real contract/design/test-plan correction; branch from sprint/01-staging, reviewed PR back to sprint/01-staging. No empty PR merely to simulate a past review |
+| `fix/sprint-1-<issue>-<short-description>` | Integration/acceptance defect after feature merge; branch from current sprint/01-staging, regression test + fix + reviewed PR to sprint/01-staging |
 
-Review corrections before feature merge stay on that feature branch/PR. Avoid creating separate branches for every small commit. No release branch is required for this plan: reviewed develop itself supplies the final release PR.
+Review corrections before feature merge stay on that feature branch/PR. Avoid creating separate branches for every small commit. No release branch is required for this plan: reviewed sprint/01-staging itself supplies the final release PR.
 
 ## 6. GitHub merge controls and commit policy (to configure later)
 
-For main and develop, propose required PR review with **one approving teammate** with appropriate write access, resolved conversations, stale approval dismissal after reviewable changes, no ordinary direct/force pushes and no admin bypass for normal feature delivery. These are proposed settings, not verified current repository settings. Availability depends on repository visibility/GitHub plan; inspect capabilities before claiming enforcement.
+For main and sprint/01-staging, propose required PR review with **one approving teammate** with appropriate write access, resolved conversations, stale approval dismissal after reviewable changes, no ordinary direct/force pushes and no admin bypass for normal feature delivery. These are proposed settings, not verified current repository settings. Availability depends on repository visibility/GitHub plan; inspect capabilities before claiming enforcement.
 
 Use **Create a merge commit** for feature/release PRs to retain the small meaningful commits and their IDs, including contract/test-design/red/green evidence. Do not squash all feature history into one commit by default. Evidence must refer to the actual reviewed/tested commits, not invented timestamps. After this agreed workflow starts, synchronize shared branches through reviewed merges rather than rewriting their history.
 
@@ -79,9 +79,9 @@ GitHub references: [PR reviews](https://docs.github.com/en/pull-requests/referen
 
 ## 7. Sprint release PR
 
-After foundation and all four feature PRs merge, run integration/system/acceptance/build checks on develop and complete [DoD](dod.md) evidence. Failures go through a linked fix branch/PR and re-test. Then open `Sprint 1: release registration workflow` with **head develop → base main**; the teammate reviews the full increment, results, release setup and disclosed limitations before merge. Record main merge/tag/commit and test the actual submitted release version.
+After foundation and all four feature PRs merge, run integration/system/acceptance/build checks on sprint/01-staging and complete [DoD](dod.md) evidence. Failures go through a linked fix branch/PR and re-test. Then open `Sprint 1: release registration workflow` with **head sprint/01-staging → base main**; the teammate reviews the full increment, results, release setup and disclosed limitations before merge. Record main merge/tag/commit and test the actual submitted release version.
 
-This gives **five implementation/setup PRs plus one release PR** as the normal path; real docs/fix PRs add only when necessary. The current documentation publication task does not constitute any of those implementation/release PRs or an approved review. Final PDF/report includes actual IDs, authors/reviewers/findings and release evidence. Documentation already directly committed to develop must be reviewed honestly at the current stage; do not present those commits as previously PR-approved. Documentation PR publication/reviewer request is tracked via SYS-01 Issue #1; approval remains separate.
+This gives **five implementation/setup PRs plus one release PR** as the normal path; real docs/fix PRs add only when necessary. The current documentation publication task does not constitute any of those implementation/release PRs or an approved review. Final PDF/report includes actual IDs, authors/reviewers/findings and release evidence. Documentation already directly committed to sprint/01-staging must be reviewed honestly at the current stage; do not present those commits as previously PR-approved. Documentation PR publication/reviewer request is tracked via SYS-01 Issue #1; approval remains separate.
 
 ## Revision history
 
@@ -91,3 +91,4 @@ This gives **five implementation/setup PRs plus one release PR** as the normal p
 | 0.2 | 2026-11-06 | Recorded user selection of Feature → develop → main with develop as sprint staging | Workflow selected by user; teammate review pending; no branches/PRs/settings created |
 | 0.3 | 2026-11-06 | Recorded actual documentation branch and SYS-01 Issue/lead; linked version selection and foundation test design | Design review pending; no implementation or approval claimed |
 | 0.4 | 2026-11-10 | Updated planned SYS-01 foundation scope to Prisma ORM and Prisma Migrate | Pending teammate review; no implementation claimed |
+| 0.5 | 2026-11-10 | Recorded rename of develop to sprint/01-staging and updated feature/release PR workflow | Teammate review pending; no implementation claimed |
