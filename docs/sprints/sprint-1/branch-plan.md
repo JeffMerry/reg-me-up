@@ -1,6 +1,6 @@
 # RegMeUp — Sprint 1 branch and pull request plan
 
-Version 0.5 — 2026-11-10 (Asia/Bangkok)
+Version 0.6 — 2026-11-11 (Asia/Bangkok)
 
 Status: **USER-SELECTED WORKFLOW / PENDING TEAMMATE REVIEW**. On 6 November 2026 the user selected Feature → develop → main. On 10 November 2026, GitHub and the local branch were renamed from `develop` to `sprint/01-staging`; the current flow is **Feature → sprint/01-staging → main**. Feature PRs target sprint/01-staging and require teammate review before merge; the release PR targets main after integration checks. The user subsequently authorized documentation publication and SYS-01 preparation: `docs/sprint-1-branch-plan` now holds the documentation changes and [SYS-01 Issue #1](https://github.com/JeffMerry/reg-me-up/issues/1) is open, assigned to JeffMerry with THN4 designated reviewer. No implementation branch, review approval or GitHub protection configuration is claimed. Other feature assignments remain open; existing contracts/STS stay the pre-implementation baseline.
 
@@ -33,7 +33,7 @@ SYS-01 now has a [bounded preparation contract](sys-01.md), [dependency targets]
 
 ## 3. PR and teammate review workflow
 
-1. Create a real GitHub Issue with SYS/F ID, linked requirements/contract/AC/STS, scope, dependency, lead and a different teammate reviewer. SYS-01 is [Issue #1](https://github.com/JeffMerry/reg-me-up/issues/1), assigned JeffMerry; THN4 has verified write access and is designated reviewer. F-01–04 Issues/assignments remain uncreated/unassigned.
+1. Use a real GitHub Issue with SYS/F ID, linked requirements/contract/AC/STS, scope, dependency, lead and a different teammate reviewer. SYS-01 is [Issue #1](https://github.com/JeffMerry/reg-me-up/issues/1), assigned JeffMerry; THN4 has verified write access and is designated reviewer. F-01–04 Issues [#3](https://github.com/JeffMerry/reg-me-up/issues/3), [#4](https://github.com/JeffMerry/reg-me-up/issues/4), [#5](https://github.com/JeffMerry/reg-me-up/issues/5) and [#6](https://github.com/JeffMerry/reg-me-up/issues/6) exist but have no GitHub assignees as of 11 November 2026; the feature allocations below are proposals.
 2. Before code, teammate reviews the current contract/UI/test design in that Issue with a substantive check/question/finding/reason. Record actual date/person; existing baseline commits do not count as historical approval. If revision is needed, use a real docs PR or contract-first commit on the work branch.
 3. Create work branch from updated sprint/01-staging after its predecessor merges. Retain specification/test-design version before corresponding implementation. For meaningful rule work record actual intended-behavior red test and green correction versions.
 4. Implement only the bounded feature, update actual test results/traceability/docs and commit meaningful increments. Red intermediate commits may exist on the work branch; the PR candidate must pass required verification before merge.
@@ -41,7 +41,16 @@ SYS-01 now has a [bounded preparation contract](sys-01.md), [dependency targets]
 6. Reviewer inspects behavior/assertions/schema/privacy and reproduces the relevant checks. Submit actual Approve/Request changes with specific reasoning. Author fixes comments on the same branch; changes affecting the diff receive review again.
 7. Merge only after approval, resolved discussions and actual relevant checks. Record merge/tested commits and update Issue/board. Create the next feature branch from the updated sprint/01-staging. Remove completed temporary branch only after confirming merge; PR/history remain evidence.
 
-Planned PR titles: `SYS-01: establish local project foundation`, `F-01: implement identity and access`, `F-02: publish and discover events`, `F-03: register and retrieve own registrations`, `F-04: list registrations for owned events`. These are title suggestions, not PRs already opened.
+Use the same work ID in each Issue and its PR title. The Issue titles below exist; PR titles are suggestions, not PRs already opened. Link the relevant Issue in the PR description, for example `Refs #5` on the F-03 implementation PR. PRs target the non-default staging branch, so do not assume a closing keyword will automatically close the Issue on merge; close it only when its criteria and team workflow are satisfied. The documentation PR only references SYS-01 and does not close it.
+
+| Work | Existing Issue | Suggested PR title |
+|---|---|---|
+| SYS-01 | [#1 — SYS-01: establish local project foundation](https://github.com/JeffMerry/reg-me-up/issues/1) | `SYS-01: establish local project foundation` |
+| F-01 | [#3 — [F-01] Implement identity and access](https://github.com/JeffMerry/reg-me-up/issues/3) | `F-01: implement identity and access` |
+| F-02 | [#4 — [F-02] Publish and discover events](https://github.com/JeffMerry/reg-me-up/issues/4) | `F-02: publish and discover events` |
+| F-03 | [#5 — [F-03] Register and retrieve own registrations](https://github.com/JeffMerry/reg-me-up/issues/5) | `F-03: register and retrieve own registrations` |
+| F-04 | [#6 — [F-04] List registrations for owned events](https://github.com/JeffMerry/reg-me-up/issues/6) | `F-04: list registrations for owned events` |
+| Sprint release | No release Issue recorded | `Sprint 1: release registration workflow` |
 
 PR description must state problem/resulting behavior, linked Issue/contract/AC, key UI/API/DB changes, exact verification command/result/tested version and known limitations. Include meaningful screenshots for UI changes and API/DB evidence where appropriate; screenshots alone do not prove security/concurrency. Never fill PASS/reviewer/evidence until they exist.
 
@@ -50,13 +59,13 @@ PR description must state problem/resulting behavior, linked Issue/contract/AC, 
 | Work | Proposed lead | Proposed reviewer |
 |---|---|---|
 | SYS-01 foundation | JeffMerry (Issue #1 assigned) | THN4 (designated; approval pending) |
-| F-01 | Member A | Member B |
-| F-02 | Member B | Member A |
-| F-03 | Member A | Member B |
-| F-04 | Member B | Member A |
-| Sprint release PR | Member B | Member A |
+| F-01 ([#3](https://github.com/JeffMerry/reg-me-up/issues/3)) | JeffMerry (proposed) | THN4 (proposed) |
+| F-02 ([#4](https://github.com/JeffMerry/reg-me-up/issues/4)) | JeffMerry (proposed) | THN4 (proposed) |
+| F-03 ([#5](https://github.com/JeffMerry/reg-me-up/issues/5)) | THN4 (proposed) | JeffMerry (proposed) |
+| F-04 ([#6](https://github.com/JeffMerry/reg-me-up/issues/6)) | THN4 (proposed) | JeffMerry (proposed) |
+| Sprint release PR | THN4 (proposed; no release Issue recorded) | JeffMerry (proposed) |
 
-Only SYS-01 has an actual assigned lead; the Member A/B feature rows remain allocation proposals, not contribution records. Both join baseline/schema/API discussions and work on tests/design/UI/API as applicable. While one implements a dependency, the other can review it, prepare downstream test cases and review UI/contracts. The default delivery sequence follows feature dependencies; do not merge downstream work against missing auth/data behavior.
+Only SYS-01 has an actual GitHub assignee; the named feature and release allocations are proposals, not GitHub assignments, reviewer requests, approvals or contribution records. Record team agreement and make actual assignments/reviewer requests when appropriate. Both join baseline/schema/API discussions and work on tests/design/UI/API as applicable. While one implements a dependency, the other can review it, prepare downstream test cases and review UI/contracts. The default delivery sequence follows feature dependencies; do not merge downstream work against missing auth/data behavior.
 
 ## 5. Additional branches when real work requires them
 
@@ -92,3 +101,4 @@ This gives **five implementation/setup PRs plus one release PR** as the normal p
 | 0.3 | 2026-11-06 | Recorded actual documentation branch and SYS-01 Issue/lead; linked version selection and foundation test design | Design review pending; no implementation or approval claimed |
 | 0.4 | 2026-11-10 | Updated planned SYS-01 foundation scope to Prisma ORM and Prisma Migrate | Pending teammate review; no implementation claimed |
 | 0.5 | 2026-11-10 | Recorded rename of develop to sprint/01-staging and updated feature/release PR workflow | Teammate review pending; no implementation claimed |
+| 0.6 | 2026-11-11 | Added proposed named allocation, actual feature Issue links and paired Issue/PR title examples | Pending teammate review; feature Issues unassigned |
