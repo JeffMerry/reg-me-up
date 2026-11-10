@@ -1,6 +1,6 @@
 # RegMeUp — Sprint 1 branch and pull request plan
 
-Version 0.3 — 2026-11-06 (Asia/Bangkok)
+Version 0.4 — 2026-11-10 (Asia/Bangkok)
 
 Status: **USER-SELECTED WORKFLOW / PENDING TEAMMATE REVIEW**. On 6 November 2026 the user selected **Feature → develop → main**, with develop serving as Sprint 1 staging. Feature PRs target develop and require teammate review before merge; the release PR targets main after integration checks. The user subsequently authorized documentation publication and SYS-01 preparation: `docs/sprint-1-branch-plan` now holds the documentation changes and [SYS-01 Issue #1](https://github.com/JeffMerry/reg-me-up/issues/1) is open, assigned to JeffMerry with THN4 designated reviewer. No implementation branch, review approval or GitHub protection configuration is claimed. Other feature assignments remain open; existing contracts/STS stay the pre-implementation baseline.
 
@@ -19,7 +19,7 @@ New work branches are created from **current develop when dependencies have merg
 
 | Order | Branch to create | Scope / linked work | Required predecessor | PR base / readiness |
 |---|---|---|---|---|
-| 1 | `chore/sys-01-foundation` | SYS-01: pinned runtime/dependencies, client/server skeleton, Tailwind tokens/shared base setup, local/test PostgreSQL config, migration runner and shared schema/seed plan, test runner setup, actual README commands; no completed domain workflow claimed | Baseline/design review; ENG-01 selections recorded | `develop`; fresh setup/build and meaningful setup checks actually run, teammate approves |
+| 1 | `chore/sys-01-foundation` | SYS-01: pinned runtime/dependencies, client/server skeleton, Tailwind tokens/shared base setup, local/test PostgreSQL config, Prisma schema/Migrate and shared schema/seed plan, test runner setup, actual README commands; no completed domain workflow claimed | Baseline/design review; ENG-01 selections recorded | `develop`; fresh setup/build and meaningful setup checks actually run, teammate approves |
 | 2 | `feature/f-01-identity` | F-01 contract: login/logout/me, hash/session/CSRF, backend role foundation, UI-01/navigation/guards, TEST-01/02/12 and applicable shared cases | Foundation merged | `develop`; auth/UI lifecycle checks, contract/review evidence and tests |
 | 3 | `feature/f-02-events` | F-02: publish/public list/detail/own-event list, validation/timezone/privacy, UI-02/03/05/06, TEST-03/11/15 + shared cases | F-01 merged; shared registration relation available for counts | `develop`; public/owner/validation API+DB and selected UI checks |
 | 4 | `feature/f-03-registration` | F-03: atomic register, own list/detail/status, UI-03 registration + UI-04/04-D, TEST-04–07/10 + shared cases | F-02 merged | `develop`; real DB concurrency/uniqueness/privacy/restart verification required |
@@ -29,7 +29,7 @@ Initial baseline contracts: [F-01](f-01.md), [F-02](f-02.md), [F-03](f-03.md), [
 
 Foundation schema responsibilities must be agreed in its Issue: establish shared migrations once, including registration relation/constraints needed by F-02 counts even before registration endpoints exist. This is consistent with [feature dependency clarification](../../features.md). F-01–04 implement their domain behavior and add only genuinely required schema changes via new ordered migrations. Do not duplicate/rewrite already shared migrations across feature branches. Foundation auth libraries/store schema may be installed/pinned there; login/logout logic remains F-01.
 
-SYS-01 now has a [bounded preparation contract](sys-01.md), [exact dependency targets](../../dependency-versions.md) and [Issue #1](https://github.com/JeffMerry/reg-me-up/issues/1) identifying setup acceptance/test design and migration ownership. Executable setup/lockfile/provisioning and all foundation checks remain unimplemented/NOT RUN. Do not claim full TEST-13/E2E success before domain workflows exist. Full reproducibility across the released product is verified again at integration.
+SYS-01 now has a [bounded preparation contract](sys-01.md), [dependency targets](../../dependency-versions.md) and [Issue #1](https://github.com/JeffMerry/reg-me-up/issues/1) identifying setup acceptance/test design and migration ownership. Exact Prisma versions remain to be selected; the existing issue predates DEC-14 and its original no-ORM details need reconciliation before implementation. Executable setup/lockfile/provisioning and all foundation checks remain unimplemented/NOT RUN. Do not claim full TEST-13/E2E success before domain workflows exist. Full reproducibility across the released product is verified again at integration.
 
 ## 3. PR and teammate review workflow
 
@@ -90,3 +90,4 @@ This gives **five implementation/setup PRs plus one release PR** as the normal p
 | 0.1 | 2026-11-06 | Proposed branches, feature dependencies, GitHub PR/teammate gates, merge policy and release path | Pending team agreement; no branches/PRs/settings created |
 | 0.2 | 2026-11-06 | Recorded user selection of Feature → develop → main with develop as sprint staging | Workflow selected by user; teammate review pending; no branches/PRs/settings created |
 | 0.3 | 2026-11-06 | Recorded actual documentation branch and SYS-01 Issue/lead; linked version selection and foundation test design | Design review pending; no implementation or approval claimed |
+| 0.4 | 2026-11-10 | Updated planned SYS-01 foundation scope to Prisma ORM and Prisma Migrate | Pending teammate review; no implementation claimed |

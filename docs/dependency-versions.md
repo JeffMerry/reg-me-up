@@ -1,6 +1,6 @@
 # RegMeUp — Dependency version baseline
 
-Version 0.1 — 2026-11-06 (Asia/Bangkok). **Selected targets for SYS-01; not installed or build-tested.** This is planning/metadata evidence, not a lockfile, vulnerability audit or integration result. Human review pending.
+Version 0.2 — 2026-11-10 (Asia/Bangkok). **Existing targets plus Prisma v7 direction for SYS-01; exact Prisma versions not yet selected or build-tested.** This is planning/metadata evidence, not a lockfile, vulnerability audit or integration result. Human review pending.
 
 ## 1. Runtime and database
 
@@ -30,7 +30,8 @@ Versions/engines/peer ranges were read from the authoritative npm registry on 6 
 | Client styling | tailwindcss | 4.3.5 |
 | Client styling | @tailwindcss/vite | 4.3.5 |
 | Server runtime | express | 5.3.0 |
-| Server runtime | pg | 8.23.1 |
+| PostgreSQL driver target | pg | 8.23.1 |
+| ORM, CLI and PostgreSQL adapter | prisma, @prisma/client, @prisma/adapter-pg | Exact matching v7 versions PENDING selection and compatibility validation |
 | Auth dependency prepared for F-01 | express-session | 1.19.0 |
 | Auth dependency prepared for F-01 | connect-pg-simple | 10.0.0 |
 | Auth dependency prepared for F-01 | argon2 | 0.45.2 |
@@ -47,6 +48,8 @@ Versions/engines/peer ranges were read from the authoritative npm registry on 6 
 
 Metadata endpoints use `https://registry.npmjs.org/<URL-encoded-package>/<version>`; for example [React](https://registry.npmjs.org/react/19.3.1), [Vite](https://registry.npmjs.org/vite/8.3.6), [Vitest](https://registry.npmjs.org/vitest/5.1.0), [React plugin](https://registry.npmjs.org/@vitejs%2Fplugin-react/6.2.1), [npm](https://registry.npmjs.org/npm/10.9.9). Current `@types/node` global latest targets a different major; selected22.20.5 was obtained from the published22.x versions to match Node22.
 
+Prisma v7 is the proposed stable major for this baseline; v8 is documented as a release candidate. Before SYS-01 implementation, select matching exact `prisma`, `@prisma/client` and `@prisma/adapter-pg` releases, verify registry engines/peers and PostgreSQL/Node/TypeScript compatibility, then record the versions here. The `pg` driver remains relevant to the PostgreSQL adapter and `connect-pg-simple`; verify pool configuration/lifecycle and avoid unnecessary duplicate pools. Prisma v7 uses an adapter and generated client; see [Prisma 7](https://www.prisma.io/docs/orm/v7), [PostgreSQL adapter](https://www.prisma.io/docs/orm/v7/core-concepts/supported-databases/postgresql), and [Prisma 7 upgrade requirements](https://www.prisma.io/docs/guides/upgrade-prisma-orm/v7). Do not infer successful installation or compatibility from these sources.
+
 ## 3. Compatibility boundary
 
 Metadata inspection supports the target: Vite/plugin-react engines accept Node>=22.12; plugin-react peers Vite8; Tailwind Vite plugin peers include Vite8; Vitest5.1 engines include Node22>=22.12 and peer Vite8; React DOM19.3.1 peers React^19.3.1; Express5/pg8/session-store/Playwright/tsx engines include selected Node22.
@@ -59,8 +62,9 @@ No install, peer resolution, TypeScript/native Argon2 build, browser download or
 
 Use root npm workspaces for client/server with shared tooling and one lockfile. Foundation creates runtime version files/engines/packageManager declaration matching the table, actual install scripts, appropriate project tsconfigs and Tailwind/Vite integration. Auth packages can be pinned/prepared without implementing login/logout in SYS-01. Native crypto and browser/toolchain checks must be recorded separately from feature acceptance results.
 
-This resolves ENG-01's **version selection** portion; actual environment provisioning, install/lockfile and compatible builds remain NOT RUN. [SYS-01 contract](sprints/sprint-1/sys-01.md) defines the bounded foundation acceptance and test design; full TEST-13 remains a release-level reproducibility check.
+ENG-01 is **partially resolved**: Prisma exact versions and compatibility remain open; actual environment provisioning, install/lockfile and compatible builds remain NOT RUN. [SYS-01 contract](sprints/sprint-1/sys-01.md) defines the bounded foundation acceptance and test design; full TEST-13 remains a release-level reproducibility check.
 
 | Version | Date | Change | Review |
 |---|---|---|---|
 | 0.1 | 2026-11-06 | Selected runtime/database/direct versions from official metadata; documented observed local mismatch and pending executable validation | Pending THN4 review; no install/build/tests |
+| 0.2 | 2026-11-10 | Added Prisma v7 direction and reopened exact Prisma version/compatibility selection | Pending teammate review; no install/build/tests |
