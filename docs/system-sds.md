@@ -1,6 +1,6 @@
 # RegMeUp — System-Level Software Design Specification
 
-Version 0.3 — 2026-11-10 (Asia/Bangkok). Selected design direction adopted by user; **pending teammate review**. This is a pre-implementation design, not an implemented architecture or tested result. [SRS](srs.md) defines requirements/decisions; feature contracts refine endpoint behavior.
+Version 0.4 — 2026-11-11 (Asia/Bangkok). Selected design direction adopted by user; **pending teammate review**. This is a pre-implementation design, not an implemented architecture or tested result. [SRS](srs.md) defines requirements/decisions; feature contracts refine endpoint behavior.
 
 ## 1. Architecture and stack
 
@@ -32,14 +32,14 @@ erDiagram
   EVENTS ||--o{ REGISTRATIONS : receives
 ```
 
-All domain IDs are UUIDs generated on server; API field names camelCase, DB columns snake_case. Time columns are `timestamptz`. Schema below is a design, not a migration already applied.
+All domain IDs are UUIDs generated on server; API field names camelCase, DB columns snake_case. Domain time columns are `timestamptz`. The [Sprint 1 DBML](data-model/sprint-1.dbml) captures the conceptual model and rules; it is a design, not a migration already applied. In the `chore/sys-01-foundation` PR compare DBML against Prisma schema, reviewed migration SQL and the actual session adapter schema; update the DBML whenever the model changes and review any differences.
 
 | Table | Fields / constraints |
 |---|---|
 | users | `id uuid PK`; `email text NOT NULL UNIQUE`, normalized trim/lowercase; `password_hash text NOT NULL`; `display_name text NOT NULL` length 1–100 after trim; `role text NOT NULL` in PARTICIPANT/ORGANIZER; `created_at timestamptz NOT NULL` server time |
 | events | `id uuid PK`; `organizer_id uuid NOT NULL FK users(id)`; `title text NOT NULL` length 1–200 after trim; `starts_at/ends_at timestamptz NOT NULL`, end > start; `location text NOT NULL` length 1–300 after trim; `capacity integer NOT NULL` > 0; `description text NULL` max 10,000; `publication_status text NOT NULL` in PUBLISHED/UNPUBLISHED; `created_at timestamptz NOT NULL` |
 | registrations | `id uuid PK` also displayed reference; `event_id/participant_id uuid NOT NULL FK`; `status text NOT NULL` = ACTIVE in Sprint 1; `registered_at timestamptz NOT NULL` server time; unique active event/participant pair |
-| sessions | Library PostgreSQL store's versioned table: `sid` PK, serialized session data and indexed expiry; adapter-required exact SQL is captured in initial F-01 migration after package selection, not assumed applied |
+| sessions | Logical name for the library PostgreSQL store table: `sid` PK, serialized `sess`, indexed `expire`; SYS-01 owns the initial versioned session schema. The shipped `connect-pg-simple` table is named `session` by default; configure its table name if using `sessions` and verify the selected package's exact SQL. No users FK is implied by the serialized user ID. |
 | _prisma_migrations | Prisma Migrate-managed migration history/checksums; do not manually edit the ledger or previously applied migration files |
 
 DB indexes: unique normalized email; `events(publication_status, starts_at, id)` for public list; `events(organizer_id, created_at, id)` for own list; `registrations(event_id, status, registered_at, id)` and `(participant_id, registered_at, id)`; partial unique `(event_id,participant_id) WHERE status='ACTIVE'`. Naming convention uses descriptive `..._active_pair_unique` to map only the known duplicate constraint safely.
@@ -174,3 +174,4 @@ No code/package/schema/test/migration/container deployed or executed by this doc
 | 0.1 | 2026-11-06 | Selected stack/no ORM, model, atomic registration, session/CSRF, DTO/API/UI/config and delivery design | Pending teammate review; correctness NOT VERIFIED |
 | 0.2 | 2026-11-06 | Linked exact dependency targets and SYS-01 acceptance/test design; distinguished selection from installation/build evidence | Pending teammate review; application tests NOT RUN |
 | 0.3 | 2026-11-10 | Adopted Prisma ORM/Migrate and retained event-lock transaction protocol and PostgreSQL constraints | Pending teammate review; Prisma compatibility and application tests NOT RUN |
+| 0.4 | 2026-11-11 | Linked conceptual DBML and assigned the initial session schema to SYS-01 | Pending teammate review; schema not applied |

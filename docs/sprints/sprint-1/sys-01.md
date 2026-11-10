@@ -1,13 +1,13 @@
 # SYS-01 — Local project foundation: implementation preparation
 
-Version 0.3 — 2026-11-10 (Asia/Bangkok)
+Version 0.4 — 2026-11-11 (Asia/Bangkok)
 
 **State: READY FOR DESIGN REVIEW; IMPLEMENTATION NOT STARTED; ALL FOUNDATION TESTS NOT RUN.** This prepares step2 only. It does not create the implementation branch, package manifests, migration scripts, database or test suite.
 
 | Item | Plan / current fact |
 |---|---|
 | Requirement | NFR-05, supports NFR-02 and F-01–04 shared schema; AC-13/TEST-13 full fresh-setup target |
-| Sources | [SDS](../../system-sds.md), [versions](../../dependency-versions.md), [branch plan](branch-plan.md), [STS](sts.md), [DoD](dod.md) |
+| Sources | [SDS](../../system-sds.md), [Sprint 1 DBML](../../data-model/sprint-1.dbml), [versions](../../dependency-versions.md), [branch plan](branch-plan.md), [STS](sts.md), [DoD](dod.md) |
 | Intended implementation branch | `chore/sys-01-foundation` from reviewed/current sprint/01-staging after documentation PR merge |
 | Implementation PR target | sprint/01-staging; peer approval before merge |
 | Lead / reviewer | JeffMerry assigned lead; THN4 designated design reviewer through documentation PR; no approval claimed |
@@ -32,7 +32,7 @@ Foundation may introduce shared schema required by all Sprint1 features: users/s
 | Verification harness | Unit/API integration targets use actual test PostgreSQL; dedicated reset safety guard and deterministic cleanup; Playwright config can be prepared without pretending future domain E2E exists |
 | Reproduction | README exact cwd/env/setup/migrate/seed/run/build/test instructions, observed versions/known limitations and tested commit when executed |
 
-JeffMerry coordinates initial shared migrations in the foundation Issue; THN4 reviews the Prisma schema/migrations and proposed ownership. Feature branches add later migrations only after this baseline merges; do not rewrite applied files or create a second competing schema. Session adapter migration must match the selected package's actual shipped table shape, verified during implementation.
+`chore/sys-01-foundation` owns the initial Prisma schema and reviewed migrations for users, events, registrations and the session store, including required constraints and indexes. JeffMerry coordinates these migrations; THN4 reviews the Prisma schema/migrations and proposed ownership. Before writing migrations, review the [DBML](../../data-model/sprint-1.dbml); in the SYS-01 PR compare it with `schema.prisma`, generated/custom SQL and the actual session adapter shape, then update the DBML when the model changes. Feature branches add later migrations only after this baseline merges; do not rewrite applied files or create a second competing schema. The logical DBML `sessions` name needs explicit adapter configuration if selected; the library default is `session`. `_prisma_migrations` is managed by Prisma, not a domain table.
 
 ## 3. Acceptance criteria and test design
 
@@ -84,3 +84,4 @@ Create meaningful commits: runtime/workspace setup; client/server configuration;
 | 0.1 | 2026-11-06 | Prepared SYS-01 scope, migration ownership, exact version handoff and seven acceptance/test designs before implementation | Pending teammate review; NOT RUN |
 | 0.2 | 2026-11-10 | Switched foundation design to Prisma Client/Migrate and revised migration verification and reset safety; Prisma versions pending | Pending teammate review; NOT RUN |
 | 0.3 | 2026-11-10 | Updated foundation source branch and PR base after staging branch rename | Pending teammate review; NOT RUN |
+| 0.4 | 2026-11-11 | Assigned initial shared schema to SYS-01 and linked DBML-to-migration review | Pending teammate review; NOT RUN |
