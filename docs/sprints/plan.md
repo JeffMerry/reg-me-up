@@ -1,6 +1,6 @@
 # RegMeUp — Three-sprint plan
 
-Version 0.5 — 2026-11-10 (Asia/Bangkok). Planning baseline; pending teammate review. User selected Feature → sprint/01-staging → main. No feature completion or test execution claimed.
+Version 0.6 — 2026-11-11 (Asia/Bangkok). Planning baseline; pending teammate review. User selected Feature → sprint/01-staging → main. No feature completion or test execution claimed.
 
 ## 1. Goals, scope and dependencies
 
@@ -16,13 +16,20 @@ Sprint 3 must have contracts and meaningful tested progress by 29 November, alon
 
 | Due date | Assessment | Required state |
 |---|---|---|
-| 8 Nov 2026, 23:59 | Deliverable 1 | Complete baseline A–D, Sprint 1 contracts/STS/DoD E, working reviewed local release and real evidence F; self-contained PDF A–F |
+| 15 Nov 2026, 23:59 — LEB2 update reported by user | Deliverable 1 | Complete baseline A–D, Sprint 1 contracts/STS/DoD E, working reviewed local release and real evidence F; self-contained PDF A–F |
 | 15 Nov 2026, 23:59 | Lab 5 | Accepted Sprint 1 containerized; CI checks and enforced failing gate; durable GCP deployment and repeatable release pipeline |
 | 22 Nov 2026, 23:59 | Lab 6 | Independent cross-team UAT, genuine defect triage/fix/re-test, recorded tested version |
 | 29 Nov 2026, 23:59 | Deliverable 2 / Lab 7 | Sprint 2 complete + Sprint 3 tested progress on integrated deployed candidate; separately evidenced instructor/TA-approved maintenance change and metrics |
 | 13 Dec 2026, 23:59 | Final | All baseline features integrated/released/verified, final handoff/report/video per final guidance |
 
-Dates are transcribed from [G](../references/group_work_specs_v1.md) and [D1](../references/project_deliverable_1_v1.md); no live course announcement checked. Detailed later handouts are not present locally. The R draft additionally expects at least one meaningful Sprint 3 workflow/rule implemented and tested by D2; retain that planning target.
+Source and discrepancy: [G course schedule](../references/group_work_specs_v1.md) lines 54–64 and [D1 handout](../references/project_deliverable_1_v1.md) lines 5 and 170 specify the earlier D1 date of 8 November 2026 at 23:59; G specifies Lab 5 on 15 November 2026 at 23:59. THN4's [PR #2 review](https://github.com/JeffMerry/reg-me-up/pull/2) on 10 November requested changing D1 to 15 November at 23:59. On 11 November the user confirmed that LEB2 was updated to that D1 deadline; the plan uses the reported LEB2 date while preserving the original course files. LEB2 has not been independently inspected in this session; retain the announcement or submission-page reference when available. Detailed later handouts are not present locally. The R draft additionally expects at least one meaningful Sprint 3 workflow/rule implemented and tested by D2; retain that planning target.
+
+The assessments have separate submission requirements even if their deadlines are later confirmed to coincide:
+
+| Assessment | Submission / evidence |
+|---|---|
+| Deliverable 1 | Self-contained PDF Parts A–F, including baseline, feature contracts/test designs and actual local Sprint 1 release, setup, tests and review evidence, per [D1 handout](../references/project_deliverable_1_v1.md) |
+| Lab 5 | Containerized and deployed Sprint 1, CI/CD including failed-check enforcement, GCP and durable data/repeatable delivery, with required Lab 5 evidence per [G](../references/group_work_specs_v1.md); detailed Lab 5 handout not in this repository |
 
 ## 3. Sprint 1 work sequence
 
@@ -55,7 +62,7 @@ Before Lab 5, retain local build/test output against the tested commit. Complete
 
 | Risk | Impact / action |
 |---|---|
-| Inspected repo has README only tracked; docs untracked; D1 in two days at planning date | High schedule risk. Estimate available hours with both members before committing a delivery forecast; preserve minimum required slice; report incomplete work/ask TA about scope changes rather than fabricate evidence |
+| D1 and Lab 5 both due 15 November; foundation and features not yet implemented | User reports the updated D1 deadline in LEB2; the earlier handouts still state 8 November. Confirm submission details on LEB2, estimate available hours, report actual status and do not fabricate evidence |
 | New stack/package compatibility | Pin versions after checking both environments; no claim that dependencies are installed or commands run today |
 | Race handling implemented with count outside lock | F-03 review requires same-client transaction and real PostgreSQL contention tests; Sprint 2 writers reuse lock protocol |
 | UI protection mistaken for API authorization | TEST-09 calls backend directly for every protected endpoint; owner detail negative checks include metadata/totals |
@@ -74,3 +81,4 @@ No fixed hour/day estimates or contribution counts have been agreed. At each int
 | 0.3 | 2026-11-06 | Recorded user selection of Feature → develop → main, with develop as staging | Teammate review pending; workflow not executed |
 | 0.4 | 2026-11-06 | Recorded SYS-01 Issue/lead, exact targets and bounded foundation acceptance/test preparation | Pending teammate review; installation/implementation/tests not started |
 | 0.5 | 2026-11-10 | Updated workflow after develop was renamed sprint/01-staging | Pending teammate review |
+| 0.6 | 2026-11-11 | Recorded user-reported LEB2 D1 deadline, preserved earlier handout discrepancy and separated D1/Lab 5 deliverables | LEB2 not independently inspected; teammate review pending |
