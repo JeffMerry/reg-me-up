@@ -1,6 +1,6 @@
 # RegMeUp — Three-sprint plan
 
-Version 0.6 — 2026-11-11 (Asia/Bangkok). Planning baseline; pending teammate review. User selected Feature → sprint/01-staging → main. No feature completion or test execution claimed.
+Version 0.7 — 2026-11-11 (Asia/Bangkok). Planning baseline; pending teammate review. User selected Feature → sprint/01-staging → main. No feature completion or test execution claimed.
 
 ## 1. Goals, scope and dependencies
 
@@ -54,7 +54,7 @@ Use `sprint/01-staging` as sprint staging and `main` as accepted release. Propos
 
 Issue → contract/test-design version → feature branch from current staging → failing intended-behavior test for meaningful rule work → implementation → passing checks/diff inspection → PR into sprint/01-staging reviewed by the other teammate → staging integration/system/acceptance checks → reviewed release PR to main → immutable release reference. Preserve contract revision reasons and real red/green versions.
 
-No self-approval. Record a specific check/question/finding/reason for teammate approval. Both members must participate in requirements/design, tests, implementation, review/integration and later delivery/maintenance; do not assign permanent docs-only/code-only roles. SYS-01 Issue #1 is assigned JeffMerry with THN4 designated reviewer; remaining feature assignments and actual review approvals are pending and recorded only when they occur.
+No self-approval. Record a specific check/question/finding/reason for teammate approval. Both members must participate in requirements/design, tests, implementation, review/integration and later delivery/maintenance; do not assign permanent docs-only/code-only roles. SYS-01 Issue #1 and F-01/F-02 Issues #3/#4 are assigned JeffMerry; F-03/F-04 Issues #5/#6 are assigned THN4 at the user's direction. Teammate agreement and actual feature review approvals remain pending.
 
 Before Lab 5, retain local build/test output against the tested commit. Completed CI/Docker/GCP belongs to Lab 5; use CI earlier if implemented, but never claim it exists from a plan. Main default branch does not itself establish protected checks/review policy; inspect GitHub settings separately.
 
@@ -82,3 +82,4 @@ No fixed hour/day estimates or contribution counts have been agreed. At each int
 | 0.4 | 2026-11-06 | Recorded SYS-01 Issue/lead, exact targets and bounded foundation acceptance/test preparation | Pending teammate review; installation/implementation/tests not started |
 | 0.5 | 2026-11-10 | Updated workflow after develop was renamed sprint/01-staging | Pending teammate review |
 | 0.6 | 2026-11-11 | Recorded user-reported LEB2 D1 deadline, preserved earlier handout discrepancy and separated D1/Lab 5 deliverables | LEB2 not independently inspected; teammate review pending |
+| 0.7 | 2026-11-11 | Recorded user-directed feature Issue assignees | Teammate agreement and review pending |

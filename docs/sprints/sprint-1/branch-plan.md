@@ -1,8 +1,8 @@
 # RegMeUp — Sprint 1 branch and pull request plan
 
-Version 0.6 — 2026-11-11 (Asia/Bangkok)
+Version 0.7 — 2026-11-11 (Asia/Bangkok)
 
-Status: **USER-SELECTED WORKFLOW / PENDING TEAMMATE REVIEW**. On 6 November 2026 the user selected Feature → develop → main. On 10 November 2026, GitHub and the local branch were renamed from `develop` to `sprint/01-staging`; the current flow is **Feature → sprint/01-staging → main**. Feature PRs target sprint/01-staging and require teammate review before merge; the release PR targets main after integration checks. The user subsequently authorized documentation publication and SYS-01 preparation: `docs/sprint-1-branch-plan` now holds the documentation changes and [SYS-01 Issue #1](https://github.com/JeffMerry/reg-me-up/issues/1) is open, assigned to JeffMerry with THN4 designated reviewer. No implementation branch, review approval or GitHub protection configuration is claimed. Other feature assignments remain open; existing contracts/STS stay the pre-implementation baseline.
+Status: **USER-SELECTED WORKFLOW / PENDING TEAMMATE REVIEW**. On 6 November 2026 the user selected Feature → develop → main. On 10 November 2026, GitHub and the local branch were renamed from `develop` to `sprint/01-staging`; the current flow is **Feature → sprint/01-staging → main**. Feature PRs target sprint/01-staging and require teammate review before merge; the release PR targets main after integration checks. The user subsequently authorized documentation publication and SYS-01 preparation: `docs/sprint-1-branch-plan` holds the documentation changes and [SYS-01 Issue #1](https://github.com/JeffMerry/reg-me-up/issues/1) is open. On 11 November, the user directed the assignments below; teammate agreement and reviewer approval remain pending. No implementation branch or GitHub protection configuration is claimed.
 
 ## 1. Current repository and branch responsibilities
 
@@ -17,23 +17,23 @@ New work branches are created from **current sprint/01-staging when dependencies
 
 ## 2. Planned work branches and PR boundaries
 
-| Order | Branch to create | Scope / linked work | Required predecessor | PR base / readiness |
-|---|---|---|---|---|
-| 1 | `chore/sys-01-foundation` | SYS-01: pinned runtime/dependencies, client/server skeleton, Tailwind tokens/shared base setup, local/test PostgreSQL config, Prisma schema/Migrate and shared schema/seed plan, test runner setup, actual README commands; no completed domain workflow claimed | Baseline/design review; ENG-01 selections recorded | `sprint/01-staging`; fresh setup/build and meaningful setup checks actually run, teammate approves |
-| 2 | `feature/f-01-identity` | F-01 contract: login/logout/me, hash/session/CSRF, backend role foundation, UI-01/navigation/guards, TEST-01/02/12 and applicable shared cases | Foundation merged | `sprint/01-staging`; auth/UI lifecycle checks, contract/review evidence and tests |
-| 3 | `feature/f-02-events` | F-02: publish/public list/detail/own-event list, validation/timezone/privacy, UI-02/03/05/06, TEST-03/11/15 + shared cases | F-01 merged; shared registration relation available for counts | `sprint/01-staging`; public/owner/validation API+DB and selected UI checks |
-| 4 | `feature/f-03-registration` | F-03: atomic register, own list/detail/status, UI-03 registration + UI-04/04-D, TEST-04–07/10 + shared cases | F-02 merged | `sprint/01-staging`; real DB concurrency/uniqueness/privacy/restart verification required |
-| 5 | `feature/f-04-owner-list` | F-04: owner-only event registrations/summary/pagination, UI-07 and UI-05 links, TEST-08 + shared cases | F-03 merged | `sprint/01-staging`; owner positive/negative controls, safe DTOs/counts and Organizer journey |
+| Order | Branch to create | Scope / linked work | Lead / planned reviewer | Required predecessor | PR base / readiness |
+|---|---|---|---|---|---|
+| 1 | `chore/sys-01-foundation` | SYS-01: pinned runtime/dependencies, client/server skeleton, Tailwind tokens/shared base setup, local/test PostgreSQL config, Prisma schema/Migrate and shared schema/seed plan, test runner setup, actual README commands; no completed domain workflow claimed | JeffMerry / THN4 | Baseline/design review; ENG-01 selections recorded | `sprint/01-staging`; fresh setup/build and meaningful setup checks actually run, teammate approves |
+| 2 | `feature/f-01-identity` | F-01 contract: login/logout/me, hash/session/CSRF, backend role foundation, UI-01/navigation/guards, TEST-01/02/12 and applicable shared cases | JeffMerry / THN4 | Foundation merged | `sprint/01-staging`; auth/UI lifecycle checks, contract/review evidence and tests |
+| 3 | `feature/f-02-events` | F-02: publish/public list/detail/own-event list, validation/timezone/privacy, UI-02/03/05/06, TEST-03/11/15 + shared cases | JeffMerry / THN4 | F-01 merged; shared registration relation from SYS-01 available for counts | `sprint/01-staging`; public/owner/validation API+DB and selected UI checks |
+| 4 | `feature/f-03-registration` | F-03: atomic register, own list/detail/status, UI-03 registration + UI-04/04-D, TEST-04–07/10 + shared cases | THN4 / JeffMerry | F-02 merged | `sprint/01-staging`; real DB concurrency/uniqueness/privacy/restart verification required |
+| 5 | `feature/f-04-owner-list` | F-04: owner-only event registrations/summary/pagination, UI-07 and UI-05 links, TEST-08 + shared cases | THN4 / JeffMerry | F-03 merged | `sprint/01-staging`; owner positive/negative controls, safe DTOs/counts and Organizer journey |
 
 Initial baseline contracts: [F-01](f-01.md), [F-02](f-02.md), [F-03](f-03.md), [F-04](f-04.md), [STS](sts.md), [DoD](dod.md). Review the relevant subset before each implementation; if details change, record revised design/test intent first on that branch before code.
 
 Foundation schema responsibilities must be agreed in its Issue: establish shared migrations once, including registration relation/constraints needed by F-02 counts even before registration endpoints exist. This is consistent with [feature dependency clarification](../../features.md). F-01–04 implement their domain behavior and add only genuinely required schema changes via new ordered migrations. Do not duplicate/rewrite already shared migrations across feature branches. Foundation auth libraries/store schema may be installed/pinned there; login/logout logic remains F-01.
 
-SYS-01 now has a [bounded preparation contract](sys-01.md), [dependency targets](../../dependency-versions.md) and [Issue #1](https://github.com/JeffMerry/reg-me-up/issues/1) identifying setup acceptance/test design and migration ownership. Exact Prisma versions remain to be selected; the existing issue predates DEC-14 and its original no-ORM details need reconciliation before implementation. Executable setup/lockfile/provisioning and all foundation checks remain unimplemented/NOT RUN. Do not claim full TEST-13/E2E success before domain workflows exist. Full reproducibility across the released product is verified again at integration.
+SYS-01 now has a [bounded preparation contract](sys-01.md), [dependency targets](../../dependency-versions.md) and [Issue #1](https://github.com/JeffMerry/reg-me-up/issues/1) identifying setup acceptance/test design and migration ownership. Issue #1 was updated to Prisma ORM/Migrate; exact Prisma versions remain to be selected and compatibility verified. Executable setup/lockfile/provisioning and all foundation checks remain unimplemented/NOT RUN. Do not claim full TEST-13/E2E success before domain workflows exist. Full reproducibility across the released product is verified again at integration.
 
 ## 3. PR and teammate review workflow
 
-1. Use a real GitHub Issue with SYS/F ID, linked requirements/contract/AC/STS, scope, dependency, lead and a different teammate reviewer. SYS-01 is [Issue #1](https://github.com/JeffMerry/reg-me-up/issues/1), assigned JeffMerry; THN4 has verified write access and is designated reviewer. F-01–04 Issues [#3](https://github.com/JeffMerry/reg-me-up/issues/3), [#4](https://github.com/JeffMerry/reg-me-up/issues/4), [#5](https://github.com/JeffMerry/reg-me-up/issues/5) and [#6](https://github.com/JeffMerry/reg-me-up/issues/6) exist but have no GitHub assignees as of 11 November 2026; the feature allocations below are proposals.
+1. Use a real GitHub Issue with SYS/F ID, linked requirements/contract/AC/STS, scope, dependency, lead and a different teammate reviewer. SYS-01 [#1](https://github.com/JeffMerry/reg-me-up/issues/1) and F-01 [#3](https://github.com/JeffMerry/reg-me-up/issues/3)/F-02 [#4](https://github.com/JeffMerry/reg-me-up/issues/4) are assigned to JeffMerry; F-03 [#5](https://github.com/JeffMerry/reg-me-up/issues/5)/F-04 [#6](https://github.com/JeffMerry/reg-me-up/issues/6) are assigned to THN4, per the user's direction on 11 November 2026. Teammate agreement on allocation and actual PR reviewer requests/approvals remain pending.
 2. Before code, teammate reviews the current contract/UI/test design in that Issue with a substantive check/question/finding/reason. Record actual date/person; existing baseline commits do not count as historical approval. If revision is needed, use a real docs PR or contract-first commit on the work branch.
 3. Create work branch from updated sprint/01-staging after its predecessor merges. Retain specification/test-design version before corresponding implementation. For meaningful rule work record actual intended-behavior red test and green correction versions.
 4. Implement only the bounded feature, update actual test results/traceability/docs and commit meaningful increments. Red intermediate commits may exist on the work branch; the PR candidate must pass required verification before merge.
@@ -54,18 +54,18 @@ Use the same work ID in each Issue and its PR title. The Issue titles below exis
 
 PR description must state problem/resulting behavior, linked Issue/contract/AC, key UI/API/DB changes, exact verification command/result/tested version and known limitations. Include meaningful screenshots for UI changes and API/DB evidence where appropriate; screenshots alone do not prove security/concurrency. Never fill PASS/reviewer/evidence until they exist.
 
-## 4. Suggested review allocation for two members
+## 4. Work and review allocation for two members
 
-| Work | Proposed lead | Proposed reviewer |
+| Work | Lead | Planned reviewer |
 |---|---|---|
 | SYS-01 foundation | JeffMerry (Issue #1 assigned) | THN4 (designated; approval pending) |
-| F-01 ([#3](https://github.com/JeffMerry/reg-me-up/issues/3)) | JeffMerry (proposed) | THN4 (proposed) |
-| F-02 ([#4](https://github.com/JeffMerry/reg-me-up/issues/4)) | JeffMerry (proposed) | THN4 (proposed) |
-| F-03 ([#5](https://github.com/JeffMerry/reg-me-up/issues/5)) | THN4 (proposed) | JeffMerry (proposed) |
-| F-04 ([#6](https://github.com/JeffMerry/reg-me-up/issues/6)) | THN4 (proposed) | JeffMerry (proposed) |
-| Sprint release PR | THN4 (proposed; no release Issue recorded) | JeffMerry (proposed) |
+| F-01 ([#3](https://github.com/JeffMerry/reg-me-up/issues/3)) | JeffMerry (GitHub assignee) | THN4 (planned) |
+| F-02 ([#4](https://github.com/JeffMerry/reg-me-up/issues/4)) | JeffMerry (GitHub assignee) | THN4 (planned) |
+| F-03 ([#5](https://github.com/JeffMerry/reg-me-up/issues/5)) | THN4 (GitHub assignee) | JeffMerry (planned) |
+| F-04 ([#6](https://github.com/JeffMerry/reg-me-up/issues/6)) | THN4 (GitHub assignee) | JeffMerry (planned) |
+| Sprint release PR | THN4 (planned; no release Issue recorded) | JeffMerry (planned) |
 
-Only SYS-01 has an actual GitHub assignee; the named feature and release allocations are proposals, not GitHub assignments, reviewer requests, approvals or contribution records. Record team agreement and make actual assignments/reviewer requests when appropriate. Both join baseline/schema/API discussions and work on tests/design/UI/API as applicable. While one implements a dependency, the other can review it, prepare downstream test cases and review UI/contracts. The default delivery sequence follows feature dependencies; do not merge downstream work against missing auth/data behavior.
+The feature Issue assignees were set at the user's direction; teammate agreement is not independently confirmed. Planned reviewers and release allocation are not actual PR reviewer requests, approvals or contribution records. Record team agreement and request review on each actual PR. Both join baseline/schema/API discussions and work on tests/design/UI/API as applicable. While one implements a dependency, the other can review it, prepare downstream test cases and review UI/contracts. The default delivery sequence follows feature dependencies; do not merge downstream work against missing auth/data behavior.
 
 ## 5. Additional branches when real work requires them
 
@@ -102,3 +102,4 @@ This gives **five implementation/setup PRs plus one release PR** as the normal p
 | 0.4 | 2026-11-10 | Updated planned SYS-01 foundation scope to Prisma ORM and Prisma Migrate | Pending teammate review; no implementation claimed |
 | 0.5 | 2026-11-10 | Recorded rename of develop to sprint/01-staging and updated feature/release PR workflow | Teammate review pending; no implementation claimed |
 | 0.6 | 2026-11-11 | Added proposed named allocation, actual feature Issue links and paired Issue/PR title examples | Pending teammate review; feature Issues unassigned |
+| 0.7 | 2026-11-11 | Recorded user-directed Issue assignees and planned reviewers in branch table; corrected SYS-01 Issue status | Teammate allocation agreement and PR review pending |

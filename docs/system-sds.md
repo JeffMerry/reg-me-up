@@ -1,6 +1,6 @@
 # RegMeUp — System-Level Software Design Specification
 
-Version 0.4 — 2026-11-11 (Asia/Bangkok). Selected design direction adopted by user; **pending teammate review**. This is a pre-implementation design, not an implemented architecture or tested result. [SRS](srs.md) defines requirements/decisions; feature contracts refine endpoint behavior.
+Version 0.5 — 2026-11-11 (Asia/Bangkok). Selected design direction adopted by user; **pending teammate review**. This is a pre-implementation design, not an implemented architecture or tested result. [SRS](srs.md) defines requirements/decisions; feature contracts refine endpoint behavior.
 
 ## 1. Architecture and stack
 
@@ -167,7 +167,7 @@ D1: local working release, setup/build/tests and reviewed main release. Lab 5: D
 
 ## 8. Review and limitations
 
-No code/package/schema/test/migration/container deployed or executed by this document. Existing target versions are documented; exact Prisma package selection and install/lockfile/environment verification remain ENG-01. GitHub CLI confirmed JeffMerry admin and THN4 write access; actual board/settings/review approvals and feature-specific assignments remain ENG-02. Technical v0.1 additions (encoding/limits/hash/timeouts/errors) are explicit design choices for teammate review, not invented stakeholder statements. UI source retains its original pending review; this SDS does not assert teammate acceptance.
+No code/package/schema/test/migration/container deployed or executed by this document. Existing target versions are documented; exact Prisma package selection and install/lockfile/environment verification remain ENG-01. GitHub CLI confirmed JeffMerry admin and THN4 write access and user-directed Issue assignments; teammate agreement, actual board/settings and feature PR approvals remain ENG-02. Technical v0.1 additions (encoding/limits/hash/timeouts/errors) are explicit design choices for teammate review, not invented stakeholder statements. UI source retains its original pending review; this SDS does not assert teammate acceptance.
 
 | Version | Date | Change | Review |
 |---|---|---|---|
@@ -175,3 +175,4 @@ No code/package/schema/test/migration/container deployed or executed by this doc
 | 0.2 | 2026-11-06 | Linked exact dependency targets and SYS-01 acceptance/test design; distinguished selection from installation/build evidence | Pending teammate review; application tests NOT RUN |
 | 0.3 | 2026-11-10 | Adopted Prisma ORM/Migrate and retained event-lock transaction protocol and PostgreSQL constraints | Pending teammate review; Prisma compatibility and application tests NOT RUN |
 | 0.4 | 2026-11-11 | Linked conceptual DBML and assigned the initial session schema to SYS-01 | Pending teammate review; schema not applied |
+| 0.5 | 2026-11-11 | Updated Issue-assignment status while retaining pending team agreement and review | Pending teammate review; NOT RUN |
