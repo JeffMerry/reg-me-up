@@ -2,7 +2,7 @@
 
 | Item | Value |
 |---|---|
-| Version / date | 0.1 / 2026-11-06 |
+| Version / date | 0.3 / 2026-11-11 |
 | State | Test design only; pending teammate review; **ALL PLANNED / NOT RUN** |
 | Inputs | [SRS](../../srs.md), [SDS](../../system-sds.md), contracts [F-01](f-01.md)/[F-02](f-02.md)/[F-03](f-03.md)/[F-04](f-04.md), [UI](../../ui-spec.md) |
 | Actual test files / commands / tested commit / results | None; executable test suite does not exist yet |
@@ -13,7 +13,7 @@ TEST-01–10 retain reference IDs. TEST/AC-11–15 fill the known discovery/hash
 
 Unit: pure validation/normalization/error-priority logic. API/DB integration: real Express HTTP application, independent cookie jars, session store and PostgreSQL with same engine/constraints as release. E2E: Playwright against actual UI/API/test DB. Manual: only explicitly identified supplemental UI/restart/setup checks with recorded expected/actual version; do not replace automated rule/security tests with screenshots.
 
-Apply all versioned migrations to isolated TEST_DATABASE_URL, then deterministic synthetic fixtures. Runner must reject a missing test URL or test URL equal to application DATABASE_URL before any reset. Unit/E2E fixture setup cannot silently bypass the API behavior under test. Direct DB setup for preconditions/hidden fixtures is allowed, but actions asserting registration/publication use HTTP. Session credentials generated/provided by test harness/local seed procedure; never use real account secrets.
+Apply all versioned migrations to isolated TEST_DATABASE_URL, then deterministic synthetic fixtures. Before any destructive reset or cleanup, enforce the [SYS-01 test database safety rules and SYS-TEST-05](sys-01.md): reject missing TEST_DATABASE_URL, compare effective host/port/database and aliases against the application target even when URLs differ in format, and verify an explicit test-only database identity/marker. Refuse cleanup before writes when identity is uncertain or the target is the application or a non-test database. Unit/E2E fixture setup cannot silently bypass the API behavior under test. Direct DB setup for preconditions/hidden fixtures is allowed, but actions asserting registration/publication use HTTP. Session credentials generated/provided by test harness/local seed procedure; never use real account secrets.
 
 | Symbol | Fixture |
 |---|---|
@@ -53,6 +53,8 @@ Common API assertions: status + exact semantic code; success field allowlist; fo
 | TEST-15 / AC-15 | API/DB | A:O1/O2 own-event lists with events of each. B:O1 publication request V plus organizerId=O2; C:valid V without owner; D:GET own list with unsupported organizerId query. | A:each list own rows only/counts correct; B:422 unknown-field validation and no insertion; C:201 DB ownerO1; D:422, never another owner's rows. Role/session controls in TEST-09. |
 
 Technical transport cases supplement TEST-03/09: malformed JSON400 BAD_REQUEST, wrong content type415, >64KiB413; safe errors do not echo input secrets. F-03 timeout/commit ambiguity cases supplement TEST-07/14.M: known rolled-back lock/deadlock503 TEMPORARILY_UNAVAILABLE; lost commit outcome503 OUTCOME_UNKNOWN or disconnected response, reconcile own GET before retry; no false success/failure. Use internal test fault injection and record phase; do not infer transaction rollback merely from connection loss.
+
+Prisma-specific planned checks: exercise a lock timeout while another transaction holds the event row and verify the known-rollback response and unchanged rows; separately exercise transaction acquisition/runtime timeout and connection loss near commit, recording actual error/rollback evidence before mapping a response. The ambiguous-commit scenario must not assert rollback without proof. Confirm the event lock and subsequent reads/writes use the same interactive transaction and that Prisma/driver timeouts do not hide a normal TEST-06/07 conflict. These checks are NOT RUN.
 
 ## 3. Deterministic concurrency method
 
@@ -120,3 +122,5 @@ For meaningful TDD retain intended-behavior failing output + version and passing
 | Version | Date | Change | Review / results |
 |---|---|---|---|
 | 0.1 | 2026-11-06 | Fixtures, TEST-01–15 steps/outcomes, contention/restart/API/UI design and empty actual-result register | Pending teammate review; all NOT RUN |
+| 0.2 | 2026-11-10 | Added Prisma transaction, timeout and commit-ambiguity verification while retaining race criteria | Pending teammate review; all NOT RUN |
+| 0.3 | 2026-11-11 | Linked SYS-01 reset safety checks, including equivalent URLs and test-only identity | Pending teammate review; all NOT RUN |

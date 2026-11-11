@@ -1,6 +1,6 @@
 # RegMeUp — System-Level Software Design Specification
 
-Version 0.1 — 2026-11-06 (Asia/Bangkok). Selected design direction adopted by user; **pending teammate review**. This is a pre-implementation design, not an implemented architecture or tested result. [SRS](srs.md) defines requirements/decisions; feature contracts refine endpoint behavior.
+Version 0.5 — 2026-11-11 (Asia/Bangkok). Selected design direction adopted by user; **pending teammate review**. This is a pre-implementation design, not an implemented architecture or tested result. [SRS](srs.md) defines requirements/decisions; feature contracts refine endpoint behavior.
 
 ## 1. Architecture and stack
 
@@ -8,20 +8,20 @@ Version 0.1 — 2026-11-06 (Asia/Bangkok). Selected design direction adopted by 
 |---|---|---|
 | UI | React + TypeScript + Vite + Tailwind CSS | UI-01–07/04-D and shared states from [ui-spec](ui-spec.md); identity-driven controls, form feedback, responsive/keyboard behavior |
 | Application | Node.js + Express + TypeScript, one backend | JSON endpoints, session/role checks, validation, domain ownership, registration transaction and safe errors |
-| Persistence | PostgreSQL, `pg`, parameterized SQL, versioned SQL migrations; no ORM | Durable entities/sessions, FK/check/unique constraints, transaction/row locks |
+| Persistence | PostgreSQL, Prisma ORM and Prisma Migrate; parameterized SQL for row locks and unsupported features | Durable entities/sessions, FK/check/unique constraints, transaction/row locks |
 | Verification | Vitest + real test PostgreSQL + HTTP requests; Playwright selected E2E | Unit rules; API/DB/auth/concurrency; critical user journeys and manual UI supplements |
 
 ```mermaid
 flowchart LR
   B[Browser: React and Tailwind] -->|same-origin /api JSON and cookie| A[Express routes: session / role / validation]
   A --> S[Services: ownership and domain transactions]
-  S --> R[Repositories: parameterized SQL via pg]
+  S --> R[Repositories: Prisma Client and parameterized SQL]
   R --> D[(PostgreSQL: users / events / registrations / sessions)]
 ```
 
-One deployable application is sufficient; logical layers do not require multiple servers. Planned structure: `client/`, `server/`, `server/db/migrations/`, `server/tests/`, `e2e/`. Controllers map HTTP; services implement rules/transaction boundaries; repositories accept the transaction client. Never take identity/ownership from client-supplied role/user IDs.
+One deployable application is sufficient; logical layers do not require multiple servers. Planned structure: `client/`, `server/`, `server/prisma/` (schema and migrations), `server/tests/`, `e2e/`. Controllers map HTTP; services implement rules/transaction boundaries; repositories accept the transaction client. Never take identity/ownership from client-supplied role/user IDs.
 
-Local Vite proxies `/api` to backend. Release design serves static frontend build and API through one origin, with persistent database storage outside temporary app filesystem. Docker/CI/GCP provisioning happens in Lab 5; no container/cloud resource exists from this document. Exact runtime/package versions are ENG-01: select compatible versions on both machines and record them/lockfile before implementation; no installed versions are asserted here.
+Local Vite proxies `/api` to backend. Release design serves static frontend build and API through one origin, with persistent database storage outside temporary app filesystem. Docker/CI/GCP provisioning happens in Lab 5; no container/cloud resource exists from this document. ENG-01 existing runtime/dependency targets are in [dependency versions](dependency-versions.md); exact Prisma package versions and compatibility still need selection and verification. Actual provisioning/install/lockfile/build verification on both machines remains pending; [SYS-01 preparation](sprints/sprint-1/sys-01.md) defines its scope and test design.
 
 ## 2. Conceptual model and Sprint 1 dictionary
 
@@ -32,15 +32,15 @@ erDiagram
   EVENTS ||--o{ REGISTRATIONS : receives
 ```
 
-All domain IDs are UUIDs generated on server; API field names camelCase, DB columns snake_case. Time columns are `timestamptz`. Schema below is a design, not a migration already applied.
+All domain IDs are UUIDs generated on server; API field names camelCase, DB columns snake_case. Domain time columns are `timestamptz`. The [Sprint 1 DBML](data-model/sprint-1.dbml) captures the conceptual model and rules; it is a design, not a migration already applied. In the `chore/sys-01-foundation` PR compare DBML against Prisma schema, reviewed migration SQL and the actual session adapter schema; update the DBML whenever the model changes and review any differences.
 
 | Table | Fields / constraints |
 |---|---|
 | users | `id uuid PK`; `email text NOT NULL UNIQUE`, normalized trim/lowercase; `password_hash text NOT NULL`; `display_name text NOT NULL` length 1–100 after trim; `role text NOT NULL` in PARTICIPANT/ORGANIZER; `created_at timestamptz NOT NULL` server time |
 | events | `id uuid PK`; `organizer_id uuid NOT NULL FK users(id)`; `title text NOT NULL` length 1–200 after trim; `starts_at/ends_at timestamptz NOT NULL`, end > start; `location text NOT NULL` length 1–300 after trim; `capacity integer NOT NULL` > 0; `description text NULL` max 10,000; `publication_status text NOT NULL` in PUBLISHED/UNPUBLISHED; `created_at timestamptz NOT NULL` |
 | registrations | `id uuid PK` also displayed reference; `event_id/participant_id uuid NOT NULL FK`; `status text NOT NULL` = ACTIVE in Sprint 1; `registered_at timestamptz NOT NULL` server time; unique active event/participant pair |
-| sessions | Library PostgreSQL store's versioned table: `sid` PK, serialized session data and indexed expiry; adapter-required exact SQL is captured in initial F-01 migration after package selection, not assumed applied |
-| schema_migrations | Applied migration version/checksum/timestamp; no edited historical migrations after shared application |
+| sessions | Logical name for the library PostgreSQL store table: `sid` PK, serialized `sess`, indexed `expire`; SYS-01 owns the initial versioned session schema. The shipped `connect-pg-simple` table is named `session` by default; configure its table name if using `sessions` and verify the selected package's exact SQL. No users FK is implied by the serialized user ID. |
+| _prisma_migrations | Prisma Migrate-managed migration history/checksums; do not manually edit the ledger or previously applied migration files |
 
 DB indexes: unique normalized email; `events(publication_status, starts_at, id)` for public list; `events(organizer_id, created_at, id)` for own list; `registrations(event_id, status, registered_at, id)` and `(participant_id, registered_at, id)`; partial unique `(event_id,participant_id) WHERE status='ACTIVE'`. Naming convention uses descriptive `..._active_pair_unique` to map only the known duplicate constraint safely.
 
@@ -54,13 +54,13 @@ Later concepts: Instructor assignments link event to Instructor users; Attendanc
 
 ## 3. Transaction and consistency design
 
-F-03 write protocol (all queries on one checked-out `pg` client, `BEGIN ISOLATION LEVEL READ COMMITTED`):
+F-03 write protocol: use one Prisma interactive `$transaction` with explicit `ReadCommitted` isolation and its `tx` client for every lock, read and write. Use parameterized `tx.$queryRaw` for `SELECT ... FOR UPDATE`; never use the root Prisma client or a separate pool inside this transaction:
 
-1. Authenticate and require Participant before transaction. BEGIN; set local lock timeout 2 seconds and statement timeout 5 seconds (design parameters, not performance SLA).
+1. Authenticate and require Participant before the transaction. Set transaction-local PostgreSQL lock timeout 2 seconds and statement timeout 5 seconds; configure Prisma transaction acquisition/runtime limits separately so they are compatible with this protocol. These are design parameters, not an SLA; verify driver/Prisma error mapping and settings in real integration tests.
 2. `SELECT` event row by ID `FOR UPDATE`; reject missing/unpublished as 404 and rollback.
 3. In a **separate subsequent statement after acquiring lock**, query current Participant's active pair. If present, rollback and return 409 ALREADY_REGISTERED with that user's registration ID. Duplicate has precedence over full.
 4. In a subsequent statement count active registrations for this event. If count >= capacity, rollback and return 409 EVENT_FULL.
-5. INSERT ACTIVE registration with server identity/ID/time. COMMIT; return 201 only after commit confirmed. Release client in finally.
+5. INSERT ACTIVE registration through the same `tx` with server identity/ID/time. Return 201 only after `$transaction` resolves and commit is confirmed; Prisma manages the transaction connection. Throw on failure to roll back, and release application resources on shutdown.
 
 The event lock serializes all registration writers for one event. READ COMMITTED allows the statements after lock acquisition to see committed registrations from the previous holder; do not combine count with a pre-lock snapshot query. Unique active pair is independent duplicate protection, not a capacity constraint. No promise that an ORM/library automatically provides these invariants.
 
@@ -70,7 +70,7 @@ On known constraint duplicate, rollback and query the existing pair using authen
 
 List rows, total and counts in one response must use one consistent DB snapshot: one SQL statement, or a short read-only REPEATABLE READ transaction for multiple statements. Owner resource selection filters organizer ID before private queries/response construction. Owner-only failure never returns metadata/registrants/totals. Public metadata stays accessible through the public endpoint.
 
-Design sources: [PostgreSQL isolation](https://www.postgresql.org/docs/current/transaction-iso.html), [row locking](https://www.postgresql.org/docs/current/explicit-locking.html), [partial unique indexes](https://www.postgresql.org/docs/current/indexes-partial.html), [pg transaction client requirement](https://node-postgres.com/features/transactions). These explain available mechanisms; TEST-06/07 must still prove RegMeUp behavior.
+Design sources: [PostgreSQL isolation](https://www.postgresql.org/docs/current/transaction-iso.html), [row locking](https://www.postgresql.org/docs/current/explicit-locking.html), [partial unique indexes](https://www.postgresql.org/docs/current/indexes-partial.html), [Prisma interactive transactions](https://www.prisma.io/docs/orm/v7/prisma-client/queries/transactions), [Prisma parameterized raw queries](https://www.prisma.io/docs/orm/v7/prisma-client/using-raw-sql/raw-queries). These explain available mechanisms; TEST-06/07 must still prove RegMeUp behavior.
 
 ## 4. Authentication and permission matrix
 
@@ -159,7 +159,7 @@ UI target/reference widths 1440px and 390px; support 320px, tablet/desktop break
 
 Server env names: `NODE_ENV`, `PORT`, `DATABASE_URL`, `TEST_DATABASE_URL` (tests only), `SESSION_SECRET`, `APP_ORIGIN`; test clock/synchronization dependencies are injected by test harness, not public HTTP endpoints. Session lifetime/hash/DB timeout values above are named documented constants/config validated at startup, not client overrides. Frontend uses relative `/api`, no secrets or DB credentials. Never print connection strings/session payload/passwords in logs.
 
-Migration plan: ordered initial users+sessions, events, registrations+indexes; a schema_migrations ledger applies each once under an exclusive migration-runner lock with checksum verification/transaction for transactional DDL. SQL files and runner not created in this task. Seed is an explicit local/test command, hashes passwords, reproducibly creates at least P1/P2/P3/O1/O2, empty/partial/full published events and isolated unpublished fixture. Credentials synthetic and supplied via local seed procedure/private handoff, never real passwords in Git/PDF. No seed/reset on ordinary startup or restart/persistence test.
+Migration plan: use Prisma schema and Prisma Migrate as the single migration history, with ordered initial users+sessions, events, registrations and indexes. Generate and review versioned SQL before applying; customize migration SQL for PostgreSQL checks or other required features not represented by the selected Prisma version. Ensure the partial active-pair unique index exists; Prisma v7 documents a `partialIndexes` preview feature, so decide after exact-version verification whether to use it or reviewed SQL, and test future migration drift either way. Preserve `connect-pg-simple` session table shape; no unversioned session-table auto-creation. Use `migrate dev` only on disposable development databases and `migrate deploy` for applying reviewed migrations to non-development environments. Never edit applied shared migrations. Prisma v7 `migrate deploy` warns about modified applied migrations but does not detect schema drift or missing applied migration files; investigate any warning and verify history/schema instead of assuming an abort. Test failure/recovery and transaction boundaries for the chosen migration SQL; do not assume a failed migration always leaves no partial schema. See [development and production](https://www.prisma.io/docs/orm/v7/prisma-migrate/workflows/development-and-production) and [failed migration recovery](https://www.prisma.io/docs/orm/v7/prisma-migrate/workflows/patching-and-hotfixing). Schema/migrations have not been created. Seed is an explicit local/test command, hashes passwords, reproducibly creates at least P1/P2/P3/O1/O2, empty/partial/full published events and isolated unpublished fixture. Credentials synthetic and supplied via local seed procedure/private handoff, never real passwords in Git/PDF. No seed/reset on ordinary startup or restart/persistence test.
 
 Planned command interfaces (not runnable today): install pinned deps → configure env → db:migrate → db:seed → dev; build; test:unit; test:integration with TEST_DATABASE_URL; test:e2e against test server. Implementation adds exact cwd/commands to README and records fresh setup TEST-13; never run destructive fixture cleanup against DATABASE_URL/production DB.
 
@@ -167,8 +167,12 @@ D1: local working release, setup/build/tests and reviewed main release. Lab 5: D
 
 ## 8. Review and limitations
 
-No code/package/schema/test/migration/container deployed or executed by this document. Version pinning, actual GitHub settings, named author/reviewer assignments and contract commit IDs remain ENG-01/02. Technical v0.1 additions (encoding/limits/hash/timeouts/errors) are explicit design choices for teammate review, not invented stakeholder statements. UI source retains its original pending review; this SDS does not assert teammate acceptance.
+No code/package/schema/test/migration/container deployed or executed by this document. Existing target versions are documented; exact Prisma package selection and install/lockfile/environment verification remain ENG-01. GitHub CLI confirmed JeffMerry admin and THN4 write access and user-directed Issue assignments; teammate agreement, actual board/settings and feature PR approvals remain ENG-02. Technical v0.1 additions (encoding/limits/hash/timeouts/errors) are explicit design choices for teammate review, not invented stakeholder statements. UI source retains its original pending review; this SDS does not assert teammate acceptance.
 
 | Version | Date | Change | Review |
 |---|---|---|---|
 | 0.1 | 2026-11-06 | Selected stack/no ORM, model, atomic registration, session/CSRF, DTO/API/UI/config and delivery design | Pending teammate review; correctness NOT VERIFIED |
+| 0.2 | 2026-11-06 | Linked exact dependency targets and SYS-01 acceptance/test design; distinguished selection from installation/build evidence | Pending teammate review; application tests NOT RUN |
+| 0.3 | 2026-11-10 | Adopted Prisma ORM/Migrate and retained event-lock transaction protocol and PostgreSQL constraints | Pending teammate review; Prisma compatibility and application tests NOT RUN |
+| 0.4 | 2026-11-11 | Linked conceptual DBML and assigned the initial session schema to SYS-01 | Pending teammate review; schema not applied |
+| 0.5 | 2026-11-11 | Updated Issue-assignment status while retaining pending team agreement and review | Pending teammate review; NOT RUN |

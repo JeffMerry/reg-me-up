@@ -1,8 +1,10 @@
 # RegMeUp — Feature inventory
 
-Version 0.1 — 2026-11-06. User-adopted planning baseline; teammate review pending. Implementation of every feature **NOT STARTED in the inspected checkout**; verification **NOT RUN**.
+Version 0.3 — 2026-11-10. User-adopted planning baseline; teammate review pending. Implementation of every feature **NOT STARTED in the inspected checkout**; verification **NOT RUN**.
 
 Requirements: [SRS](srs.md). Detailed design: [System SDS](system-sds.md). Verification mapping: [Traceability](traceability.md). Sprint outcomes: [Plan](sprints/plan.md).
+
+SYS-01 has a [bounded foundation preparation contract](sprints/sprint-1/sys-01.md) and [dependency targets](dependency-versions.md). DEC-14 adopts Prisma ORM; exact Prisma versions and compatibility remain open for teammate review before implementation. Actual implementation/tests remain NOT STARTED/NOT RUN.
 
 | ID | Responsibility / scope | Requirements | Dependencies | Sprint | UI / contract |
 |---|---|---|---|---|---|
@@ -28,3 +30,5 @@ Proposed team allocation: each feature has a lead and a different teammate revie
 | Version | Date | Change | Review |
 |---|---|---|---|
 | 0.1 | 2026-11-06 | Allocated all 11 FR, 13 BR, 7 NFR to F-01–09/SYS-01; corrected cross-cutting security mapping | Pending teammate review |
+| 0.2 | 2026-11-06 | Linked bounded SYS-01 preparation and exact dependency version targets | Pending teammate review; no implementation/results |
+| 0.3 | 2026-11-10 | Updated SYS-01 dependency status for the Prisma ORM decision | Pending teammate review; no implementation/results |

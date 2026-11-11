@@ -1,13 +1,13 @@
 # RegMeUp — Sprint 1 Product Definition of Done
 
-Version 0.1 — 2026-11-06. Pre-implementation checklist; pending teammate review. **No completion boxes checked.** User adoption of design is not evidence of teammate review, implementation or successful verification.
+Version 0.2 — 2026-11-10. Pre-implementation checklist; pending teammate review. **No completion boxes checked.** User adoption of design is not evidence of teammate review, implementation or successful verification.
 
 ## 1. Before each feature implementation
 
 - [ ] Relevant SRS/SDS/UI/feature contract/AC/STS read and consistent; changes have version/reason/impact.
 - [ ] Contract and test design recorded in version control before corresponding implementation; actual commit/date retained, no backdating.
 - [ ] Teammate reviews feature UI/design/test cases; actual reviewer and specific finding/question/reason recorded in Issue/PR.
-- [ ] Issue, bounded feature branch from current develop, author and different teammate reviewer assigned.
+- [ ] Issue, bounded feature branch from current sprint/01-staging, author and different teammate reviewer assigned.
 - [ ] Exact compatible dependencies/runtime/DB versions recorded (ENG-01); synthetic local/test setup does not use production secrets or reset non-test DB.
 
 ## 2. Per-feature completion
@@ -19,7 +19,7 @@ Version 0.1 — 2026-11-06. Pre-implementation checklist; pending teammate revie
 - [ ] Meaningful rule work has real intended-behavior red→green versions/output; no missing-module error presented as domain-rule red.
 - [ ] Tests, setup and docs match implementation; failures/skips/incomplete work disclosed and linked to Issues.
 - [ ] Teammate PR review includes substantive checks and fixes; author has not self-approved.
-- [ ] Reviewed feature integrated into develop and integration checks recorded for tested version.
+- [ ] Reviewed feature integrated into sprint/01-staging and integration checks recorded for tested version.
 
 ## 3. Sprint release completion
 
@@ -55,3 +55,4 @@ Known current limitations: no application/test suite exists in inspected checkou
 | Version | Date | Change | Review |
 |---|---|---|---|
 | 0.1 | 2026-11-06 | Pre-implementation gates and product/release evidence checklist | Pending teammate review |
+| 0.2 | 2026-11-10 | Updated staging branch references after rename | Pending teammate review |

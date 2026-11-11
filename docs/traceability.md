@@ -1,6 +1,6 @@
 # RegMeUp — Requirements and verification traceability
 
-Version 0.1 — 2026-11-06. Pending teammate review. Sources: [SRS](srs.md), [features](features.md), [System SDS](system-sds.md), [UI baseline](ui-spec.md), [Sprint 1 STS](sprints/sprint-1/sts.md).
+Version 0.4 — 2026-11-11. Pending teammate review. Sources: [SRS](srs.md), [features](features.md), [System SDS](system-sds.md), [UI baseline](ui-spec.md), [Sprint 1 STS](sprints/sprint-1/sts.md).
 
 **Every actual test result is NOT RUN; actual test files/names, tested commits, command output and evidence are not available.** Planned coverage below does not mean implementation or coverage measurements exist. No baseline requirement removed.
 
@@ -46,7 +46,7 @@ Version 0.1 — 2026-11-06. Pending teammate review. Sources: [SRS](srs.md), [fe
 | NFR-02 | F-03/05/07; SYS-01 durability | 1–3 + Lab 5 | AC-10 → TEST-10 app restart; later cancellation/attendance and cloud redeploy checks | S1 designed; later checks pending; NOT RUN |
 | NFR-03 | F-03/05/06 | 1–2 | AC-06/07 → TEST-06/07 real DB contention; later cancel/capacity interactions | S1 designed; later contracts pending; NOT RUN |
 | NFR-04 | F-01 | 1 | AC-02/12 → TEST-02/12 lifecycle/hashed storage/log/response verification | Hashing gap addressed by design; NOT RUN |
-| NFR-05 | SYS-01 | 1–3 + Lab 5 | AC-13 → TEST-13 fresh setup/migrate/seed/build/tests; later Docker/CI/deploy/reproduce | Local design; executable commands not present; NOT RUN |
+| NFR-05 | SYS-01 | 1–3 + Lab 5 | AC-13 → TEST-13 full setup; foundation SYS-AC-01–07 → SYS-TEST-01–07 in [SYS-01](sprints/sprint-1/sys-01.md); later Docker/CI/deploy/reproduce | Exact targets selected; foundation/full tests NOT RUN; executable commands not present |
 | NFR-06 | F-01–09 applicable UI | 1–3 | AC-14 → TEST-14.A–N ↔ UIV-01–14; later feature states added per sprint | S1 cases designed; later contracts pending; NOT RUN |
 | NFR-07 | F-09 | 2–3 | Future AC/STS: assignment restart + anonymous/wrong-role/unassigned reads denied | Pending Q-07/08 and F-09 contract; NOT RUN |
 
@@ -72,17 +72,21 @@ Version 0.1 — 2026-11-06. Pending teammate review. Sources: [SRS](srs.md), [fe
 
 STS §5 maps every UIV-01–14 to TEST-14.A–N and API/DB supplements. Screen coverage: UI-01 F-01; UI-02 F-02; UI-03 F-02/03; UI-04/04-D F-03; UI-05 F-02/04; UI-06 F-02; UI-07 F-04; UI-S01/02 shared access/not-found cases. UI coverage is planned, not measured.
 
+Example: **FR-05 → [F-04](sprints/sprint-1/f-04.md) → AC-08 → [TEST-08](sprints/sprint-1/sts.md)**. FR-05 requires an Organizer to read registrations only for their own event; AC-08 defines owner success and non-owner denial; TEST-08 plans positive, cross-owner, empty-list and pagination checks. This is planned verification, not an executed result.
+
+For foundation preparation, [SYS-01 acceptance and test design](sprints/sprint-1/sys-01.md) maps SYS-AC-01–07 to SYS-TEST-01–07. These foundation checks supplement, rather than replace, product-level AC-13 → TEST-13; all remain NOT RUN.
+
 ## 5. Actual evidence, gaps and changes
 
 [STS execution register](sprints/sprint-1/sts.md) is the single actual-test record: planned ID/AC, actual file/name, automated/manual method, result, tested commit and evidence. Every current actual field is empty/NOT RUN. When executed, retain command/output/counts/failed/skipped cases and manual tester/version. PR/review/release evidence belongs to [DoD](sprints/sprint-1/dod.md), currently NOT RECORDED.
 
-Known remaining work: implement and run all S1 tests; pin versions and produce actual setup; record contracts/test-design commit before implementation; real teammate review/Issues/integration; elaborate Sprint 2–3 AC/STS after Q-04–09. A row linked to planned tests is not a completed requirement. No evidence of coverage percentage exists.
+Known remaining work: implement and run all S1 tests; install/lock/verify [selected versions](dependency-versions.md) and produce actual setup; record contract/test-design commits before implementation; real teammate review/Issues/integration; elaborate Sprint 2–3 AC/STS after Q-04–09. Foundation-specific SYS-AC/SYS-TEST design supplements full AC-13/TEST-13; its actual results remain NOT RUN. A row linked to planned tests is not a completed requirement. No evidence of coverage percentage exists.
 
 | Change | Rationale / authority | Affected artifacts | Status |
 |---|---|---|---|
 | Mapping clarification | R omitted NFR-01 coverage in F-02/03/09; original security rule already applies | Features/traceability/SDS/contracts | Documented, pending teammate review |
 | AC/TEST-11–15 | Close R discovery/hash/setup/UI/own-event verification gaps under user-adopted proposal | Contracts/STS/DoD/traceability | Designed; NOT RUN |
-| No ORM; selected technical direction | User explicitly chose no ORM and instructed proposals be documented | SRS DEC-08–13, SDS/contracts | Baseline for documentation; teammate review pending |
+| Prisma ORM replaces earlier no-ORM choice | User selected Prisma ORM on 2026-11-10; DEC-08 remains historical and DEC-14 supersedes it | SRS DEC-14, SDS, F-03, SYS-01, versions | Design updated; exact Prisma versions, teammate review and execution pending |
 
 No instructor-approved scope changes or teammate approvals have been recorded; this table is not a fabricated approval log. Later changes need reason/affected requirement IDs/version/actual decision source and must retain baseline unfinished work.
 
@@ -91,3 +95,6 @@ No instructor-approved scope changes or teammate approvals have been recorded; t
 | Version | Date | Change | Review |
 |---|---|---|---|
 | 0.1 | 2026-11-06 | All baseline requirements allocated; S1 AC/test/UI links; explicit later gaps and empty actual evidence | Pending teammate review |
+| 0.2 | 2026-11-06 | Linked foundation-specific SYS-AC/SYS-TEST design and selected versions without claiming execution | Pending teammate review; all tests NOT RUN |
+| 0.3 | 2026-11-10 | Traced DEC-14 Prisma decision and affected design artifacts | Pending teammate review; all tests NOT RUN |
+| 0.4 | 2026-11-11 | Added explicit FR-05 to TEST-08 example and SYS-01 foundation test link | Pending teammate review; all tests NOT RUN |
