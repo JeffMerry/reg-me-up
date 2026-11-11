@@ -1,16 +1,16 @@
 # RegMeUp
 
-ระบบลงทะเบียนกิจกรรมอบรมและเวิร์กช็อปภายในมหาวิทยาลัย สำหรับวิชา CPE334 วิศวกรรมซอฟต์แวร์
+An event registration system for university training sessions and workshops, developed for CPE334 Software Engineering.
 
-Branch foundation เตรียมโครงสร้าง client/server ฐานข้อมูลและเครื่องมือทดสอบ ยังไม่ได้พัฒนา login, กิจกรรม หรือการลงทะเบียน ดู [เอกสาร](docs/README.md), [SYS-01](docs/sprints/sprint-1/sys-01.md) และ [UI baseline](docs/ui-spec.md)
+The foundation branch provides the client/server structure, database setup, and test tooling. Login, events, and registration have not yet been implemented. See the [documentation index](docs/README.md), [SYS-01 contract](docs/sprints/sprint-1/sys-01.md), and [UI baseline](docs/ui-spec.md).
 
-## เตรียมเครื่อง
+## Prerequisites
 
-- Node.js **22.23.4** และ npm **10.9.9**; `.nvmrc` ระบุ Node เป้าหมาย
-- PostgreSQL **17.11** สองฐานข้อมูลแยกสำหรับแอปและทดสอบ พร้อมสิทธิ์จัดการ schema ของฐานข้อมูลที่กำหนด
-- ใช้ข้อมูลสังเคราะห์เท่านั้น และไม่ commit รหัสผ่านหรือไฟล์ `.env`
+- Node.js **22.23.4** and npm **10.9.9**; `.nvmrc` specifies the target Node version.
+- PostgreSQL **17.11** with separate application and test databases and permission to manage the schema in each designated database.
+- Use synthetic data only. Do not commit passwords or `.env` files.
 
-ติดตั้งจาก root ของ repository:
+Install dependencies from the repository root:
 
 ```powershell
 node --version
@@ -19,18 +19,18 @@ npm ci
 Copy-Item server/.env.example server/.env
 ```
 
-กำหนด `DATABASE_URL`, `TEST_DATABASE_URL`, `SESSION_SECRET` และ `APP_ORIGIN` ใน `server/.env` ให้ตรงกับเครื่อง ฐานข้อมูล app/test ต้องเป็นคนละฐานข้อมูลจริง; session secret ต้องมีอย่างน้อย 32 ตัวอักษร ห้ามใช้ production credentials ข้อมูลใน `.env.example` เป็นเพียง placeholder
+Set `DATABASE_URL`, `TEST_DATABASE_URL`, `SESSION_SECRET`, and `APP_ORIGIN` in `server/.env` for your environment. The application and test databases must be separate databases; the session secret must contain at least 32 characters. Do not use production credentials. Values in `.env.example` are placeholders.
 
-## ฐานข้อมูลและ seed
+## Database and seed
 
-สร้างฐานข้อมูลและบัญชีตามวิธีติดตั้ง PostgreSQL ของทีมก่อน คำสั่ง migration ใช้ `DATABASE_URL` ที่ระบุใน `server/.env` โดยไม่ reset ฐานข้อมูล และตรวจ checksum ของ migration ที่เคยใช้แล้วก่อน deploy หากไฟล์ถูกแก้/หายหรือมี migration ล้มเหลวที่ยังไม่ resolve คำสั่งจะหยุดให้ตรวจประวัติก่อน ห้ามข้ามตัวตรวจด้วยการเรียก Prisma deploy ตรงใน workflow ปกติ:
+Create the databases and accounts using your team's PostgreSQL setup procedure. The migration command uses `DATABASE_URL` from `server/.env` without resetting the database. It checks the checksums of previously applied migrations before deployment and stops if a file has been changed or removed, or if a failed migration has not been resolved. Do not bypass this check by calling Prisma deploy directly in the normal workflow:
 
 ```powershell
 npm run db:generate
 npm run db:migrate
 ```
 
-Seed เป็นคำสั่งแยก และปฏิเสธ `NODE_ENV=production` ใช้รหัสผ่านสำหรับบัญชีสังเคราะห์ที่กำหนดเองใน environment เท่านั้น บัญชี `p1`, `p2`, `p3`, `o1`, `o2` ใช้โดเมน `example.test`:
+Seeding is a separate command and rejects `NODE_ENV=production`. Provide a password for synthetic accounts through the environment. The `p1`, `p2`, `p3`, `o1`, and `o2` accounts use the `example.test` domain:
 
 ```powershell
 $env:ALLOW_SYNTHETIC_SEED = '1'
@@ -39,11 +39,11 @@ npm run db:seed
 Remove-Item Env:ALLOW_SYNTHETIC_SEED, Env:SEED_PASSWORD
 ```
 
-Seed ใช้ fixture IDs คงที่ ไม่ reset ฐานข้อมูล และไม่เปลี่ยนรายการที่มี ID เดิมเมื่อรันซ้ำ จึงควรใช้กับฐานข้อมูลสำหรับ local/test ที่จัดเตรียมไว้เท่านั้น
+The seed uses fixed fixture IDs, does not reset the database, and does not change existing records with the same IDs when run again. Use it only with databases prepared for local development or testing.
 
-## รันและตรวจ
+## Run and verify
 
-เปิดสอง terminal จาก root:
+Open two terminals from the repository root:
 
 ```powershell
 npm run dev:server
@@ -53,7 +53,7 @@ npm run dev:server
 npm run dev:client
 ```
 
-Frontend อยู่ที่ `http://localhost:5173` และ Vite ส่ง `/api` ไป server ที่ `http://localhost:3000`; `/api/health` ตอบ 200 เมื่อเชื่อมฐานข้อมูลได้และ 503 เมื่อไม่ได้ ปัจจุบันยังไม่มี domain endpoints
+The frontend is available at `http://localhost:5173`, and Vite proxies `/api` to the server at `http://localhost:3000`. `/api/health` returns 200 when the database is reachable and 503 otherwise. Domain endpoints are not yet available.
 
 ```powershell
 npm run typecheck
@@ -63,23 +63,23 @@ npm run test:unit
 
 ## Integration tests
 
-ต้องใช้ PostgreSQL แยกสองฐานข้อมูลจริงบน server endpoint เดียวกัน: `DATABASE_URL` สำหรับแอป และ `TEST_DATABASE_URL` สำหรับทดสอบ ตัวตรวจจะอ่าน effective database/server identity จากการเชื่อมต่อทั้งคู่ ไม่ใช้การเทียบ URL string อย่างเดียว และปฏิเสธเมื่อ endpoint ต่างกันหรือพิสูจน์ไม่ได้ว่าเป็นคนละฐานข้อมูล
+Use two separate PostgreSQL databases on the same server endpoint: `DATABASE_URL` for the application and `TEST_DATABASE_URL` for testing. The guard reads the effective database and server identity from both connections rather than comparing URL strings alone. It rejects different endpoints or cases where it cannot verify that the databases are separate.
 
-เตรียม test DB แบบว่างที่ตรวจสอบชื่อและปลายทางด้วยตนเองแล้ว ใช้ `DATABASE_URL` ชี้ test DB ชั่วคราวเพื่อรัน `npm run db:migrate` และ `npm run db:seed` จากนั้นสร้างตาราง marker **เฉพาะใน test DB ที่ยืนยันแล้ว** ด้วย `psql` หรือเครื่องมือจัดการฐานข้อมูล:
+Prepare an empty test database after manually verifying its name and endpoint. Temporarily point `DATABASE_URL` to the test database to run `npm run db:migrate` and `npm run db:seed`. Then create the marker table **only in the verified test database** using `psql` or a database management tool:
 
 ```sql
 CREATE TABLE regmeup_test_guard (marker text PRIMARY KEY CHECK (marker = 'regmeup-isolated-test'));
 INSERT INTO regmeup_test_guard VALUES ('regmeup-isolated-test');
 ```
 
-ตั้ง `DATABASE_URL` กลับไปที่ฐานข้อมูลแอป และกำหนด `TEST_DATABASE_URL` กับ `SEED_PASSWORD` ที่ใช้ seed test DB ใน shell ก่อนรัน:
+Set `DATABASE_URL` back to the application database, and set `TEST_DATABASE_URL` and the `SEED_PASSWORD` used to seed the test database in your shell before running:
 
 ```powershell
 npm run test:integration
 ```
 
-Integration tests ปฏิเสธเมื่อไม่มี URL หรือ marker/ตัวตนฐานข้อมูลไม่ผ่าน guard; การทดสอบ constraint ใช้ transaction แล้ว rollback ไม่เปิด HTTP reset endpoint และโปรเจกต์ยังไม่มีคำสั่ง reset อัตโนมัติ ห้ามใช้ `prisma migrate reset` หรือ `migrate dev` กับฐานข้อมูลแอป/production ที่มีข้อมูลต้องเก็บไว้
+Integration tests refuse to run if a URL is missing or the database identity or marker fails the guard. Constraint tests use transactions and roll them back. There is no HTTP reset endpoint or automatic reset command. Do not use `prisma migrate reset` or `migrate dev` against application or production databases containing data that must be kept.
 
-## ขอบเขตการตรวจ
+## Verification scope
 
-SYS-01 มี acceptance/test design ใน [contract](docs/sprints/sprint-1/sys-01.md) ผลการตรวจจริงและข้อจำกัดต้องบันทึกใน PR; การตรวจ foundation ไม่ใช่ผลทดสอบ F-01–F-04 หรือ TEST-13 ทั้งระบบ Playwright tooling เตรียมไว้ แต่ยังไม่มี E2E domain journey ใน branch นี้
+The [SYS-01 contract](docs/sprints/sprint-1/sys-01.md) defines the acceptance criteria and test design. Record actual results and limitations in the PR. Foundation checks are not evidence that F-01–F-04 or full-product TEST-13 have passed. Playwright tooling is prepared, but this branch does not yet contain domain E2E journeys.
