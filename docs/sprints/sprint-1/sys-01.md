@@ -1,6 +1,6 @@
 # SYS-01 — Local project foundation: implementation preparation
 
-Version 0.6 — 2026-11-11 (Asia/Bangkok)
+Version 0.7 — 2026-11-12 (Asia/Bangkok)
 
 **State: FOUNDATION IMPLEMENTATION IN PROGRESS; PARTIAL CHECKS RUN.** PR #2 was approved by THN4 at commit `2e07ba7` and merged into staging as `7cd640e` on 11 November 2026. The [verification record](sys-01-evidence.md) distinguishes actual local results from unexecuted acceptance cases.
 
@@ -12,7 +12,7 @@ Version 0.6 — 2026-11-11 (Asia/Bangkok)
 | Implementation PR target | sprint/01-staging; peer approval before merge |
 | Lead / reviewer | JeffMerry assigned lead; THN4 designated design reviewer through documentation PR; no approval claimed |
 | GitHub Issue / documentation PR | [SYS-01 Issue #1](https://github.com/JeffMerry/reg-me-up/issues/1); documentation PR link is maintained in that Issue after publication |
-| Version selection | Node22.23.4 / npm10.9.9 / PostgreSQL17.11; Prisma 7.10.1 and other targets in versions document; local install/build and PostgreSQL 17.11 checks recorded, teammate validation pending |
+| Version selection | Node22.23.4 / npm10.9.9 / PostgreSQL17.11; Prisma 7.10.1 and other targets in versions document; local checks and THN4's fresh-setup report recorded |
 
 ## 1. Bounded scope
 
@@ -62,8 +62,8 @@ Create meaningful commits: runtime/workspace setup; client/server configuration;
 
 - [x] Documentation PR #2 approved by THN4 on 11 November 2026 and merged into sprint/01-staging as `7cd640e`.
 - [x] [SYS-01 GitHub Issue #1](https://github.com/JeffMerry/reg-me-up/issues/1) created with scope, seven SYS-AC/test designs, selected versions, assigned JeffMerry lead and designated THN4 reviewer. This is planning evidence only.
-- [ ] Teammate reviews schema/migration ownership and environment/cleanup test design before implementation.
-- [x] Created `chore/sys-01-foundation` locally from staging commit `7cd640e`; implementation PR is still to be opened and linked to SYS-01 Issue.
+- [x] THN4 reviewed schema/migration ownership and environment/cleanup test design in documentation PR #2, then approved that PR.
+- [x] Created `chore/sys-01-foundation` from staging commit `7cd640e` and opened [implementation PR #7](https://github.com/JeffMerry/reg-me-up/pull/7), linked to SYS-01 Issue.
 - [ ] Actual foundation checks execute with commands/files/commit/counts; disclosed failures/limitations; full Sprint1 results remain NOT RUN until implemented/tested.
 - [ ] THN4 reviews implementation PR; merge only after accepted changes/checks, without author self-approval.
 
@@ -74,10 +74,10 @@ Create meaningful commits: runtime/workspace setup; client/server configuration;
 | Version metadata / collaborator permission inspection | Read npm/Node/PostgreSQL official metadata and GitHub CLI collaborator permissions on 2026-11-06; THN4 has write/push |
 | SYS-01 preparation Issue | [#1](https://github.com/JeffMerry/reg-me-up/issues/1), open and assigned JeffMerry; no implementation completion claimed |
 | Runtime/dependency install / DB provisioning | Local Node22.23.4/npm10.9.9 and lockfile install tested; isolated PostgreSQL 17.11 and 18.1 test clusters; see [verification record](sys-01-evidence.md) |
-| SYS-TEST-01–07 | PARTIAL — local unit/integration/build/smoke results and outstanding cases are in [verification record](sys-01-evidence.md); no complete acceptance claim |
+| SYS-TEST-01–07 | PARTIAL — local checks and THN4's reported SYS-TEST-07 PASS at `645e044` are in [verification record](sys-01-evidence.md); unverified details and other outstanding cases remain disclosed |
 | Full AC-13 / TEST-13 | NOT RUN |
-| Foundation implementation branch / PR / commits | `chore/sys-01-foundation`; implementation PR and final review evidence to be recorded |
-| Human design review / approval | THN4 approved PR #2 at `2e07ba7`; implementation PR review remains pending |
+| Foundation implementation branch / PR / commits | `chore/sys-01-foundation`; [PR #7](https://github.com/JeffMerry/reg-me-up/pull/7); THN4 reported fresh setup at `645e044` |
+| Human design review / approval | THN4 approved PR #2 at `2e07ba7`; PR #7 review is COMMENTED and implementation approval remains pending |
 
 | Version | Date | Change | Review |
 |---|---|---|---|
@@ -87,3 +87,4 @@ Create meaningful commits: runtime/workspace setup; client/server configuration;
 | 0.4 | 2026-11-11 | Assigned initial shared schema to SYS-01 and linked DBML-to-migration review | Pending teammate review; NOT RUN |
 | 0.5 | 2026-11-11 | Started foundation implementation and linked actual partial verification | Implementation review and remaining cases pending |
 | 0.6 | 2026-11-11 | Added fail-closed migration history preflight after Prisma v7.10.1 did not warn on an edited applied migration in an isolated test | Isolated preflight/failed-migration recovery verified; implementation review pending |
+| 0.7 | 2026-11-12 | Recorded THN4's reported SYS-TEST-07 fresh setup and actual PR #7 status | Teammate reported PASS at `645e044`; approval pending |

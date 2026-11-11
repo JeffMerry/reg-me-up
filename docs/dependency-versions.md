@@ -1,6 +1,6 @@
 # RegMeUp — Dependency version baseline
 
-Version 0.5 — 2026-11-11 (Asia/Bangkok). **SYS-01 implementation targets; metadata is not installation or build evidence.** Local installation/build and PostgreSQL 17.11/18.1 checks were subsequently run as recorded in [SYS-01 evidence](sprints/sprint-1/sys-01-evidence.md); teammate setup remains unverified.
+Version 0.6 — 2026-11-12 (Asia/Bangkok). **SYS-01 implementation targets; metadata is not installation or build evidence.** Local checks and THN4's reported fresh setup are recorded in [SYS-01 evidence](sprints/sprint-1/sys-01-evidence.md).
 
 ## 1. Runtime and database
 
@@ -10,7 +10,7 @@ Version 0.5 — 2026-11-11 (Asia/Bangkok). **SYS-01 implementation targets; meta
 | npm | 10.9.9 | Bundled with selected Node22 distribution; package engine accepts Node ^18.17.0 or >=20.5.0, including target runtime |
 | PostgreSQL | 17.11 | Official versioning table lists supported17/current minor17.11; use same engine/version for local and integration test DB |
 
-Initially observed in the machine PATH: Node22.15.0 and npm11.5.2; `psql` was not on PATH. For foundation verification, Node22.23.4/npm10.9.9 and PostgreSQL17.11 binaries were subsequently prepared locally in ignored workspace tooling; the existing PostgreSQL18 service was not replaced. Teammate environment verification remains open.
+Initially observed in the developer machine PATH: Node22.15.0 and npm11.5.2; `psql` was not on PATH. For foundation verification, Node22.23.4/npm10.9.9 and PostgreSQL17.11 binaries were subsequently prepared locally in ignored workspace tooling; the existing PostgreSQL18 service was not replaced. THN4 later reported a fresh setup using the target versions at commit `645e044`.
 
 Provision local PostgreSQL17.11 with separate application/test databases and roles; native Windows installation or an existing team-managed matching instance is acceptable after documenting actual setup. Isolated temporary PostgreSQL17.11 and 18.1 clusters were started for tests; no existing database was reset. No app-container/cloud provisioning is required for this step.
 
@@ -57,13 +57,13 @@ Metadata inspection supports the target: Vite/plugin-react engines accept Node>=
 
 The React plugin's oxc-transform-react, Babel integration and React compiler peers are **optional**, not automatically required project dependencies. Do not install a latest optional peer blindly: observed latest oxc0.157.0 is outside the plugin's declared `>=0.152.0 <0.157.0` optional range. Use the documented default setup; if an optional compiler path is needed, select a compatible version and revise this baseline before its implementation.
 
-The local foundation installation and lockfile resolution, typecheck/build, native Argon2 and isolated PostgreSQL 17.11 checks have run; exact results and environment are in [SYS-01 evidence](sprints/sprint-1/sys-01-evidence.md). Browser installation and teammate setup remain unverified. Metadata alone does not prove runtime compatibility; the committed lockfile records the resolved transitive versions/integrities.
+The local foundation installation and lockfile resolution, typecheck/build, native Argon2 and isolated PostgreSQL 17.11 checks have run; exact results and THN4's reported fresh setup are in [SYS-01 evidence](sprints/sprint-1/sys-01-evidence.md). The teammate did not provide raw command output or OS details in the review. Metadata alone does not prove runtime compatibility; the committed lockfile records the resolved transitive versions/integrities.
 
 ## 4. Implementation handoff
 
 Use root npm workspaces for client/server with shared tooling and one lockfile. Foundation creates runtime version files/engines/packageManager declaration matching the table, actual install scripts, appropriate project tsconfigs and Tailwind/Vite integration. Auth packages can be pinned/prepared without implementing login/logout in SYS-01. Native crypto and browser/toolchain checks must be recorded separately from feature acceptance results.
 
-ENG-01 is **partially resolved**: exact Prisma targets and local install/lockfile/build and PostgreSQL 17.11 checks are recorded; teammate verification remains open. [SYS-01 contract](sprints/sprint-1/sys-01.md) defines bounded foundation acceptance and test design; full TEST-13 remains a release-level reproducibility check.
+ENG-01 records exact targets, local install/lockfile/build/PostgreSQL checks and THN4's fresh-setup report at `645e044`; raw teammate output and OS details were not provided. [SYS-01 contract](sprints/sprint-1/sys-01.md) defines bounded foundation acceptance and test design; full TEST-13 remains a release-level reproducibility check.
 
 | Version | Date | Change | Review |
 |---|---|---|---|
@@ -72,3 +72,4 @@ ENG-01 is **partially resolved**: exact Prisma targets and local install/lockfil
 | 0.3 | 2026-11-11 | Selected matching Prisma 7.10.1 targets from registry metadata | Actual install/build/database verification pending |
 | 0.4 | 2026-11-11 | Linked actual local installation/build and PostgreSQL 17.11 evidence | Teammate setup pending |
 | 0.5 | 2026-11-11 | Updated local runtime and isolated database provisioning observations | Teammate setup pending |
+| 0.6 | 2026-11-12 | Recorded THN4's fresh-setup report at `645e044` | Reported PASS; raw output not supplied |
