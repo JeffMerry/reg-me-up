@@ -2,7 +2,7 @@
 
 Version 0.4 — 2026-11-11 (Asia/Bangkok)
 
-**State: READY FOR DESIGN REVIEW; IMPLEMENTATION NOT STARTED; ALL FOUNDATION TESTS NOT RUN.** This prepares step2 only. It does not create the implementation branch, package manifests, migration scripts, database or test suite.
+**State: IMPLEMENTATION STARTED ON FOUNDATION BRANCH; ALL FOUNDATION TESTS NOT RUN.** PR #2 was approved by THN4 at commit `2e07ba7` and merged into staging as `7cd640e` on 11 November 2026. No foundation implementation, installation or test result is implied by this status update.
 
 | Item | Plan / current fact |
 |---|---|
@@ -12,7 +12,7 @@ Version 0.4 — 2026-11-11 (Asia/Bangkok)
 | Implementation PR target | sprint/01-staging; peer approval before merge |
 | Lead / reviewer | JeffMerry assigned lead; THN4 designated design reviewer through documentation PR; no approval claimed |
 | GitHub Issue / documentation PR | [SYS-01 Issue #1](https://github.com/JeffMerry/reg-me-up/issues/1); documentation PR link is maintained in that Issue after publication |
-| Version selection | Node22.23.4 / npm10.9.9 / PostgreSQL17.11 and prior package targets in versions document; exact Prisma v7 package versions pending selection/validation |
+| Version selection | Node22.23.4 / npm10.9.9 / PostgreSQL17.11; Prisma 7.10.1 and other targets in versions document; installation and compatibility validation pending |
 
 ## 1. Bounded scope
 
@@ -60,10 +60,10 @@ Create meaningful commits: runtime/workspace setup; client/server configuration;
 
 ## 5. Before implementation and completion gates
 
-- [ ] Documentation PR merged into sprint/01-staging after THN4's substantive review; actual approval/date recorded.
+- [x] Documentation PR #2 approved by THN4 on 11 November 2026 and merged into sprint/01-staging as `7cd640e`.
 - [x] [SYS-01 GitHub Issue #1](https://github.com/JeffMerry/reg-me-up/issues/1) created with scope, seven SYS-AC/test designs, selected versions, assigned JeffMerry lead and designated THN4 reviewer. This is planning evidence only.
 - [ ] Teammate reviews schema/migration ownership and environment/cleanup test design before implementation.
-- [ ] Create `chore/sys-01-foundation` from current sprint/01-staging and link implementation PR to SYS-01 Issue; do not close the implementation Issue from this docs-only PR.
+- [x] Created `chore/sys-01-foundation` locally from staging commit `7cd640e`; implementation PR is still to be opened and linked to SYS-01 Issue.
 - [ ] Actual foundation checks execute with commands/files/commit/counts; disclosed failures/limitations; full Sprint1 results remain NOT RUN until implemented/tested.
 - [ ] THN4 reviews implementation PR; merge only after accepted changes/checks, without author self-approval.
 
@@ -76,8 +76,8 @@ Create meaningful commits: runtime/workspace setup; client/server configuration;
 | Runtime/dependency install / DB provisioning | NOT PERFORMED |
 | SYS-TEST-01–07 | ALL NOT RUN |
 | Full AC-13 / TEST-13 | NOT RUN |
-| Foundation implementation branch / PR / commits | NOT CREATED |
-| Human design review / approval | PENDING; request is not approval |
+| Foundation implementation branch / PR / commits | Local `chore/sys-01-foundation` created; implementation PR not created |
+| Human design review / approval | THN4 approved PR #2 at `2e07ba7`; implementation PR review remains pending |
 
 | Version | Date | Change | Review |
 |---|---|---|---|
