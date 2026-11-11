@@ -1,6 +1,6 @@
 # RegMeUp — Dependency version baseline
 
-Version 0.4 — 2026-11-11 (Asia/Bangkok). **SYS-01 implementation targets; metadata is not installation or build evidence.** Local installation/build and PostgreSQL 17.11/18.1 checks were subsequently run as recorded in [SYS-01 evidence](sprints/sprint-1/sys-01-evidence.md); teammate setup remains unverified.
+Version 0.5 — 2026-11-11 (Asia/Bangkok). **SYS-01 implementation targets; metadata is not installation or build evidence.** Local installation/build and PostgreSQL 17.11/18.1 checks were subsequently run as recorded in [SYS-01 evidence](sprints/sprint-1/sys-01-evidence.md); teammate setup remains unverified.
 
 ## 1. Runtime and database
 
@@ -10,9 +10,9 @@ Version 0.4 — 2026-11-11 (Asia/Bangkok). **SYS-01 implementation targets; meta
 | npm | 10.9.9 | Bundled with selected Node22 distribution; package engine accepts Node ^18.17.0 or >=20.5.0, including target runtime |
 | PostgreSQL | 17.11 | Official versioning table lists supported17/current minor17.11; use same engine/version for local and integration test DB |
 
-Observed on this machine: Node22.15.0 and npm11.5.2. Selected versions **are not those installed versions**. `psql` was not found through PATH during inspection; this does not prove no PostgreSQL installation/server exists. Upgrade/provisioning and teammate environment verification belong to foundation implementation, not this documentation task.
+Initially observed in the machine PATH: Node22.15.0 and npm11.5.2; `psql` was not on PATH. For foundation verification, Node22.23.4/npm10.9.9 and PostgreSQL17.11 binaries were subsequently prepared locally in ignored workspace tooling; the existing PostgreSQL18 service was not replaced. Teammate environment verification remains open.
 
-Provision local PostgreSQL17.11 with separate application/test databases and roles; native Windows installation or an existing team-managed matching instance is acceptable after documenting actual setup. No app-container/cloud provisioning is required for this step. No DB installation/start/reset has been performed.
+Provision local PostgreSQL17.11 with separate application/test databases and roles; native Windows installation or an existing team-managed matching instance is acceptable after documenting actual setup. Isolated temporary PostgreSQL17.11 and 18.1 clusters were started for tests; no existing database was reset. No app-container/cloud provisioning is required for this step.
 
 Sources: [official Node22.23.4 release](https://nodejs.org/en/blog/release/v22.23.4), [Node distribution index](https://nodejs.org/dist/index.json), [PostgreSQL supported versions](https://www.postgresql.org/support/versioning/).
 
@@ -71,3 +71,4 @@ ENG-01 is **partially resolved**: exact Prisma targets and local install/lockfil
 | 0.2 | 2026-11-10 | Added Prisma v7 direction and reopened exact Prisma version/compatibility selection | Pending teammate review; no install/build/tests |
 | 0.3 | 2026-11-11 | Selected matching Prisma 7.10.1 targets from registry metadata | Actual install/build/database verification pending |
 | 0.4 | 2026-11-11 | Linked actual local installation/build and PostgreSQL 17.11 evidence | Teammate setup pending |
+| 0.5 | 2026-11-11 | Updated local runtime and isolated database provisioning observations | Teammate setup pending |
