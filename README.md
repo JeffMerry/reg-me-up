@@ -53,7 +53,7 @@ npm run dev:server
 npm run dev:client
 ```
 
-The frontend is available at `http://localhost:5173`, and Vite proxies `/api` to the server at `http://localhost:3000`. `/api/health` returns 200 when the database is reachable and 503 otherwise. Domain endpoints are not yet available.
+The frontend is available at `http://localhost:5173`, and Vite proxies `/api` to the server at `http://localhost:3000`. `/api/health` returns 200 when the database is reachable and 503 otherwise. F-01 supplies login, logout and current identity; event and registration endpoints belong to later features. Use the synthetic accounts described by the seed and the password supplied when first creating them.
 
 ```powershell
 npm run typecheck
@@ -78,8 +78,8 @@ Set `DATABASE_URL` back to the application database, and set `TEST_DATABASE_URL`
 npm run test:integration
 ```
 
-Integration tests refuse to run if a URL is missing or the database identity or marker fails the guard. Constraint tests use transactions and roll them back. There is no HTTP reset endpoint or automatic reset command. Do not use `prisma migrate reset` or `migrate dev` against application or production databases containing data that must be kept.
+Integration tests refuse to run if a URL is missing or the database identity or marker fails the guard. Constraint tests use transactions and roll them back. There is no HTTP reset endpoint or automatic reset command. Do not use `prisma migrate reset` or `migrate dev` against application or production databases containing data that must be kept. For F-01 browser tests, see [e2e/README.md](e2e/README.md).
 
 ## Verification scope
 
-The [SYS-01 contract](docs/sprints/sprint-1/sys-01.md) defines the acceptance criteria and test design. Record actual results and limitations in the PR. Foundation checks are not evidence that F-01–F-04 or full-product TEST-13 have passed. Playwright tooling is prepared, but this branch does not yet contain domain E2E journeys.
+The [SYS-01 contract](docs/sprints/sprint-1/sys-01.md) defines the foundation criteria. [F-01 verification](docs/sprints/sprint-1/f-01-evidence.md) records identity checks and remaining gaps. These checks do not establish completion of F-02–F-04 or full-product TEST-13.
