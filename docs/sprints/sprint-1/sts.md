@@ -2,7 +2,7 @@
 
 | Item | Value |
 |---|---|
-| Version / date | 0.2 / 2026-11-10 |
+| Version / date | 0.3 / 2026-11-11 |
 | State | Test design only; pending teammate review; **ALL PLANNED / NOT RUN** |
 | Inputs | [SRS](../../srs.md), [SDS](../../system-sds.md), contracts [F-01](f-01.md)/[F-02](f-02.md)/[F-03](f-03.md)/[F-04](f-04.md), [UI](../../ui-spec.md) |
 | Actual test files / commands / tested commit / results | None; executable test suite does not exist yet |
@@ -13,7 +13,7 @@ TEST-01–10 retain reference IDs. TEST/AC-11–15 fill the known discovery/hash
 
 Unit: pure validation/normalization/error-priority logic. API/DB integration: real Express HTTP application, independent cookie jars, session store and PostgreSQL with same engine/constraints as release. E2E: Playwright against actual UI/API/test DB. Manual: only explicitly identified supplemental UI/restart/setup checks with recorded expected/actual version; do not replace automated rule/security tests with screenshots.
 
-Apply all versioned migrations to isolated TEST_DATABASE_URL, then deterministic synthetic fixtures. Runner must reject a missing test URL or test URL equal to application DATABASE_URL before any reset. Unit/E2E fixture setup cannot silently bypass the API behavior under test. Direct DB setup for preconditions/hidden fixtures is allowed, but actions asserting registration/publication use HTTP. Session credentials generated/provided by test harness/local seed procedure; never use real account secrets.
+Apply all versioned migrations to isolated TEST_DATABASE_URL, then deterministic synthetic fixtures. Before any destructive reset or cleanup, enforce the [SYS-01 test database safety rules and SYS-TEST-05](sys-01.md): reject missing TEST_DATABASE_URL, compare effective host/port/database and aliases against the application target even when URLs differ in format, and verify an explicit test-only database identity/marker. Refuse cleanup before writes when identity is uncertain or the target is the application or a non-test database. Unit/E2E fixture setup cannot silently bypass the API behavior under test. Direct DB setup for preconditions/hidden fixtures is allowed, but actions asserting registration/publication use HTTP. Session credentials generated/provided by test harness/local seed procedure; never use real account secrets.
 
 | Symbol | Fixture |
 |---|---|
@@ -123,3 +123,4 @@ For meaningful TDD retain intended-behavior failing output + version and passing
 |---|---|---|---|
 | 0.1 | 2026-11-06 | Fixtures, TEST-01–15 steps/outcomes, contention/restart/API/UI design and empty actual-result register | Pending teammate review; all NOT RUN |
 | 0.2 | 2026-11-10 | Added Prisma transaction, timeout and commit-ambiguity verification while retaining race criteria | Pending teammate review; all NOT RUN |
+| 0.3 | 2026-11-11 | Linked SYS-01 reset safety checks, including equivalent URLs and test-only identity | Pending teammate review; all NOT RUN |
