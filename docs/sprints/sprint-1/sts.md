@@ -1,5 +1,7 @@
 # RegMeUp Sprint 1 — Software Test Specification
 
+This document retains its original test-design baseline and historical empty execution register. F-01 implementation and partial actual results are recorded separately in [F-01 verification](f-01-evidence.md); later-feature and full-product tests remain unclaimed.
+
 | Item | Value |
 |---|---|
 | Version / date | 0.3 / 2026-11-11 |
