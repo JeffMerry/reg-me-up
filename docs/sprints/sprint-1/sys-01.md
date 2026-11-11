@@ -12,7 +12,7 @@ Version 0.6 — 2026-11-11 (Asia/Bangkok)
 | Implementation PR target | sprint/01-staging; peer approval before merge |
 | Lead / reviewer | JeffMerry assigned lead; THN4 designated design reviewer through documentation PR; no approval claimed |
 | GitHub Issue / documentation PR | [SYS-01 Issue #1](https://github.com/JeffMerry/reg-me-up/issues/1); documentation PR link is maintained in that Issue after publication |
-| Version selection | Node22.23.4 / npm10.9.9 / PostgreSQL17.11; Prisma 7.10.1 and other targets in versions document; local install/build recorded, PostgreSQL 17.11 and teammate compatibility validation pending |
+| Version selection | Node22.23.4 / npm10.9.9 / PostgreSQL17.11; Prisma 7.10.1 and other targets in versions document; local install/build and PostgreSQL 17.11 checks recorded, teammate validation pending |
 
 ## 1. Bounded scope
 
@@ -73,7 +73,7 @@ Create meaningful commits: runtime/workspace setup; client/server configuration;
 |---|---|
 | Version metadata / collaborator permission inspection | Read npm/Node/PostgreSQL official metadata and GitHub CLI collaborator permissions on 2026-11-06; THN4 has write/push |
 | SYS-01 preparation Issue | [#1](https://github.com/JeffMerry/reg-me-up/issues/1), open and assigned JeffMerry; no implementation completion claimed |
-| Runtime/dependency install / DB provisioning | Local Node22.23.4/npm10.9.9 and lockfile install tested; isolated PostgreSQL 18.1 test cluster, not target 17.11; see [verification record](sys-01-evidence.md) |
+| Runtime/dependency install / DB provisioning | Local Node22.23.4/npm10.9.9 and lockfile install tested; isolated PostgreSQL 17.11 and 18.1 test clusters; see [verification record](sys-01-evidence.md) |
 | SYS-TEST-01–07 | PARTIAL — local unit/integration/build/smoke results and outstanding cases are in [verification record](sys-01-evidence.md); no complete acceptance claim |
 | Full AC-13 / TEST-13 | NOT RUN |
 | Foundation implementation branch / PR / commits | `chore/sys-01-foundation`; implementation PR and final review evidence to be recorded |
