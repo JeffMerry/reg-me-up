@@ -1,8 +1,8 @@
 # SYS-01 — Local project foundation: implementation preparation
 
-Version 0.4 — 2026-11-11 (Asia/Bangkok)
+Version 0.7 — 2026-11-12 (Asia/Bangkok)
 
-**State: READY FOR DESIGN REVIEW; IMPLEMENTATION NOT STARTED; ALL FOUNDATION TESTS NOT RUN.** This prepares step2 only. It does not create the implementation branch, package manifests, migration scripts, database or test suite.
+**State: FOUNDATION IMPLEMENTATION IN PROGRESS; PARTIAL CHECKS RUN.** PR #2 was approved by THN4 at commit `2e07ba7` and merged into staging as `7cd640e` on 11 November 2026. The [verification record](sys-01-evidence.md) distinguishes actual local results from unexecuted acceptance cases.
 
 | Item | Plan / current fact |
 |---|---|
@@ -12,7 +12,7 @@ Version 0.4 — 2026-11-11 (Asia/Bangkok)
 | Implementation PR target | sprint/01-staging; peer approval before merge |
 | Lead / reviewer | JeffMerry assigned lead; THN4 designated design reviewer through documentation PR; no approval claimed |
 | GitHub Issue / documentation PR | [SYS-01 Issue #1](https://github.com/JeffMerry/reg-me-up/issues/1); documentation PR link is maintained in that Issue after publication |
-| Version selection | Node22.23.4 / npm10.9.9 / PostgreSQL17.11 and prior package targets in versions document; exact Prisma v7 package versions pending selection/validation |
+| Version selection | Node22.23.4 / npm10.9.9 / PostgreSQL17.11; Prisma 7.10.1 and other targets in versions document; local checks and THN4's fresh-setup report recorded |
 
 ## 1. Bounded scope
 
@@ -36,13 +36,13 @@ Foundation may introduce shared schema required by all Sprint1 features: users/s
 
 ## 3. Acceptance criteria and test design
 
-SYS-AC/SYS-TEST IDs below are foundation-specific; they do not replace AC-01–15/TEST-01–15. Exact executable commands/files/tested commit/results remain absent until step3 implementation.
+SYS-AC/SYS-TEST IDs below are foundation-specific; they do not replace AC-01–15/TEST-01–15. The [verification record](sys-01-evidence.md) lists actual commands/results and distinguishes remaining cases; no completion is inferred from a planned test.
 
 | AC | Observable acceptance | Planned verification: precondition → action → expected result | Level |
 |---|---|---|---|
 | SYS-AC-01 | Both members can resolve pinned dependencies with recorded runtime/toolchain and shared lockfile | SYS-TEST-01: selected Node/npm in fresh workspace → install then clean lockfile install/typecheck/build → versions/engines match, no unexplained required-peer conflicts; retain actual output | Fresh environment/toolchain |
 | SYS-AC-02 | Client/server skeleton runs with proxy and UI baseline styling; no domain/private claim | SYS-TEST-02: valid local config → start both, request health and open client → successful safe health, client assets styled by Tailwind, no secret config in client bundle; stop cleanly | Process/API + browser smoke |
-| SYS-AC-03 | Prisma Migrate establishes the required schema reproducibly and reports migration state safely | SYS-TEST-03: isolated empty PostgreSQL → apply reviewed migrations twice → FK/check/active-unique indexes and session schema exist, second deploy adds nothing; concurrent deploys do not duplicate migration and any lock timeout is reported; edited applied migration produces a deploy warning and is investigated, not treated as an automatic abort; failed migration blocks later deploy until documented recovery, inspect actual schema/history without assuming automatic rollback | Real PostgreSQL integration |
+| SYS-AC-03 | Prisma Migrate establishes the required schema reproducibly and reports migration state safely | SYS-TEST-03: isolated empty PostgreSQL → apply reviewed migrations twice → FK/check/active-unique indexes and session schema exist, second deploy adds nothing; concurrent deploys do not duplicate migration and any lock timeout is reported; project preflight rejects edited/missing applied migrations and unresolved failed migrations before deploy; verify failure and documented recovery without assuming failed SQL is automatically rolled back | Real PostgreSQL integration |
 | SYS-AC-04 | Explicit synthetic seed is reproducible without plaintext storage or duplicates | SYS-TEST-04: migrated isolated DB → seed twice → expected stable account/event/registration fixture IDs/counts, positive/time/owner constraints satisfied, salted hashes verify known harness credentials, no plaintext/log secrets; regular startup/restart does not reset/reseed | DB/seed integration |
 | SYS-AC-05 | Test cleanup cannot act on the application or arbitrary database | SYS-TEST-05: absent TEST_DATABASE_URL, test/app same target with differently formatted equivalent URLs, non-test DB → request cleanup/reset → refused before writes; valid dedicated test DB → isolated fixtures reset without touching application sentinel | Unit config + two-DB integration |
 | SYS-AC-06 | Invalid environment fails safely and initialized processes clean up resources | SYS-TEST-06: missing required server env/unreachable DB → start/operate health → safe failure/non-ready response, no connection string/secret; shutdown releases pool/listeners and restart does not mutate domain data | Unit/process/API |
@@ -60,10 +60,10 @@ Create meaningful commits: runtime/workspace setup; client/server configuration;
 
 ## 5. Before implementation and completion gates
 
-- [ ] Documentation PR merged into sprint/01-staging after THN4's substantive review; actual approval/date recorded.
+- [x] Documentation PR #2 approved by THN4 on 11 November 2026 and merged into sprint/01-staging as `7cd640e`.
 - [x] [SYS-01 GitHub Issue #1](https://github.com/JeffMerry/reg-me-up/issues/1) created with scope, seven SYS-AC/test designs, selected versions, assigned JeffMerry lead and designated THN4 reviewer. This is planning evidence only.
-- [ ] Teammate reviews schema/migration ownership and environment/cleanup test design before implementation.
-- [ ] Create `chore/sys-01-foundation` from current sprint/01-staging and link implementation PR to SYS-01 Issue; do not close the implementation Issue from this docs-only PR.
+- [x] THN4 reviewed schema/migration ownership and environment/cleanup test design in documentation PR #2, then approved that PR.
+- [x] Created `chore/sys-01-foundation` from staging commit `7cd640e` and opened [implementation PR #7](https://github.com/JeffMerry/reg-me-up/pull/7), linked to SYS-01 Issue.
 - [ ] Actual foundation checks execute with commands/files/commit/counts; disclosed failures/limitations; full Sprint1 results remain NOT RUN until implemented/tested.
 - [ ] THN4 reviews implementation PR; merge only after accepted changes/checks, without author self-approval.
 
@@ -73,11 +73,11 @@ Create meaningful commits: runtime/workspace setup; client/server configuration;
 |---|---|
 | Version metadata / collaborator permission inspection | Read npm/Node/PostgreSQL official metadata and GitHub CLI collaborator permissions on 2026-11-06; THN4 has write/push |
 | SYS-01 preparation Issue | [#1](https://github.com/JeffMerry/reg-me-up/issues/1), open and assigned JeffMerry; no implementation completion claimed |
-| Runtime/dependency install / DB provisioning | NOT PERFORMED |
-| SYS-TEST-01–07 | ALL NOT RUN |
+| Runtime/dependency install / DB provisioning | Local Node22.23.4/npm10.9.9 and lockfile install tested; isolated PostgreSQL 17.11 and 18.1 test clusters; see [verification record](sys-01-evidence.md) |
+| SYS-TEST-01–07 | PARTIAL — local checks and THN4's reported SYS-TEST-07 PASS at `645e044` are in [verification record](sys-01-evidence.md); unverified details and other outstanding cases remain disclosed |
 | Full AC-13 / TEST-13 | NOT RUN |
-| Foundation implementation branch / PR / commits | NOT CREATED |
-| Human design review / approval | PENDING; request is not approval |
+| Foundation implementation branch / PR / commits | `chore/sys-01-foundation`; [PR #7](https://github.com/JeffMerry/reg-me-up/pull/7); THN4 reported fresh setup at `645e044` |
+| Human design review / approval | THN4 approved PR #2 at `2e07ba7`; PR #7 review is COMMENTED and implementation approval remains pending |
 
 | Version | Date | Change | Review |
 |---|---|---|---|
@@ -85,3 +85,6 @@ Create meaningful commits: runtime/workspace setup; client/server configuration;
 | 0.2 | 2026-11-10 | Switched foundation design to Prisma Client/Migrate and revised migration verification and reset safety; Prisma versions pending | Pending teammate review; NOT RUN |
 | 0.3 | 2026-11-10 | Updated foundation source branch and PR base after staging branch rename | Pending teammate review; NOT RUN |
 | 0.4 | 2026-11-11 | Assigned initial shared schema to SYS-01 and linked DBML-to-migration review | Pending teammate review; NOT RUN |
+| 0.5 | 2026-11-11 | Started foundation implementation and linked actual partial verification | Implementation review and remaining cases pending |
+| 0.6 | 2026-11-11 | Added fail-closed migration history preflight after Prisma v7.10.1 did not warn on an edited applied migration in an isolated test | Isolated preflight/failed-migration recovery verified; implementation review pending |
+| 0.7 | 2026-11-12 | Recorded THN4's reported SYS-TEST-07 fresh setup and actual PR #7 status | Teammate reported PASS at `645e044`; approval pending |

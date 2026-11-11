@@ -1,0 +1,10 @@
+node_modules/
+.toolchain/
+dist/
+coverage/
+.env
+.env.*
+!.env.example
+server/generated/
+playwright-report/
+test-results/
