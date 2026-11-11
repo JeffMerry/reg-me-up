@@ -30,6 +30,7 @@ Versions/engines/peer ranges were read from the authoritative npm registry on 6 
 | Client styling | tailwindcss | 4.3.5 |
 | Client styling | @tailwindcss/vite | 4.3.5 |
 | Server runtime | express | 5.3.0 |
+| Environment file loading | dotenv | 17.2.3 |
 | PostgreSQL driver target | pg | 8.23.1 |
 | ORM, CLI and PostgreSQL adapter | prisma, @prisma/client, @prisma/adapter-pg | 7.10.1 each |
 | Auth dependency prepared for F-01 | express-session | 1.19.0 |
