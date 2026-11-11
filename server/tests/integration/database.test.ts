@@ -4,7 +4,7 @@ import argon2 from 'argon2';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../../generated/prisma/client.js';
 import { createApp } from '../../src/app.js';
-import { verifyTestDatabase } from '../../src/test-db-safety.js';
+import { verifyTestDatabase, withVerifiedTestDatabase } from '../../src/test-db-safety.js';
 
 const testUrl = process.env.TEST_DATABASE_URL;
 
@@ -50,6 +50,29 @@ describe('foundation database schema', () => {
       await app.connect();
       await test.connect();
       await expect(verifyTestDatabase(test, app)).rejects.toThrow('Unsafe test database target');
+    } finally { await Promise.allSettled([app.end(), test.end()]); }
+  });
+
+  it('refuses cleanup of app data and allows isolated test cleanup without touching app sentinel', async () => {
+    if (!testUrl || !process.env.DATABASE_URL) throw new Error('Two explicit database URLs are required');
+    const app = new pg.Client({ connectionString: process.env.DATABASE_URL });
+    const test = new pg.Client({ connectionString: testUrl });
+    try {
+      await app.connect(); await test.connect();
+      await app.query('CREATE TEMP TABLE app_sentinel (id int PRIMARY KEY)');
+      await app.query('INSERT INTO app_sentinel VALUES (1)');
+      await test.query('CREATE TEMP TABLE synthetic_cleanup (id int PRIMARY KEY)');
+      await test.query('INSERT INTO synthetic_cleanup VALUES (1)');
+      const aliasUrl = new URL(process.env.DATABASE_URL);
+      aliasUrl.searchParams.set('application_name', 'equivalent-target');
+      const alias = new pg.Client({ connectionString: aliasUrl.toString() });
+      try {
+        await alias.connect();
+        await expect(withVerifiedTestDatabase(app, alias, async () => { await app.query('DELETE FROM app_sentinel'); })).rejects.toThrow('Unsafe test database target');
+      } finally { await alias.end(); }
+      await withVerifiedTestDatabase(app, test, async () => { await test.query('DELETE FROM synthetic_cleanup'); });
+      expect((await app.query('SELECT count(*)::int AS n FROM app_sentinel')).rows[0].n).toBe(1);
+      expect((await test.query('SELECT count(*)::int AS n FROM synthetic_cleanup')).rows[0].n).toBe(0);
     } finally { await Promise.allSettled([app.end(), test.end()]); }
   });
 

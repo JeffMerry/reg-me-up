@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { assertDistinctTestDatabase, verifyTestDatabase } from '../../src/test-db-safety.js';
+import { assertDistinctTestDatabase, verifyTestDatabase, withVerifiedTestDatabase } from '../../src/test-db-safety.js';
 
 const app = { host: '127.0.0.1', port: 5432, database: 'regmeup' };
 const test = { host: '127.0.0.1', port: 5432, database: 'regmeup_test' };
@@ -22,5 +22,11 @@ describe('test database reset guard', () => {
     await expect(verifyTestDatabase(client('app', true), client('test', true))).resolves.toBeUndefined();
     await expect(verifyTestDatabase(client('app', true), client('test', false))).rejects.toThrow('Unsafe test database target');
     await expect(verifyTestDatabase(client('app', true), client('app', true))).rejects.toThrow('Unsafe test database target');
+  });
+  it('does not run cleanup when target verification fails', async () => {
+    const same = { query: async () => ({ rows: [{ host: '127.0.0.1', port: 5432, database: 'same' }] }) };
+    let called = false;
+    await expect(withVerifiedTestDatabase(same, same, async () => { called = true; })).rejects.toThrow();
+    expect(called).toBe(false);
   });
 });
