@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import type { Server } from 'node:http';
 import pg from 'pg';
@@ -108,6 +108,37 @@ describe('F-01 identity with PostgreSQL sessions', () => {
     expect(large.status).toBe(413);
     const media = await fetch(`${base}/api/auth/login`, { method: 'POST', headers: { ...headers, 'Content-Type': 'text/plain' }, body: 'test' });
     expect(media.status).toBe(415);
+  });
+  it('enforces email code-point and password UTF-8 byte boundaries without trimming passwords', async () => {
+    const anon = await bootstrap();
+    const submit = (address: string, secret: string) => call('/api/auth/login', { method: 'POST', cookie: anon.cookie, csrf: anon.token, body: { email: address, password: secret } });
+    const suffix = '@example.test';
+    expect((await submit(`${'a'.repeat(254 - suffix.length)}${suffix}`, password)).status).toBe(401);
+    expect((await submit(`${'a'.repeat(255 - suffix.length)}${suffix}`, password)).status).toBe(422);
+    expect((await submit(email, 'é'.repeat(512))).status).toBe(401);
+    expect((await submit(email, 'é'.repeat(513))).status).toBe(422);
+    expect((await submit(email, ` ${password} `)).status).toBe(401);
+    const valid = await submit(`  ${email.toUpperCase()}  `, password);
+    expect(valid.status).toBe(200);
+  });
+  it('does not expose passwords, hashes or the session secret in auth responses or captured application logs', async () => {
+    const logs: string[] = [];
+    const log = vi.spyOn(console, 'log').mockImplementation((...args: unknown[]) => { logs.push(args.map(String).join(' ')); });
+    const error = vi.spyOn(console, 'error').mockImplementation((...args: unknown[]) => { logs.push(args.map(String).join(' ')); });
+    try {
+      const anon = await bootstrap();
+      const failed = await call('/api/auth/login', { method: 'POST', cookie: anon.cookie, csrf: anon.token, body: { email, password: `${password}-wrong` } });
+      const signed = await call('/api/auth/login', { method: 'POST', cookie: anon.cookie, csrf: anon.token, body: { email, password } });
+      expect(signed.status).toBe(200);
+      const signedCookie = cookie(signed); const successBody = await signed.text(); const failureBody = await failed.text();
+      const me = await call('/api/auth/me', { cookie: signedCookie }); const meBody = await me.text();
+      const user = await prisma.user.findUniqueOrThrow({ where: { id }, select: { passwordHash: true } });
+      const captured = [successBody, failureBody, meBody, ...logs].join('\n');
+      for (const secret of [password, user.passwordHash, 'synthetic-secret-only-for-testing-123456']) expect(captured).not.toContain(secret);
+      expect(Object.keys(JSON.parse(successBody).data.user).sort()).toEqual(['displayName', 'id', 'role']);
+      expect(Object.keys(JSON.parse(meBody).data).sort()).toEqual(['displayName', 'id', 'role']);
+      expect(signed.headers.get('cache-control')).toBe('no-store'); expect(me.headers.get('cache-control')).toBe('no-store');
+    } finally { log.mockRestore(); error.mockRestore(); }
   });
   it('uses a separate salt for each new hash', async () => {
     if (!process.env.SEED_PASSWORD) throw new Error('Synthetic seed password is required');

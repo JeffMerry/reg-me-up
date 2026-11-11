@@ -79,6 +79,34 @@ test('wrong role sees access denied instead of private content', async ({ page }
   await expect(page.getByRole('heading', { name: 'Access Denied' })).toBeVisible();
 });
 
+test('pending login disables resubmission and network failure preserves email', async ({ page }) => {
+  await page.goto('/login');
+  await page.getByLabel('Email').fill('p1@example.test'); await page.getByLabel('Password').fill(password!);
+  let release: (() => void) | undefined;
+  let arrived: (() => void) | undefined;
+  const requestArrived = new Promise<void>(resolve => { arrived = resolve; });
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  await page.route('**/api/auth/login', async route => { arrived?.(); await gate; await route.abort('failed'); });
+  await page.getByRole('button', { name: 'Log in', exact: true }).click();
+  await requestArrived;
+  await expect(page.getByRole('button', { name: 'Logging in…' })).toBeDisabled();
+  release?.();
+  await expect(page.getByText('Unable to log in. Please try again.')).toBeVisible();
+  await expect(page.getByLabel('Email')).toHaveValue('p1@example.test');
+  await expect(page.getByRole('button', { name: 'Log in', exact: true })).toBeEnabled();
+});
+
+test('login form can be operated with keyboard and reports field errors', async ({ page }) => {
+  await page.goto('/login');
+  await page.getByLabel('Email').focus(); await page.keyboard.type('p1@example.test');
+  await page.keyboard.press('Tab'); await expect(page.getByLabel('Password')).toBeFocused();
+  await page.keyboard.type(password!); await page.keyboard.press('Tab');
+  await expect(page.getByRole('button', { name: 'Show password' })).toBeFocused();
+  await page.keyboard.press('Space'); await expect(page.getByLabel('Password')).toHaveAttribute('type', 'text');
+  await page.keyboard.press('Tab'); await expect(page.getByRole('button', { name: 'Log in', exact: true })).toBeFocused();
+  await page.keyboard.press('Enter'); await expect(page).toHaveURL(/\/events$/);
+});
+
 for (const width of [320, 390, 1440]) {
   test(`login layout at ${width}px and mobile menu keyboard behavior`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 }); await page.goto('/login');
