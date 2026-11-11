@@ -12,7 +12,7 @@ Version 0.6 — 2026-11-11 (Asia/Bangkok)
 | Implementation PR target | sprint/01-staging; peer approval before merge |
 | Lead / reviewer | JeffMerry assigned lead; THN4 designated design reviewer through documentation PR; no approval claimed |
 | GitHub Issue / documentation PR | [SYS-01 Issue #1](https://github.com/JeffMerry/reg-me-up/issues/1); documentation PR link is maintained in that Issue after publication |
-| Version selection | Node22.23.4 / npm10.9.9 / PostgreSQL17.11; Prisma 7.10.1 and other targets in versions document; installation and compatibility validation pending |
+| Version selection | Node22.23.4 / npm10.9.9 / PostgreSQL17.11; Prisma 7.10.1 and other targets in versions document; local install/build recorded, PostgreSQL 17.11 and teammate compatibility validation pending |
 
 ## 1. Bounded scope
 
@@ -86,4 +86,4 @@ Create meaningful commits: runtime/workspace setup; client/server configuration;
 | 0.3 | 2026-11-10 | Updated foundation source branch and PR base after staging branch rename | Pending teammate review; NOT RUN |
 | 0.4 | 2026-11-11 | Assigned initial shared schema to SYS-01 and linked DBML-to-migration review | Pending teammate review; NOT RUN |
 | 0.5 | 2026-11-11 | Started foundation implementation and linked actual partial verification | Implementation review and remaining cases pending |
-| 0.6 | 2026-11-11 | Added fail-closed migration history preflight design after Prisma v7.10.1 did not warn on an edited applied migration in an isolated test | Preflight tests and implementation pending |
+| 0.6 | 2026-11-11 | Added fail-closed migration history preflight after Prisma v7.10.1 did not warn on an edited applied migration in an isolated test | Isolated preflight/failed-migration recovery verified; implementation review pending |

@@ -23,7 +23,7 @@ Copy-Item server/.env.example server/.env
 
 ## ฐานข้อมูลและ seed
 
-สร้างฐานข้อมูลและบัญชีตามวิธีติดตั้ง PostgreSQL ของทีมก่อน คำสั่ง migration ใช้ `DATABASE_URL` ที่ระบุใน `server/.env` โดยไม่ reset ฐานข้อมูล:
+สร้างฐานข้อมูลและบัญชีตามวิธีติดตั้ง PostgreSQL ของทีมก่อน คำสั่ง migration ใช้ `DATABASE_URL` ที่ระบุใน `server/.env` โดยไม่ reset ฐานข้อมูล และตรวจ checksum ของ migration ที่เคยใช้แล้วก่อน deploy หากไฟล์ถูกแก้/หายหรือมี migration ล้มเหลวที่ยังไม่ resolve คำสั่งจะหยุดให้ตรวจประวัติก่อน ห้ามข้ามตัวตรวจด้วยการเรียก Prisma deploy ตรงใน workflow ปกติ:
 
 ```powershell
 npm run db:generate

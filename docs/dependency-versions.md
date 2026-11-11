@@ -1,6 +1,6 @@
 # RegMeUp — Dependency version baseline
 
-Version 0.3 — 2026-11-11 (Asia/Bangkok). **SYS-01 implementation targets; metadata is not installation or build evidence.** Exact Prisma 7.10.1 package targets were selected from npm registry metadata. Installation and integration remain to be verified.
+Version 0.4 — 2026-11-11 (Asia/Bangkok). **SYS-01 implementation targets; metadata is not installation or build evidence.** Local installation/build and PostgreSQL 18.1 checks were subsequently run as recorded in [SYS-01 evidence](sprints/sprint-1/sys-01-evidence.md); the PostgreSQL 17.11 target and teammate setup remain unverified.
 
 ## 1. Runtime and database
 
@@ -57,16 +57,17 @@ Metadata inspection supports the target: Vite/plugin-react engines accept Node>=
 
 The React plugin's oxc-transform-react, Babel integration and React compiler peers are **optional**, not automatically required project dependencies. Do not install a latest optional peer blindly: observed latest oxc0.157.0 is outside the plugin's declared `>=0.152.0 <0.157.0` optional range. Use the documented default setup; if an optional compiler path is needed, select a compatible version and revise this baseline before its implementation.
 
-No install, peer resolution, TypeScript/native Argon2 build, browser download or application test has occurred. Foundation must verify actual dependency resolution, typecheck/build and the Windows/teammate environment. Any resolution failure requires a small documented version correction before continuing, not a claim that metadata inspection proves runtime compatibility. Transitive versions/integrities are established only by the future lockfile.
+The local foundation installation and lockfile resolution, typecheck/build and native Argon2 checks have run; exact results and environment are in [SYS-01 evidence](sprints/sprint-1/sys-01-evidence.md). Browser download, target PostgreSQL 17.11 and teammate setup remain unverified. Metadata alone does not prove runtime compatibility; the committed lockfile records the resolved transitive versions/integrities.
 
 ## 4. Implementation handoff
 
 Use root npm workspaces for client/server with shared tooling and one lockfile. Foundation creates runtime version files/engines/packageManager declaration matching the table, actual install scripts, appropriate project tsconfigs and Tailwind/Vite integration. Auth packages can be pinned/prepared without implementing login/logout in SYS-01. Native crypto and browser/toolchain checks must be recorded separately from feature acceptance results.
 
-ENG-01 is **partially resolved**: exact Prisma targets have been selected; actual environment provisioning, install/lockfile and compatible builds remain NOT RUN until recorded. [SYS-01 contract](sprints/sprint-1/sys-01.md) defines the bounded foundation acceptance and test design; full TEST-13 remains a release-level reproducibility check.
+ENG-01 is **partially resolved**: exact Prisma targets and local install/lockfile/build are recorded; target PostgreSQL 17.11 and teammate verification remain open. [SYS-01 contract](sprints/sprint-1/sys-01.md) defines bounded foundation acceptance and test design; full TEST-13 remains a release-level reproducibility check.
 
 | Version | Date | Change | Review |
 |---|---|---|---|
 | 0.1 | 2026-11-06 | Selected runtime/database/direct versions from official metadata; documented observed local mismatch and pending executable validation | Pending THN4 review; no install/build/tests |
 | 0.2 | 2026-11-10 | Added Prisma v7 direction and reopened exact Prisma version/compatibility selection | Pending teammate review; no install/build/tests |
 | 0.3 | 2026-11-11 | Selected matching Prisma 7.10.1 targets from registry metadata | Actual install/build/database verification pending |
+| 0.4 | 2026-11-11 | Linked actual local installation/build evidence and disclosed PostgreSQL version gap | PostgreSQL 17.11 and teammate setup pending |
