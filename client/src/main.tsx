@@ -25,6 +25,7 @@ function App() {
   const [error, setError] = useState('');
   const [fields, setFields] = useState<Record<string, string>>({});
   const [path, setPath] = useState(location.pathname);
+  const [menuOpen, setMenuOpen] = useState(false);
   function navigate(target: string, replace = false) { history[replace ? 'replaceState' : 'pushState']({}, '', target); setPath(location.pathname); }
   async function refresh() {
     setLoading(true);
@@ -33,6 +34,7 @@ function App() {
     finally { setLoading(false); }
   }
   useEffect(() => { void refresh(); const back = () => { setPath(location.pathname); void refresh(); }; window.addEventListener('popstate', back); return () => window.removeEventListener('popstate', back); }, []);
+  useEffect(() => { const key = (event: KeyboardEvent) => { if (event.key === 'Escape') setMenuOpen(false); }; window.addEventListener('keydown', key); return () => window.removeEventListener('keydown', key); }, []);
   useEffect(() => {
     if (loading) return;
     if (path === '/') navigate('/events', true);
@@ -62,13 +64,13 @@ function App() {
     try {
       const csrf = token || await bootstrap();
       const response = await fetch('/api/auth/logout', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf }, body: '{}' });
-      if (response.status === 401) { setIdentity(null); setToken(''); setError('Your session has expired. Please log in again.'); navigate('/events'); }
+      if (response.status === 401) { setIdentity(null); setToken(''); setError('Your session has expired. Please log in again.'); if (!new RegExp(`^/events/${uuid}$`).test(path)) navigate('/events'); }
       else if (!response.ok) throw new Error();
       else { setIdentity(null); setToken(''); navigate('/events'); }
     } catch { setError('Unable to log out. Please try again.'); } finally { setPending(false); }
   }
   const denied = identity && ((path.startsWith('/organizer/') && identity.role !== 'ORGANIZER') || (path === '/my-registrations' && identity.role !== 'PARTICIPANT'));
-  return <><header className="flex flex-wrap items-center justify-between gap-4 bg-neutral-900 px-6 py-4 text-white"><a href="/events" className="text-xl font-bold">RegMeUp</a><nav className="flex flex-wrap items-center gap-4" aria-label="Main navigation"><a href="/events">Events</a>{loading ? <span>Checking session…</span> : identity ? <><a href={identity.role === 'ORGANIZER' ? '/organizer/events' : '/my-registrations'}>{identity.role === 'ORGANIZER' ? 'My Events' : 'My Registrations'}</a><span>{identity.displayName} ({identity.role})</span><button type="button" onClick={() => void logout()} disabled={pending}>{pending ? 'Logging out…' : 'Log out'}</button></> : <a href="/login">Log in</a>}</nav></header>
+  return <><header className="flex flex-wrap items-center justify-between gap-4 bg-neutral-900 px-4 py-4 text-white md:px-6"><a href="/events" className="text-xl font-bold">RegMeUp</a><button type="button" className="min-h-11 min-w-11 rounded border px-3 md:hidden" aria-label="Toggle navigation" aria-controls="main-navigation" aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>Menu</button><nav id="main-navigation" className={`${menuOpen ? 'flex' : 'hidden'} w-full flex-col items-start gap-4 md:flex md:w-auto md:flex-row md:items-center`} aria-label="Main navigation"><a href="/events">Events</a>{loading ? <span>Checking session…</span> : identity ? <><a href={identity.role === 'ORGANIZER' ? '/organizer/events' : '/my-registrations'}>{identity.role === 'ORGANIZER' ? 'My Events' : 'My Registrations'}</a><span>{identity.displayName} ({identity.role})</span><button type="button" onClick={() => void logout()} disabled={pending}>{pending ? 'Logging out…' : 'Log out'}</button></> : <a href="/login">Log in</a>}</nav></header>
   <main className="mx-auto max-w-5xl px-5 py-10"><p role="status" aria-live="polite" className="text-red-700">{error}</p>{loading ? <p>Checking session…</p> : path === '/login' && !identity ? <div className="grid overflow-hidden rounded-2xl bg-white shadow md:grid-cols-2"><section className="bg-neutral-900 p-8 text-white"><div className="text-5xl text-orange-500" aria-hidden="true">🎟</div><h1 className="mt-6 text-3xl font-bold">Welcome to RegMeUp</h1><p className="mt-4">Discover university activities and workshops.</p></section><section className="p-8"><h2 className="text-2xl font-bold">Log in</h2><form onSubmit={event => void login(event)} noValidate className="mt-6 grid gap-4"><label htmlFor="email">Email</label><input id="email" type="email" autoComplete="username" value={email} onChange={e => setEmail(e.target.value)} aria-invalid={!!fields.email} aria-describedby={fields.email ? 'email-error' : undefined} className="rounded border p-3" />{fields.email && <p id="email-error" className="text-red-700">{fields.email}</p>}<label htmlFor="password">Password</label><input id="password" type={visible ? 'text' : 'password'} autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} aria-invalid={!!fields.password} aria-describedby={fields.password ? 'password-error' : undefined} className="rounded border p-3" />{fields.password && <p id="password-error" className="text-red-700">{fields.password}</p>}<button type="button" className="text-left underline" onClick={() => setVisible(!visible)}>{visible ? 'Hide password' : 'Show password'}</button><button disabled={pending} className="rounded bg-orange-700 p-3 font-bold text-white disabled:opacity-60">{pending ? 'Logging in…' : 'Log in'}</button></form><a className="mt-5 inline-block underline" href="/events">Browse events</a></section></div> : denied ? <><h1 className="text-2xl font-bold">Access Denied</h1><p>You do not have access to this page.</p></> : <><h1 className="text-2xl font-bold">{path === '/events' ? 'Events' : 'RegMeUp'}</h1><p className="mt-3">This page is being prepared.</p></>}</main></>;
 }
 
