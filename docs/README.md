@@ -1,8 +1,8 @@
 # RegMeUp engineering baseline
 
-Version 0.3 — 10 November 2026 (Asia/Bangkok)
+Version 0.4 — 11 November 2026 (Asia/Bangkok)
 
-เอกสารชุดนี้จัดทำตามคำสั่งผู้ใช้ให้นำข้อเสนอที่คุยกันมาสรุปลงเอกสาร ใช้เป็น baseline สำหรับ design และการ review ก่อน implementation **ยังไม่มี teammate approval, application implementation หรือ test execution**
+เอกสารชุดนี้เป็น baseline สำหรับ design และ feature review [PR #2](https://github.com/JeffMerry/reg-me-up/pull/2) ได้รับ approval และ merge แล้ว; SYS-01 foundation เริ่มพัฒนาบน `chore/sys-01-foundation` และมี [ผลตรวจบางส่วน](sprints/sprint-1/sys-01-evidence.md) โดย F-01–F-04 ยังไม่ได้พัฒนา
 
 | Part | Artifact | สถานะ |
 |---|---|---|
@@ -13,7 +13,7 @@ Version 0.3 — 10 November 2026 (Asia/Bangkok)
 | E | [F-01](sprints/sprint-1/f-01.md), [F-02](sprints/sprint-1/f-02.md), [F-03](sprints/sprint-1/f-03.md), [F-04](sprints/sprint-1/f-04.md) | Pre-implementation contracts v0.1 |
 | E | [STS](sprints/sprint-1/sts.md), [Definition of Done](sprints/sprint-1/dod.md) | Test design จัดทำแล้ว; ทุก verification NOT RUN |
 | UI | [UI specification](ui-spec.md) | Baseline เดิม; teammate review ยัง pending |
-| SYS-01 | [Foundation preparation](sprints/sprint-1/sys-01.md), [Dependency versions](dependency-versions.md), [Issue #1](https://github.com/JeffMerry/reg-me-up/issues/1) | Scope/acceptance/test design และเวอร์ชันเป้าหมายจัดทำแล้ว; JeffMerry เป็น assignee, THN4 designated reviewer; ยังไม่ติดตั้งหรือ implementation |
+| SYS-01 | [Foundation contract](sprints/sprint-1/sys-01.md), [Dependency versions](dependency-versions.md), [Issue #1](https://github.com/JeffMerry/reg-me-up/issues/1) | Foundation in progress; actual partial checks/remaining work อยู่ใน evidence; implementation PR review ยัง pending |
 
 เลือก React/TypeScript/Vite + Tailwind, Express/TypeScript และ PostgreSQL ผ่าน **Prisma ORM และ Prisma Migrate** โดยใช้ parameterized SQL สำหรับ event row lock ตาม [DEC-14](srs.md) การรับแนวทางในแชตเป็นคนละรายการกับ teammate review/PR approval ไม่มีการใส่ชื่อ reviewer หรือ Issue/PR ที่ยังไม่เกิดขึ้น
 

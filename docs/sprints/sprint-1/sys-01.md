@@ -1,8 +1,8 @@
 # SYS-01 — Local project foundation: implementation preparation
 
-Version 0.4 — 2026-11-11 (Asia/Bangkok)
+Version 0.5 — 2026-11-11 (Asia/Bangkok)
 
-**State: IMPLEMENTATION STARTED ON FOUNDATION BRANCH; ALL FOUNDATION TESTS NOT RUN.** PR #2 was approved by THN4 at commit `2e07ba7` and merged into staging as `7cd640e` on 11 November 2026. No foundation implementation, installation or test result is implied by this status update.
+**State: FOUNDATION IMPLEMENTATION IN PROGRESS; PARTIAL CHECKS RUN.** PR #2 was approved by THN4 at commit `2e07ba7` and merged into staging as `7cd640e` on 11 November 2026. The [verification record](sys-01-evidence.md) distinguishes actual local results from unexecuted acceptance cases.
 
 | Item | Plan / current fact |
 |---|---|
@@ -36,7 +36,7 @@ Foundation may introduce shared schema required by all Sprint1 features: users/s
 
 ## 3. Acceptance criteria and test design
 
-SYS-AC/SYS-TEST IDs below are foundation-specific; they do not replace AC-01–15/TEST-01–15. Exact executable commands/files/tested commit/results remain absent until step3 implementation.
+SYS-AC/SYS-TEST IDs below are foundation-specific; they do not replace AC-01–15/TEST-01–15. The [verification record](sys-01-evidence.md) lists actual commands/results and distinguishes remaining cases; no completion is inferred from a planned test.
 
 | AC | Observable acceptance | Planned verification: precondition → action → expected result | Level |
 |---|---|---|---|
@@ -73,10 +73,10 @@ Create meaningful commits: runtime/workspace setup; client/server configuration;
 |---|---|
 | Version metadata / collaborator permission inspection | Read npm/Node/PostgreSQL official metadata and GitHub CLI collaborator permissions on 2026-11-06; THN4 has write/push |
 | SYS-01 preparation Issue | [#1](https://github.com/JeffMerry/reg-me-up/issues/1), open and assigned JeffMerry; no implementation completion claimed |
-| Runtime/dependency install / DB provisioning | NOT PERFORMED |
-| SYS-TEST-01–07 | ALL NOT RUN |
+| Runtime/dependency install / DB provisioning | Local Node22.23.4/npm10.9.9 and lockfile install tested; isolated PostgreSQL 18.1 test cluster, not target 17.11; see [verification record](sys-01-evidence.md) |
+| SYS-TEST-01–07 | PARTIAL — local unit/integration/build/smoke results and outstanding cases are in [verification record](sys-01-evidence.md); no complete acceptance claim |
 | Full AC-13 / TEST-13 | NOT RUN |
-| Foundation implementation branch / PR / commits | Local `chore/sys-01-foundation` created; implementation PR not created |
+| Foundation implementation branch / PR / commits | `chore/sys-01-foundation`; implementation PR and final review evidence to be recorded |
 | Human design review / approval | THN4 approved PR #2 at `2e07ba7`; implementation PR review remains pending |
 
 | Version | Date | Change | Review |
@@ -85,3 +85,4 @@ Create meaningful commits: runtime/workspace setup; client/server configuration;
 | 0.2 | 2026-11-10 | Switched foundation design to Prisma Client/Migrate and revised migration verification and reset safety; Prisma versions pending | Pending teammate review; NOT RUN |
 | 0.3 | 2026-11-10 | Updated foundation source branch and PR base after staging branch rename | Pending teammate review; NOT RUN |
 | 0.4 | 2026-11-11 | Assigned initial shared schema to SYS-01 and linked DBML-to-migration review | Pending teammate review; NOT RUN |
+| 0.5 | 2026-11-11 | Started foundation implementation and linked actual partial verification | Implementation review and remaining cases pending |
