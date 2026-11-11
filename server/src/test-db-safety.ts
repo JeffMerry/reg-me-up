@@ -30,3 +30,10 @@ export async function verifyTestDatabase(appClient: Queryable, testClient: Query
     throw new Error('Unsafe test database target');
   }
 }
+
+// The caller owns the cleanup operation; no reset endpoint or automatic reset
+// is provided. Verification always completes before the callback can run.
+export async function withVerifiedTestDatabase<T>(appClient: Queryable, testClient: Queryable, operation: (verifiedTestClient: Queryable) => Promise<T>): Promise<T> {
+  await verifyTestDatabase(appClient, testClient);
+  return operation(testClient);
+}

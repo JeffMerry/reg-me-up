@@ -68,9 +68,9 @@ describe('foundation database schema', () => {
       const alias = new pg.Client({ connectionString: aliasUrl.toString() });
       try {
         await alias.connect();
-        await expect(withVerifiedTestDatabase(app, alias, async () => { await app.query('DELETE FROM app_sentinel'); })).rejects.toThrow('Unsafe test database target');
+        await expect(withVerifiedTestDatabase(app, alias, async client => { await client.query('DELETE FROM app_sentinel'); })).rejects.toThrow('Unsafe test database target');
       } finally { await alias.end(); }
-      await withVerifiedTestDatabase(app, test, async () => { await test.query('DELETE FROM synthetic_cleanup'); });
+      await withVerifiedTestDatabase(app, test, async client => { await client.query('DELETE FROM synthetic_cleanup'); });
       expect((await app.query('SELECT count(*)::int AS n FROM app_sentinel')).rows[0].n).toBe(1);
       expect((await test.query('SELECT count(*)::int AS n FROM synthetic_cleanup')).rows[0].n).toBe(0);
     } finally { await Promise.allSettled([app.end(), test.end()]); }
