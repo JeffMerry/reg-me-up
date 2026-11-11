@@ -71,6 +71,10 @@ describe('F-01 identity with PostgreSQL sessions', () => {
     expect((await call('/api/auth/me', { cookie: anon.cookie })).status).toBe(401);
     expect((await call('/api/auth/login', { method: 'POST', cookie: anon.cookie, csrf: anon.token, origin: 'https://evil.example', body: { email, password } })).status).toBe(403);
     expect((await call('/api/auth/login', { method: 'POST', cookie: anon.cookie, csrf: anon.token, body: { email, password, role: 'ORGANIZER' } })).status).toBe(422);
+    expect((await call('/api/auth/login', { method: 'POST', cookie: anon.cookie, body: { email, password } })).status).toBe(403);
+    expect((await call('/api/auth/login', { method: 'POST', cookie: anon.cookie, csrf: 'wrong', body: { email, password } })).status).toBe(403);
+    expect((await call('/api/auth/login', { method: 'POST', cookie: anon.cookie, csrf: anon.token, body: { email: 'bad', password } })).status).toBe(422);
+    expect((await call('/api/auth/login', { method: 'POST', cookie: anon.cookie, csrf: anon.token, body: { email, password: 'x'.repeat(1025) } })).status).toBe(422);
   });
   it('enforces the exact absolute eight-hour boundary', async () => {
     const signed = await login(); const started = clock;
@@ -87,6 +91,23 @@ describe('F-01 identity with PostgreSQL sessions', () => {
     expect(replacement).not.toBe(initial.cookie);
     expect((await call('/api/auth/me', { cookie: initial.cookie })).status).toBe(401);
     expect((await (await call('/api/auth/me', { cookie: replacement })).json()).data.role).toBe('ORGANIZER');
+  });
+  it('loads the current role from the database on every authenticated request', async () => {
+    const signed = await login();
+    try {
+      await prisma.user.update({ where: { id }, data: { role: 'ORGANIZER' } });
+      expect((await (await call('/api/auth/me', { cookie: signed.cookie })).json()).data.role).toBe('ORGANIZER');
+    } finally { await prisma.user.update({ where: { id }, data: { role: 'PARTICIPANT' } }); }
+  });
+  it('handles invalid transport without leaking parser errors', async () => {
+    const anon = await bootstrap();
+    const headers = { Cookie: anon.cookie, Origin: origin, 'X-CSRF-Token': anon.token };
+    const bad = await fetch(`${base}/api/auth/login`, { method: 'POST', headers: { ...headers, 'Content-Type': 'application/json' }, body: '{' });
+    expect(bad.status).toBe(400); expect((await bad.json()).error.code).toBe('BAD_REQUEST');
+    const large = await fetch(`${base}/api/auth/login`, { method: 'POST', headers: { ...headers, 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password: 'x'.repeat(65536) }) });
+    expect(large.status).toBe(413);
+    const media = await fetch(`${base}/api/auth/login`, { method: 'POST', headers: { ...headers, 'Content-Type': 'text/plain' }, body: 'test' });
+    expect(media.status).toBe(415);
   });
   it('uses a separate salt for each new hash', async () => {
     if (!process.env.SEED_PASSWORD) throw new Error('Synthetic seed password is required');
