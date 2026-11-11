@@ -1,6 +1,6 @@
 # SYS-01 — Local project foundation: implementation preparation
 
-Version 0.5 — 2026-11-11 (Asia/Bangkok)
+Version 0.6 — 2026-11-11 (Asia/Bangkok)
 
 **State: FOUNDATION IMPLEMENTATION IN PROGRESS; PARTIAL CHECKS RUN.** PR #2 was approved by THN4 at commit `2e07ba7` and merged into staging as `7cd640e` on 11 November 2026. The [verification record](sys-01-evidence.md) distinguishes actual local results from unexecuted acceptance cases.
 
@@ -42,7 +42,7 @@ SYS-AC/SYS-TEST IDs below are foundation-specific; they do not replace AC-01–1
 |---|---|---|---|
 | SYS-AC-01 | Both members can resolve pinned dependencies with recorded runtime/toolchain and shared lockfile | SYS-TEST-01: selected Node/npm in fresh workspace → install then clean lockfile install/typecheck/build → versions/engines match, no unexplained required-peer conflicts; retain actual output | Fresh environment/toolchain |
 | SYS-AC-02 | Client/server skeleton runs with proxy and UI baseline styling; no domain/private claim | SYS-TEST-02: valid local config → start both, request health and open client → successful safe health, client assets styled by Tailwind, no secret config in client bundle; stop cleanly | Process/API + browser smoke |
-| SYS-AC-03 | Prisma Migrate establishes the required schema reproducibly and reports migration state safely | SYS-TEST-03: isolated empty PostgreSQL → apply reviewed migrations twice → FK/check/active-unique indexes and session schema exist, second deploy adds nothing; concurrent deploys do not duplicate migration and any lock timeout is reported; edited applied migration produces a deploy warning and is investigated, not treated as an automatic abort; failed migration blocks later deploy until documented recovery, inspect actual schema/history without assuming automatic rollback | Real PostgreSQL integration |
+| SYS-AC-03 | Prisma Migrate establishes the required schema reproducibly and reports migration state safely | SYS-TEST-03: isolated empty PostgreSQL → apply reviewed migrations twice → FK/check/active-unique indexes and session schema exist, second deploy adds nothing; concurrent deploys do not duplicate migration and any lock timeout is reported; project preflight rejects edited/missing applied migrations and unresolved failed migrations before deploy; verify failure and documented recovery without assuming failed SQL is automatically rolled back | Real PostgreSQL integration |
 | SYS-AC-04 | Explicit synthetic seed is reproducible without plaintext storage or duplicates | SYS-TEST-04: migrated isolated DB → seed twice → expected stable account/event/registration fixture IDs/counts, positive/time/owner constraints satisfied, salted hashes verify known harness credentials, no plaintext/log secrets; regular startup/restart does not reset/reseed | DB/seed integration |
 | SYS-AC-05 | Test cleanup cannot act on the application or arbitrary database | SYS-TEST-05: absent TEST_DATABASE_URL, test/app same target with differently formatted equivalent URLs, non-test DB → request cleanup/reset → refused before writes; valid dedicated test DB → isolated fixtures reset without touching application sentinel | Unit config + two-DB integration |
 | SYS-AC-06 | Invalid environment fails safely and initialized processes clean up resources | SYS-TEST-06: missing required server env/unreachable DB → start/operate health → safe failure/non-ready response, no connection string/secret; shutdown releases pool/listeners and restart does not mutate domain data | Unit/process/API |
@@ -86,3 +86,4 @@ Create meaningful commits: runtime/workspace setup; client/server configuration;
 | 0.3 | 2026-11-10 | Updated foundation source branch and PR base after staging branch rename | Pending teammate review; NOT RUN |
 | 0.4 | 2026-11-11 | Assigned initial shared schema to SYS-01 and linked DBML-to-migration review | Pending teammate review; NOT RUN |
 | 0.5 | 2026-11-11 | Started foundation implementation and linked actual partial verification | Implementation review and remaining cases pending |
+| 0.6 | 2026-11-11 | Added fail-closed migration history preflight design after Prisma v7.10.1 did not warn on an edited applied migration in an isolated test | Preflight tests and implementation pending |
