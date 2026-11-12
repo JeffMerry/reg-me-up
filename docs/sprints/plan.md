@@ -1,6 +1,6 @@
 # RegMeUp — Three-sprint plan
 
-Version 0.7 — 2026-11-11 (Asia/Bangkok). Planning baseline; pending teammate review. User selected Feature → sprint/01-staging → main. No feature completion or test execution claimed.
+Version 0.8 — 2026-11-12 (Asia/Bangkok). Planning baseline; pending teammate review. User selected Feature → sprint/01-staging → main. No feature completion or test execution claimed.
 
 ## 1. Goals, scope and dependencies
 
@@ -9,6 +9,7 @@ Version 0.7 — 2026-11-11 (Asia/Bangkok). Planning baseline; pending teammate r
 | 1 | Useful registration journey: F-01/02/03/04 + SYS-01 local setup | Baseline SRS/SDS/UI; feature contracts/STS; exact runtime versions; two-person review workflow | Working UI→API→DB publication/discovery/register/retrieve/owner list; server role/ownership; capacity/duplicate/concurrent last seat; restart persistence; executed verification and reviewed release on main |
 | 2 | Registration/event lifecycle and teaching: F-05/06/09 | Accepted Sprint 1; Q-04–08; compatible event-lock protocol and reviewed contract revisions | Cancellation/seat return, edit/capacity/deadline enforcement, Instructor assignment/assigned reads; regression; deployed integrated candidate |
 | 3 | Attendance/reporting and product hardening: F-07/08 | Prior lifecycle/ownership; Q-09; contracts before their implementation | Check-in/attendance/report calculations; usability/security/failure handling; final regression, UAT re-tests, defects disclosed and complete release |
+| Final UI pass | Cross-feature presentation refinement: F-10 | F-01–F-09 integrated; functional defects resolved under their owning features | Consistent visual system and refined responsive/keyboard interaction details across implemented screens; evidence and teammate review before final release |
 
 Sprint 3 must have contracts and meaningful tested progress by 29 November, alongside completed Sprint 2. Do not defer all Sprint 3 work until after that date.
 
@@ -45,6 +46,12 @@ The assessments have separate submission requirements even if their deadlines ar
 | H | Assemble actual PDF A–F with page navigation/evidence | Release commit and real results/screenshots/reviews/contributions present | NOT STARTED |
 
 UI reference layouts/components can be designed alongside contract review, but feature implementation and executable rule tests follow that feature's versioned design. The authorized documentation/SYS-01 preparation task starts planning portions of B only; it does not provision the environment or start implementation steps C–H.
+
+### Final UI refinement after baseline features
+
+Every feature first meets its baseline: the workflow, rules, required loading/empty/error/success states, and responsive/keyboard expectations work as specified. The baseline may use simple styling. After F-01–F-09 are integrated, F-10 provides a dedicated pass to review the screens together and improve visual consistency, hierarchy, spacing, typography, responsive composition, feedback, and accessibility details. The pass does not excuse incomplete or broken baseline behavior, and any behavior change remains with the owning feature. See the [F-10 refinement plan](f-10-ui-refinement.md).
+
+F-10 is an explicit product-level workstream because it spans all screens and is intentionally sequenced after their baseline implementation. Track it with a GitHub Issue for ownership, prioritized findings, and review evidence. The issue has not yet been created; do not cite an issue number until it exists. An additional feature entry is useful for this team's feature inventory and release planning, but issue and feature are not universally required as a pair: use a feature when the work represents a coherent user-facing scope, and an issue to assign/track the concrete work. Small polish findings can instead be subtasks under the F-10 issue.
 
 ## 4. Two-person workflow
 
@@ -83,3 +90,4 @@ No fixed hour/day estimates or contribution counts have been agreed. At each int
 | 0.5 | 2026-11-10 | Updated workflow after develop was renamed sprint/01-staging | Pending teammate review |
 | 0.6 | 2026-11-11 | Recorded user-reported LEB2 D1 deadline, preserved earlier handout discrepancy and separated D1/Lab 5 deliverables | LEB2 not independently inspected; teammate review pending |
 | 0.7 | 2026-11-11 | Recorded user-directed feature Issue assignees | Teammate agreement and review pending |
+| 0.8 | 2026-11-12 | Added F-10 final UI refinement after baseline feature integration | Planning only; GitHub issue and teammate review pending |
