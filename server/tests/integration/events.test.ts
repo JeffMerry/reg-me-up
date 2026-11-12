@@ -201,4 +201,22 @@ describe('F-03 registration APIs', () => {
     expect(await prisma.registration.count({ where: { eventId: visible } })).toBe(before);
     await prisma.event.update({ where: { id: visible }, data: { capacity: 2 } });
   });
+
+  it('allows only one of two Participants to claim the last seat', async () => {
+    const lastSeatEvent = randomUUID();
+    await prisma.event.create({ data: { id: lastSeatEvent, organizerId: owner, title: 'Last seat', startsAt: new Date('2026-12-01T02:00:00Z'), endsAt: new Date('2026-12-01T04:00:00Z'), location: 'A', capacity: 1, publicationStatus: 'PUBLISHED' } });
+    try {
+      const [p1, p2] = await Promise.all([login(participant), login(participant2)]);
+      const results = await Promise.all([p1, p2].map(p => request(`/api/events/${lastSeatEvent}/registrations`, { method: 'POST', cookie: p.cookie, token: p.token, body: {} })));
+      expect(results.map(response => response.status).sort()).toEqual([201, 409]);
+      const conflict = results.find(response => response.status === 409)!;
+      expect((await conflict.json()).error.code).toBe('EVENT_FULL');
+      expect(await prisma.registration.count({ where: { eventId: lastSeatEvent, status: 'ACTIVE' } })).toBe(1);
+      const event = await prisma.event.findUniqueOrThrow({ where: { id: lastSeatEvent }, select: { capacity: true, _count: { select: { registrations: { where: { status: 'ACTIVE' } } } } } });
+      expect(event._count.registrations).toBe(event.capacity);
+    } finally {
+      await prisma.registration.deleteMany({ where: { eventId: lastSeatEvent } });
+      await prisma.event.deleteMany({ where: { id: lastSeatEvent } });
+    }
+  });
 });
