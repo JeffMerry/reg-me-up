@@ -2,7 +2,7 @@
 
 An event registration system for university training sessions and workshops, developed for CPE334 Software Engineering.
 
-This branch provides the project foundation and F-01 identity/login. Event and registration features remain in later work. See the [documentation index](docs/README.md), [SYS-01 contract](docs/sprints/sprint-1/sys-01.md), and [UI baseline](docs/ui-spec.md).
+This branch provides the project foundation, F-01 identity/login, and F-02 event publication/discovery work. Registration remains F-03. See the [documentation index](docs/README.md), [SYS-01 contract](docs/sprints/sprint-1/sys-01.md), and [UI baseline](docs/ui-spec.md).
 
 ## Prerequisites
 
@@ -62,7 +62,7 @@ npm run dev:server
 npm run dev:client
 ```
 
-The frontend is available at `http://localhost:5173`, and Vite proxies `/api` to the server at `http://localhost:3000`. `/api/health` returns 200 when the database is reachable and 503 otherwise. F-01 supplies login, logout and current identity; event and registration endpoints belong to later features. Use the synthetic accounts described by the seed and the password supplied when first creating them.
+The frontend is available at `http://localhost:5173`, and Vite proxies `/api` to the server at `http://localhost:3000`. `/api/health` returns 200 when the database is reachable and 503 otherwise. F-01 supplies login, logout and current identity; F-02 supplies public event discovery and Organizer publication. Registration belongs to F-03. Use the synthetic accounts described by the seed and the password supplied when first creating them.
 
 If port 3000 is occupied, set `PORT=3001` in `server/.env`, add `REGMEUP_API_PROXY_TARGET=http://localhost:3001` to `client/.env.local`, and restart both processes. Choose a different free port if 3001 is occupied too. The Vite proxy target and backend port must match.
 
