@@ -9,6 +9,7 @@ async function seed() {
   }
   const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }) });
   try {
+    const passwordHash = await argon2.hash(process.env.SEED_PASSWORD, { type: argon2.argon2id, memoryCost: 19456, timeCost: 2, parallelism: 1 });
     const people = [
       ['10000000-0000-4000-8000-000000000001', 'p1@example.test', 'Participant One', 'PARTICIPANT'],
       ['10000000-0000-4000-8000-000000000002', 'p2@example.test', 'Participant Two', 'PARTICIPANT'],
@@ -18,7 +19,6 @@ async function seed() {
     ];
     await prisma.$transaction(async (tx) => {
       for (const [id, email, displayName, role] of people) {
-        const passwordHash = await argon2.hash(process.env.SEED_PASSWORD!, { type: argon2.argon2id, memoryCost: 19456, timeCost: 2, parallelism: 1 });
         await tx.user.upsert({ where: { id }, update: {}, create: { id, email, displayName, role, passwordHash } });
       }
       const events = [
