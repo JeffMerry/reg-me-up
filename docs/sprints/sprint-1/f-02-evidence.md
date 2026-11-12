@@ -16,4 +16,6 @@ At test commit `7475e0d8777cc8f2c5f57c2bf210f385398e74c6`, `npm run test:unit` p
 
 At test commit `27071d8ca426c6308a2d489b162ac19f513bd6b9`, `npm run typecheck` passed, `npm run test:integration` passed 25/25, and `npx playwright test e2e/f-02.spec.ts` passed 5/5. The new API test verifies that missing/invalid required fields, descriptions, dates and capacity values produce validation errors without inserting rows. The new browser assertions verify that an Organizer can find a newly created event in My Events and that cancelling a changed form asks before discarding it.
 
+At test commit `49870a64330cc06e914a84252463d000d677136b`, `npm run test:integration` passed 27/27 and `npm run typecheck` passed. Additional database/API cases verified omitted/null/empty/whitespace descriptions, valid maximum-length fields, a past overnight event with offset conversion, and public visibility of a full event without registrant information.
+
 Still required before declaring F-02 done: complete remaining TEST-03/11/15 subcases and role/owner negative controls; broaden UI and accessibility/manual checks against UI-02/03/05/06; record peer review. TEST-09/14 shared cases and later F-03 registration behavior are not complete. The existing uncommitted `package-lock.json` change is unrelated and excluded from F-02 work.
