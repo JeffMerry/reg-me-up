@@ -30,6 +30,20 @@ describe('F-02 publication validation', () => {
     expect(validateEvent({ ...good, title: '😀'.repeat(201) }).errors.title).toBeTruthy();
     expect(validateEvent({ ...good, description: 'x'.repeat(10001) }).errors.description).toBeTruthy();
   });
+  it('accepts exact limits, optional null description and past or overnight offset dates', () => {
+    const result = validateEvent({ ...good, title: 't'.repeat(200), location: '😀'.repeat(300), description: 'x'.repeat(10000), capacity: 2147483647, startsAt: '2020-12-31T23:30:00+07:00', endsAt: '2021-01-01T01:00:00+07:00' });
+    expect(result.errors).toEqual({});
+    expect(result.data?.startsAt.toISOString()).toBe('2020-12-31T16:30:00.000Z');
+    expect(result.data?.endsAt.toISOString()).toBe('2020-12-31T18:00:00.000Z');
+    expect(validateEvent({ ...good, description: null }).data?.description).toBeNull();
+  });
+  it('rejects blank or overlong location/title and non-text description', () => {
+    expect(validateEvent({ ...good, title: '  ' }).errors.title).toBeTruthy();
+    expect(validateEvent({ ...good, location: '  ' }).errors.location).toBeTruthy();
+    expect(validateEvent({ ...good, location: '😀'.repeat(301) }).errors.location).toBeTruthy();
+    expect(validateEvent({ ...good, description: 123 }).errors.description).toBeTruthy();
+    expect(validateEvent({ ...good, endsAt: '2026-11-30T09:00:00+07:00' }).errors.endsAt).toBeTruthy();
+  });
 });
 
 describe('F-02 pagination validation', () => {

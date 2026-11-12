@@ -80,6 +80,21 @@ describe('F-02 event APIs', () => {
     expect((await request('/api/events?pageSize=101')).status).toBe(422);
     expect((await request('/api/events?page=0')).status).toBe(422);
   });
+  it('paginates 23 additional published events including tied timestamps using the server total', async () => {
+    const fixtureIds = Array.from({ length: 23 }, () => randomUUID());
+    const before = await prisma.event.count({ where: { publicationStatus: 'PUBLISHED' } });
+    try {
+      await prisma.event.createMany({ data: fixtureIds.map(id => ({ id, organizerId: other, title: `Pagination ${id}`, startsAt: new Date('2026-01-01T02:00:00Z'), endsAt: new Date('2026-01-01T04:00:00Z'), location: 'Pagination room', capacity: 1, publicationStatus: 'PUBLISHED' })) });
+      const expected = await prisma.event.findMany({ where: { publicationStatus: 'PUBLISHED' }, orderBy: [{ startsAt: 'asc' }, { id: 'asc' }], select: { id: true } });
+      const first = await (await request('/api/events?page=1')).json(); const second = await (await request('/api/events?page=2')).json();
+      expect(first.meta).toEqual({ page: 1, pageSize: 20, total: before + 23 });
+      expect(second.meta).toEqual({ page: 2, pageSize: 20, total: before + 23 });
+      expect(first.data).toHaveLength(20);
+      expect([...first.data, ...second.data].map((row: { id: string }) => row.id)).toEqual(expected.slice(0, 40).map(row => row.id));
+      const organizer = await login(other); const owned = await (await request('/api/me/events?page=2', { cookie: organizer.cookie })).json();
+      expect(owned.meta).toEqual({ page: 2, pageSize: 20, total: 23 }); expect(owned.data).toHaveLength(3);
+    } finally { await prisma.event.deleteMany({ where: { organizerId: other, id: { in: fixtureIds } } }); }
+  });
   it('restricts My Events to the signed-in Organizer', async () => {
     const a = await login(owner), b = await login(other), p = await login(participant);
     expect((await request('/api/me/events')).status).toBe(401);
