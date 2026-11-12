@@ -32,7 +32,7 @@ test('Participant registers, sees the server reference and opens own registratio
   await page.getByRole('link', { name: 'View registration' }).click();
   await expect(page).toHaveURL(/\/my-registrations\?registrationId=[0-9a-f-]+$/i);
   await expect(page.getByRole('dialog', { name: 'Registration details' })).toBeVisible();
-  await expect(page.getByText('Empty workshop')).toBeVisible();
+  await expect(page.getByRole('dialog').getByText('Empty workshop')).toBeVisible();
 });
 
 test('full event disables registration and the own list separates empty from error', async ({ page }) => {
