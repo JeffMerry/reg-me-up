@@ -33,6 +33,7 @@ test('Organizer validates and publishes an event that is publicly retrievable', 
   await expect(page.getByText('Building A')).toBeVisible(); await expect(page.getByRole('heading', { name: 'Description' })).toHaveCount(0);
   const url = page.url(); const anonymous = await browser.newContext(); const guest = await anonymous.newPage();
   try { await guest.goto(url); await expect(guest.getByRole('heading', { name: title })).toBeVisible(); await expect(guest.getByRole('link', { name: 'Log in to register' })).toBeVisible(); } finally { await anonymous.close(); }
+  await page.goto('/organizer/events'); await expect(page.getByRole('link', { name: title })).toBeVisible();
 });
 test('unknown publication outcome preserves form and requires checking My Events', async ({ page }) => {
   await openForm(page); await fillForm(page);
@@ -60,4 +61,11 @@ test('public list reports read errors and can retry on mobile', async ({ page })
   await expect(page.getByRole('heading', { name: 'Discover your next event' })).toBeVisible();
   await expect(page.getByText('Unable to load events.')).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});
+test('cancel asks before discarding entered event data', async ({ page }) => {
+  await openForm(page); await page.getByLabel('Event name').fill(title);
+  page.once('dialog', dialog => dialog.dismiss()); await page.getByRole('button', { name: 'Cancel' }).click();
+  await expect(page.getByLabel('Event name')).toHaveValue(title);
+  page.once('dialog', dialog => dialog.accept()); await page.getByRole('button', { name: 'Cancel' }).click();
+  await expect(page).toHaveURL(/\/organizer\/events$/);
 });

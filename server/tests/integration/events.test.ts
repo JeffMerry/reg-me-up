@@ -70,6 +70,22 @@ describe('F-02 event APIs', () => {
     expect(dto).toMatchObject({ title: 'Event fixture', location: 'Building A', description: null, startsAt: '2026-12-01T02:00:00.000Z', remainingSeats: 3, activeRegistrationCount: 0 });
     expect(await prisma.event.findUnique({ where: { id: dto.id }, select: { organizerId: true, publicationStatus: true } })).toEqual({ organizerId: owner, publicationStatus: 'PUBLISHED' });
   });
+  it('does not insert events for invalid required fields, dates or boundary values', async () => {
+    const organizer = await login(owner); const before = await prisma.event.count({ where: { organizerId: owner } });
+    const invalidInputs: Record<string, unknown>[] = [];
+    for (const field of ['title', 'startsAt', 'endsAt', 'location', 'capacity']) { const input: Record<string, unknown> = { ...valid }; delete input[field]; invalidInputs.push(input); }
+    invalidInputs.push(
+      { ...valid, title: '   ' }, { ...valid, location: '   ' }, { ...valid, title: 'x'.repeat(201) }, { ...valid, location: 'x'.repeat(301) },
+      { ...valid, description: 'x'.repeat(10001) }, { ...valid, description: 1 }, { ...valid, startsAt: '2026-02-30T09:00:00+07:00' },
+      { ...valid, startsAt: '2026-12-01T09:00:00' }, { ...valid, endsAt: valid.startsAt },
+      { ...valid, capacity: -1 }, { ...valid, capacity: 1.5 }, { ...valid, capacity: '3' }, { ...valid, capacity: 2147483648 },
+    );
+    for (const body of invalidInputs) {
+      const response = await request('/api/events', { method: 'POST', cookie: organizer.cookie, token: organizer.token, body });
+      expect(response.status).toBe(422); expect((await response.json()).error.code).toBe('VALIDATION_ERROR');
+    }
+    expect(await prisma.event.count({ where: { organizerId: owner } })).toBe(before);
+  });
   it('returns stable sorted pages and rejects invalid pagination', async () => {
     const expected = await prisma.event.findMany({ where: { publicationStatus: 'PUBLISHED' }, orderBy: [{ startsAt: 'asc' }, { id: 'asc' }], select: { id: true } });
     const page1 = await request('/api/events?page=1&pageSize=2'); const page2 = await request('/api/events?page=2&pageSize=2');
