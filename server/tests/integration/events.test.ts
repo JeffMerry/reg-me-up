@@ -86,6 +86,30 @@ describe('F-02 event APIs', () => {
     }
     expect(await prisma.event.count({ where: { organizerId: owner } })).toBe(before);
   });
+  it('persists nullable description variants and an overnight date at field limits', async () => {
+    const organizer = await login(owner);
+    for (const description of [undefined, null, '', '   ']) {
+      const body = description === undefined ? valid : { ...valid, description };
+      const response = await request('/api/events', { method: 'POST', cookie: organizer.cookie, token: organizer.token, body });
+      expect(response.status).toBe(201); const result = (await response.json()).data;
+      expect(result.description).toBeNull(); expect((await prisma.event.findUniqueOrThrow({ where: { id: result.id } })).description).toBeNull();
+    }
+    const body = { ...valid, title: '😀'.repeat(200), location: 'x'.repeat(300), description: 'x'.repeat(10000), startsAt: '2020-12-31T23:30:00+07:00', endsAt: '2021-01-01T01:00:00+07:00', capacity: 2147483647 };
+    const response = await request('/api/events', { method: 'POST', cookie: organizer.cookie, token: organizer.token, body });
+    expect(response.status).toBe(201); const event = (await response.json()).data;
+    expect(event.startsAt).toBe('2020-12-31T16:30:00.000Z'); expect(event.endsAt).toBe('2020-12-31T18:00:00.000Z');
+    expect(event.title).toBe(body.title); expect(event.location).toBe(body.location); expect(event.description).toBe(body.description);
+  });
+  it('keeps a full published event visible without exposing registrants', async () => {
+    const extraUser = randomUUID(); const extraRegistration = randomUUID();
+    try {
+      await prisma.user.create({ data: { id: extraUser, email: `${extraUser}@events.test`, passwordHash: await argon2.hash(secret), displayName: 'Extra participant', role: 'PARTICIPANT' } });
+      await prisma.registration.create({ data: { id: extraRegistration, eventId: visible, participantId: extraUser, status: 'ACTIVE' } });
+      const response = await request(`/api/events/${visible}`); expect(response.status).toBe(200);
+      const body = await response.json(); expect(body.data.remainingSeats).toBe(0);
+      expect(JSON.stringify(body)).not.toContain('Extra participant'); expect(JSON.stringify(body)).not.toContain(extraRegistration);
+    } finally { await prisma.registration.deleteMany({ where: { id: extraRegistration } }); await prisma.user.deleteMany({ where: { id: extraUser } }); }
+  });
   it('returns stable sorted pages and rejects invalid pagination', async () => {
     const expected = await prisma.event.findMany({ where: { publicationStatus: 'PUBLISHED' }, orderBy: [{ startsAt: 'asc' }, { id: 'asc' }], select: { id: true } });
     const page1 = await request('/api/events?page=1&pageSize=2'); const page2 = await request('/api/events?page=2&pageSize=2');
