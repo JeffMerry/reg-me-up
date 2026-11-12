@@ -20,6 +20,20 @@ const ownSelection = {
 const ownDto = (row: { id: string; status: string; registeredAt: Date; participant: { displayName: string }; event: Parameters<typeof publicEvent>[0] }) => ({
   id: row.id, status: row.status, registeredAt: row.registeredAt.toISOString(), participant: row.participant, event: publicEvent(row.event),
 });
+function isKnownContention(error: unknown): boolean {
+  const pending: unknown[] = [error]; const seen = new Set<object>();
+  while (pending.length) {
+    const value = pending.pop();
+    if (!value || typeof value !== 'object' || seen.has(value)) continue;
+    seen.add(value);
+    const item = value as { code?: unknown; meta?: unknown; cause?: unknown; originalCode?: unknown };
+    if (['55P03', '57014', '40P01', 'P2028'].includes(String(item.code)) || ['55P03', '57014', '40P01'].includes(String(item.originalCode))) return true;
+    if (item.meta) pending.push(item.meta);
+    if (item.cause) pending.push(item.cause);
+    for (const child of Object.values(value)) if (child && typeof child === 'object') pending.push(child);
+  }
+  return false;
+}
 
 export function registrationHandlers(prisma: PrismaClient) {
   const create: RequestHandler = async (req, res, next) => {
@@ -43,7 +57,10 @@ export function registrationHandlers(prisma: PrismaClient) {
       if (outcome.kind === 'ALREADY_REGISTERED') { res.status(409).json({ error: { code: outcome.kind, message: 'Already registered.', registrationId: outcome.registrationId } }); return; }
       if (outcome.kind === 'EVENT_FULL') { res.status(409).json({ error: { code: outcome.kind, message: 'This event is full.' } }); return; }
       res.status(201).json({ data: ownDto(outcome.registration) });
-    } catch (error) { next(error); }
+    } catch (error) {
+      if (isKnownContention(error)) { res.status(503).json({ error: { code: 'TEMPORARILY_UNAVAILABLE', message: 'Registration is temporarily unavailable. Please check your registrations before trying again.' } }); return; }
+      next(error);
+    }
   };
   const ownList: RequestHandler = async (req, res, next) => {
     try {

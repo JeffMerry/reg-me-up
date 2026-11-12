@@ -31,8 +31,12 @@ test('Participant registers, sees the server reference and opens own registratio
   await expect(page.getByText('You are registered.')).toBeVisible();
   await page.getByRole('link', { name: 'View registration' }).click();
   await expect(page).toHaveURL(/\/my-registrations\?registrationId=[0-9a-f-]+$/i);
-  await expect(page.getByRole('dialog', { name: 'Registration details' })).toBeVisible();
-  await expect(page.getByRole('dialog').getByText('Empty workshop')).toBeVisible();
+  const dialog = page.getByRole('dialog', { name: 'Registration details' });
+  await expect(dialog).toBeVisible(); await expect(dialog.getByRole('button', { name: 'Close' })).toBeFocused();
+  await page.keyboard.press('Shift+Tab'); await expect(dialog.getByRole('link', { name: 'View event' })).toBeFocused();
+  await page.keyboard.press('Tab'); await expect(dialog.getByRole('button', { name: 'Close' })).toBeFocused();
+  await page.keyboard.press('Escape'); await expect(dialog).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'Empty workshop' })).toBeFocused();
 });
 
 test('full event disables registration and the own list separates empty from error', async ({ page }) => {

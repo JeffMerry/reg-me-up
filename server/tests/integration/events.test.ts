@@ -219,4 +219,43 @@ describe('F-03 registration APIs', () => {
       await prisma.event.deleteMany({ where: { id: lastSeatEvent } });
     }
   });
+
+  it('returns a safe temporary-unavailable response when the Event lock times out', async () => {
+    const lockEvent = randomUUID();
+    await prisma.event.create({ data: { id: lockEvent, organizerId: owner, title: 'Locked event', startsAt: new Date('2026-12-01T02:00:00Z'), endsAt: new Date('2026-12-01T04:00:00Z'), location: 'A', capacity: 2, publicationStatus: 'PUBLISHED' } });
+    const blocker = new pg.Client({ connectionString: process.env.TEST_DATABASE_URL });
+    try {
+      await blocker.connect(); await blocker.query('BEGIN'); await blocker.query('SELECT id FROM events WHERE id = $1::uuid FOR UPDATE', [lockEvent]);
+      const p = await login(participant2);
+      const response = await request(`/api/events/${lockEvent}/registrations`, { method: 'POST', cookie: p.cookie, token: p.token, body: {} });
+      expect(response.status).toBe(503); expect((await response.json()).error.code).toBe('TEMPORARILY_UNAVAILABLE');
+      expect(await prisma.registration.count({ where: { eventId: lockEvent } })).toBe(0);
+    } finally {
+      await blocker.query('ROLLBACK').catch(() => undefined); await blocker.end();
+      await prisma.registration.deleteMany({ where: { eventId: lockEvent } }); await prisma.event.deleteMany({ where: { id: lockEvent } });
+    }
+  });
+
+  it('keeps a Registration readable after restarting the app with the same database', async () => {
+    const persistentEvent = randomUUID();
+    await prisma.event.create({ data: { id: persistentEvent, organizerId: owner, title: 'Persistent registration', startsAt: new Date('2026-12-01T02:00:00Z'), endsAt: new Date('2026-12-01T04:00:00Z'), location: 'A', capacity: 1, publicationStatus: 'PUBLISHED' } });
+    let registrationId: string | undefined;
+    try {
+      const p = await login(participant2);
+      const created = await request(`/api/events/${persistentEvent}/registrations`, { method: 'POST', cookie: p.cookie, token: p.token, body: {} });
+      expect(created.status).toBe(201); registrationId = (await created.json()).data.id as string;
+      await new Promise<void>((resolve, reject) => server.close(error => error ? reject(error) : resolve()));
+      const config = { nodeEnv: 'test' as const, port: 3000, databaseUrl: process.env.TEST_DATABASE_URL!, sessionSecret: 'synthetic-event-session-secret-123456', appOrigin: origin };
+      server = createApp(async () => { await prisma.$queryRaw`SELECT 1`; }, { config, pool, prisma }).listen(0, '127.0.0.1');
+      await new Promise<void>(resolve => server.once('listening', resolve));
+      const address = server.address(); if (!address || typeof address === 'string') throw new Error('No address'); base = `http://127.0.0.1:${address.port}`;
+      const freshLogin = await login(participant2);
+      const reread = await request(`/api/me/registrations/${registrationId}`, { cookie: freshLogin.cookie });
+      expect(reread.status).toBe(200); expect((await reread.json()).data).toMatchObject({ id: registrationId, event: { id: persistentEvent } });
+      expect(await prisma.registration.count({ where: { id: registrationId } })).toBe(1);
+    } finally {
+      if (registrationId) await prisma.registration.deleteMany({ where: { id: registrationId } });
+      await prisma.event.deleteMany({ where: { id: persistentEvent } });
+    }
+  });
 });
