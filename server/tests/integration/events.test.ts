@@ -188,6 +188,7 @@ describe('F-03 registration APIs', () => {
 
   it('rejects duplicate, full, hidden, malformed, forged and unauthorized registration requests without extra rows', async () => {
     const p = await login(participant), p2 = await login(participant2), o = await login(owner);
+    await prisma.event.update({ where: { id: visible }, data: { capacity: 1 } });
     const before = await prisma.registration.count({ where: { eventId: visible } });
     const duplicate = await request(`/api/events/${visible}/registrations`, { method: 'POST', cookie: p.cookie, token: p.token, body: {} });
     expect(duplicate.status).toBe(409); expect((await duplicate.json()).error).toMatchObject({ code: 'ALREADY_REGISTERED' });
@@ -198,5 +199,6 @@ describe('F-03 registration APIs', () => {
     expect((await request(`/api/events/${visible}/registrations`, { method: 'POST', cookie: o.cookie, token: o.token, body: {} })).status).toBe(403);
     expect((await request(`/api/events/${visible}/registrations`, { method: 'POST', cookie: p2.cookie, token: p2.token, body: { participantId: owner } })).status).toBe(422);
     expect(await prisma.registration.count({ where: { eventId: visible } })).toBe(before);
+    await prisma.event.update({ where: { id: visible }, data: { capacity: 2 } });
   });
 });
