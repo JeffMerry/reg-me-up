@@ -8,7 +8,7 @@ import { PrismaClient } from '../../generated/prisma/client.js';
 import { createApp } from '../../src/app.js';
 import { verifyTestDatabase } from '../../src/test-db-safety.js';
 
-const owner = randomUUID(), other = randomUUID(), participant = randomUUID(), visible = randomUUID(), hidden = randomUUID();
+const owner = randomUUID(), other = randomUUID(), participant = randomUUID(), participant2 = randomUUID(), visible = randomUUID(), hidden = randomUUID();
 const secret = 'synthetic-event-test-password';
 const origin = 'http://localhost:5173';
 const valid = { title: '  Event fixture  ', startsAt: '2026-12-01T09:00:00+07:00', endsAt: '2026-12-01T11:00:00+07:00', location: ' Building A ', capacity: 3 };
@@ -27,7 +27,7 @@ beforeAll(async () => {
   try { await app.connect(); await test.connect(); await verifyTestDatabase(app, test); safe = true; } finally { await Promise.allSettled([app.end(), test.end()]); }
   pool = new pg.Pool({ connectionString: process.env.TEST_DATABASE_URL }); prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.TEST_DATABASE_URL }) });
   const hash = await argon2.hash(secret);
-  for (const [id, role] of [[owner, 'ORGANIZER'], [other, 'ORGANIZER'], [participant, 'PARTICIPANT']]) await prisma.user.create({ data: { id, email: `${id}@events.test`, passwordHash: hash, displayName: `Test ${id}`, role } });
+  for (const [id, role] of [[owner, 'ORGANIZER'], [other, 'ORGANIZER'], [participant, 'PARTICIPANT'], [participant2, 'PARTICIPANT']]) await prisma.user.create({ data: { id, email: `${id}@events.test`, passwordHash: hash, displayName: `Test ${id}`, role } });
   for (const [id, publicationStatus] of [[visible, 'PUBLISHED'], [hidden, 'UNPUBLISHED']]) await prisma.event.create({ data: { id, organizerId: owner, title: `Fixture ${id}`, startsAt: new Date('2026-12-01T02:00:00Z'), endsAt: new Date('2026-12-01T04:00:00Z'), location: 'A', capacity: 2, publicationStatus } });
   await prisma.registration.create({ data: { id: randomUUID(), eventId: visible, participantId: participant, status: 'ACTIVE' } });
   const config = { nodeEnv: 'test' as const, port: 3000, databaseUrl: process.env.TEST_DATABASE_URL, sessionSecret: 'synthetic-event-session-secret-123456', appOrigin: origin };
@@ -39,8 +39,8 @@ afterAll(async () => {
   if (safe && prisma) {
     await prisma.registration.deleteMany({ where: { event: { organizerId: { in: [owner, other] } } } });
     await prisma.event.deleteMany({ where: { organizerId: { in: [owner, other] } } });
-    await prisma.$executeRaw`DELETE FROM sessions WHERE sess->>'userId' IN (${owner}, ${other}, ${participant})`;
-    await prisma.user.deleteMany({ where: { id: { in: [owner, other, participant] } } });
+    await prisma.$executeRaw`DELETE FROM sessions WHERE sess->>'userId' IN (${owner}, ${other}, ${participant}, ${participant2})`;
+    await prisma.user.deleteMany({ where: { id: { in: [owner, other, participant, participant2] } } });
   }
   if (prisma) await prisma.$disconnect(); if (pool) await pool.end();
 });
@@ -160,5 +160,43 @@ describe('F-02 event APIs', () => {
     expect(ownA.some(row => row.id === visible)).toBe(true); expect(ownA.some(row => row.id === otherEvent)).toBe(false);
     expect(ownB.some(row => row.id === otherEvent)).toBe(true); expect(ownB.some(row => row.id === visible)).toBe(false);
     expect((await request(`/api/events/${randomUUID()}`)).status).toBe(404);
+  });
+});
+
+describe('F-03 registration APIs', () => {
+  it('registers a Participant and returns only their own persisted registration', async () => {
+    const freshEvent = randomUUID();
+    await prisma.event.create({ data: { id: freshEvent, organizerId: owner, title: 'Open registration', startsAt: new Date('2026-12-01T02:00:00Z'), endsAt: new Date('2026-12-01T04:00:00Z'), location: 'A', capacity: 2, publicationStatus: 'PUBLISHED' } });
+    try {
+      const p = await login(participant);
+      const response = await request(`/api/events/${freshEvent}/registrations`, { method: 'POST', cookie: p.cookie, token: p.token, body: {} });
+      expect(response.status).toBe(201);
+      const created = (await response.json()).data;
+      expect(created).toMatchObject({ status: 'ACTIVE', participant: { displayName: `Test ${participant}` }, event: { id: freshEvent, remainingSeats: 1 } });
+      expect(created.registeredAt).toBeTruthy();
+      expect(Object.keys(created).sort()).toEqual(['event', 'id', 'participant', 'registeredAt', 'status']);
+      const list = await request(`/api/me/registrations?eventId=${freshEvent}`, { cookie: p.cookie });
+      expect(list.status).toBe(200); expect((await list.json()).data[0].id).toBe(created.id);
+      expect((await request(`/api/me/registrations/${created.id}`, { cookie: p.cookie })).status).toBe(200);
+      const p2 = await login(participant2);
+      expect((await request(`/api/me/registrations/${created.id}`, { cookie: p2.cookie })).status).toBe(404);
+    } finally {
+      await prisma.registration.deleteMany({ where: { eventId: freshEvent } });
+      await prisma.event.deleteMany({ where: { id: freshEvent } });
+    }
+  });
+
+  it('rejects duplicate, full, hidden, malformed, forged and unauthorized registration requests without extra rows', async () => {
+    const p = await login(participant), p2 = await login(participant2), o = await login(owner);
+    const before = await prisma.registration.count({ where: { eventId: visible } });
+    const duplicate = await request(`/api/events/${visible}/registrations`, { method: 'POST', cookie: p.cookie, token: p.token, body: {} });
+    expect(duplicate.status).toBe(409); expect((await duplicate.json()).error).toMatchObject({ code: 'ALREADY_REGISTERED' });
+    expect((await request(`/api/events/${visible}/registrations`, { method: 'POST', cookie: p2.cookie, token: p2.token, body: {} })).status).toBe(409);
+    expect((await request(`/api/events/${hidden}/registrations`, { method: 'POST', cookie: p2.cookie, token: p2.token, body: {} })).status).toBe(404);
+    expect((await request(`/api/events/${randomUUID()}/registrations`, { method: 'POST', cookie: p2.cookie, token: p2.token, body: {} })).status).toBe(404);
+    expect((await request('/api/events/not-a-uuid/registrations', { method: 'POST', cookie: p2.cookie, token: p2.token, body: {} })).status).toBe(422);
+    expect((await request(`/api/events/${visible}/registrations`, { method: 'POST', cookie: o.cookie, token: o.token, body: {} })).status).toBe(403);
+    expect((await request(`/api/events/${visible}/registrations`, { method: 'POST', cookie: p2.cookie, token: p2.token, body: { participantId: owner } })).status).toBe(422);
+    expect(await prisma.registration.count({ where: { eventId: visible } })).toBe(before);
   });
 });
