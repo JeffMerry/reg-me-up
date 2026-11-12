@@ -69,3 +69,43 @@ test('cancel asks before discarding entered event data', async ({ page }) => {
   page.once('dialog', dialog => dialog.accept()); await page.getByRole('button', { name: 'Cancel' }).click();
   await expect(page).toHaveURL(/\/organizer\/events$/);
 });
+test('invalid time and capacity are described, preserve values and focus the first invalid field', async ({ page }) => {
+  await openForm(page); await fillForm(page);
+  await page.getByLabel('End date and time').fill('2026-12-01T08:00'); await page.getByLabel('Capacity').fill('0');
+  await page.getByRole('button', { name: 'Publish event' }).click();
+  await expect(page.getByLabel('End date and time')).toBeFocused();
+  await expect(page.getByText('End time must be after start time.')).toBeVisible();
+  await expect(page.getByText('Capacity must be a positive whole number.')).toBeVisible();
+  await expect(page.getByLabel('Event name')).toHaveValue(title);
+});
+test('pending publication prevents repeat submission and preserves data on validation error', async ({ page }) => {
+  await openForm(page); await fillForm(page);
+  let release: (() => void) | undefined; let arrived: (() => void) | undefined;
+  const requestArrived = new Promise<void>(resolve => { arrived = resolve; }); const gate = new Promise<void>(resolve => { release = resolve; });
+  await page.route('**/api/events', async route => {
+    if (route.request().method() !== 'POST') { await route.continue(); return; }
+    arrived?.(); await gate; await route.fulfill({ status: 422, contentType: 'application/json', body: JSON.stringify({ error: { code: 'VALIDATION_ERROR', fieldErrors: { title: 'Please review the event name.' } } }) });
+  });
+  await page.getByRole('button', { name: 'Publish event' }).click(); await requestArrived;
+  await expect(page.getByRole('button', { name: 'Publishing…' })).toBeDisabled(); release?.();
+  await expect(page.getByText('Please review the event name.')).toBeVisible();
+  await expect(page.getByLabel('Event name')).toHaveValue(title); await expect(page.getByLabel('Event name')).toBeFocused();
+});
+test('empty public list is distinct from loading and error', async ({ page }) => {
+  await page.route('**/api/events?page=*', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: [], meta: { page: 1, pageSize: 20, total: 0 } }) }));
+  await page.goto('/events'); await expect(page.getByText('No events are available yet.')).toBeVisible();
+  await expect(page.getByText('Unable to load events.')).toHaveCount(0);
+});
+for (const width of [320, 390, 1440]) {
+  test(`long event details remain readable without horizontal overflow at ${width}px`, async ({ page }) => {
+    const id = '30000000-0000-4000-8000-000000000001'; const longTitle = 'A'.repeat(200);
+    await page.setViewportSize({ width, height: 900 });
+    await page.route(`**/api/events/${id}`, route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { id, title: longTitle, startsAt: '2026-12-01T02:00:00.000Z', endsAt: '2026-12-01T04:00:00.000Z', location: 'B'.repeat(300), capacity: 3, remainingSeats: 3, description: 'Details', organizer: { displayName: 'Organizer' } } }) }));
+    await page.goto(`/events/${id}`); await expect(page.getByRole('heading', { name: longTitle })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+    expect(await page.getByRole('heading', { name: longTitle }).evaluate(node => node.scrollWidth <= node.clientWidth)).toBe(true);
+    expect(await page.getByText('B'.repeat(300)).evaluate(node => node.scrollWidth <= node.clientWidth)).toBe(true);
+    expect(await page.getByRole('heading', { name: longTitle }).evaluate(node => node.getBoundingClientRect().right <= window.innerWidth)).toBe(true);
+    expect(await page.getByText('B'.repeat(300)).evaluate(node => node.getBoundingClientRect().right <= window.innerWidth)).toBe(true);
+  });
+}
