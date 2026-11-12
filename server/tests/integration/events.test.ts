@@ -13,8 +13,8 @@ const secret = 'synthetic-event-test-password';
 const origin = 'http://localhost:5173';
 const valid = { title: '  Event fixture  ', startsAt: '2026-12-01T09:00:00+07:00', endsAt: '2026-12-01T11:00:00+07:00', location: ' Building A ', capacity: 3 };
 let pool: pg.Pool, prisma: PrismaClient, server: Server, base: string, safe = false;
-async function request(path: string, opts: { method?: string; cookie?: string; token?: string; body?: unknown } = {}) {
-  return fetch(`${base}${path}`, { method: opts.method ?? 'GET', headers: { ...(opts.cookie ? { Cookie: opts.cookie } : {}), ...(opts.method ? { Origin: origin, 'Content-Type': 'application/json' } : {}), ...(opts.token ? { 'X-CSRF-Token': opts.token } : {}) }, ...(opts.body !== undefined ? { body: JSON.stringify(opts.body) } : {}) });
+async function request(path: string, opts: { method?: string; cookie?: string; token?: string; body?: unknown; origin?: string } = {}) {
+  return fetch(`${base}${path}`, { method: opts.method ?? 'GET', headers: { ...(opts.cookie ? { Cookie: opts.cookie } : {}), ...(opts.method ? { Origin: opts.origin ?? origin, 'Content-Type': 'application/json' } : {}), ...(opts.token ? { 'X-CSRF-Token': opts.token } : {}) }, ...(opts.body === undefined ? {} : { body: JSON.stringify(opts.body) }) });
 }
 async function login(id: string) {
   const boot = await request('/api/auth/csrf'); const cookie = boot.headers.get('set-cookie')!.split(';')[0]; const token = (await boot.json()).data.csrfToken as string;
@@ -143,5 +143,22 @@ describe('F-02 event APIs', () => {
     const responseA = await request('/api/me/events', { cookie: a.cookie }); const responseB = await request('/api/me/events', { cookie: b.cookie });
     const rowsA = (await responseA.json()).data as Array<{ id: string }>; const rowsB = (await responseB.json()).data as Array<{ id: string }>;
     expect(rowsA.some(row => row.id === visible)).toBe(true); expect(rowsB.some(row => row.id === visible)).toBe(false);
+  });
+  it('isolates both Organizers with valid own events and rejects forged owner and bad CSRF', async () => {
+    const a = await login(owner), b = await login(other); const before = await prisma.event.count();
+    const badOrigin = await request('/api/events', { method: 'POST', cookie: a.cookie, token: a.token, origin: 'https://invalid.example', body: valid });
+    const badToken = await request('/api/events', { method: 'POST', cookie: a.cookie, token: 'invalid', body: valid });
+    expect(badOrigin.status).toBe(403); expect((await badOrigin.json()).error.code).toBe('CSRF_INVALID');
+    expect(badToken.status).toBe(403); expect((await badToken.json()).error.code).toBe('CSRF_INVALID');
+    const spoof = await request('/api/events', { method: 'POST', cookie: a.cookie, token: a.token, body: { ...valid, organizerId: other } });
+    expect(spoof.status).toBe(422); expect(await prisma.event.count()).toBe(before);
+    const created = await request('/api/events', { method: 'POST', cookie: b.cookie, token: b.token, body: valid });
+    expect(created.status).toBe(201); const otherEvent = (await created.json()).data.id as string;
+    expect((await prisma.event.findUniqueOrThrow({ where: { id: otherEvent } })).organizerId).toBe(other);
+    const ownA = (await (await request('/api/me/events?pageSize=100', { cookie: a.cookie })).json()).data as Array<{ id: string }>;
+    const ownB = (await (await request('/api/me/events?pageSize=100', { cookie: b.cookie })).json()).data as Array<{ id: string }>;
+    expect(ownA.some(row => row.id === visible)).toBe(true); expect(ownA.some(row => row.id === otherEvent)).toBe(false);
+    expect(ownB.some(row => row.id === otherEvent)).toBe(true); expect(ownB.some(row => row.id === visible)).toBe(false);
+    expect((await request(`/api/events/${randomUUID()}`)).status).toBe(404);
   });
 });
