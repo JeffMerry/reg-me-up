@@ -1,6 +1,6 @@
 # RegMeUp — Feature inventory
 
-Version 0.3 — 2026-11-10. User-adopted planning baseline; teammate review pending. Implementation of every feature **NOT STARTED in the inspected checkout**; verification **NOT RUN**.
+Version 0.4 — 2026-11-12. User-adopted planning baseline; teammate review pending. Implementation of every feature **NOT STARTED in the inspected checkout**; verification **NOT RUN**.
 
 Requirements: [SRS](srs.md). Detailed design: [System SDS](system-sds.md). Verification mapping: [Traceability](traceability.md). Sprint outcomes: [Plan](sprints/plan.md).
 
@@ -17,6 +17,7 @@ SYS-01 has a [bounded foundation preparation contract](sprints/sprint-1/sys-01.m
 | F-07 | Owner check-in and attendance persistence without duplicates | FR-08; BR-05/09; NFR-01/02/06 | F-03/05; Q-09 eligible state/window/correction policy | 3 | Later contract pending |
 | F-08 | Owner attendance summaries from persisted data | FR-09; BR-05/10; NFR-01/06 | F-07 and registration lifecycle; Q-09 counts | 3 | Later contract pending |
 | F-09 | Owner Instructor assignment; assigned Instructor teaching list | FR-10/11; BR-05/11/12/13; NFR-01/07/06 | F-01/02; Q-07/08; role/schema expansion via new migrations | 2 | Later contract pending |
+| F-10 | Cross-feature UI refinement after baseline workflows are complete: visual consistency, spacing/typography, responsive layouts, interaction feedback, and accessibility details across implemented screens; no new business rules | Existing UI contracts and NFR-06; supports usability of F-01–F-09 | F-01–F-09 implemented and integrated; known functional defects triaged first | Final hardening, after Sprint 3 feature work and before final regression/release | [refinement plan](sprints/f-10-ui-refinement.md); issue tracking pending |
 | SYS-01 | Local reproducibility, migrations/seed/config/build/test; later Docker/CI/GCP/release durability | NFR-05; supports NFR-02 | Establish alongside F-01; technical versions ENG-01; GCP guidance ENG-03 | 1–3 + Lab 5 | No domain screen; [SDS](system-sds.md), TEST-13 and later delivery verification |
 
 Cross-cutting security is established in F-01 and checked on **all protected endpoints**, including F-02/F-03 and later F-09; F-01 middleware alone cannot prove ownership enforcement. NFR-03 extends to cancellation in Sprint 2 because seat return changes active counts; this mapping clarifies verification rather than changing baseline BR-02/03.
@@ -32,3 +33,4 @@ Proposed team allocation: each feature has a lead and a different teammate revie
 | 0.1 | 2026-11-06 | Allocated all 11 FR, 13 BR, 7 NFR to F-01–09/SYS-01; corrected cross-cutting security mapping | Pending teammate review |
 | 0.2 | 2026-11-06 | Linked bounded SYS-01 preparation and exact dependency version targets | Pending teammate review; no implementation/results |
 | 0.3 | 2026-11-10 | Updated SYS-01 dependency status for the Prisma ORM decision | Pending teammate review; no implementation/results |
+| 0.4 | 2026-11-12 | Added a post-baseline cross-feature UI refinement workstream (F-10) | Planning only; issue and teammate review pending |
