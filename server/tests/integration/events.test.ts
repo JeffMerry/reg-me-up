@@ -1,5 +1,8 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { randomUUID } from 'node:crypto';
+import { spawn, type ChildProcess } from 'node:child_process';
+import { createServer } from 'node:net';
+import { setTimeout as delay } from 'node:timers/promises';
 import type { Server } from 'node:http';
 import argon2 from 'argon2';
 import pg from 'pg';
@@ -13,12 +16,12 @@ const secret = 'synthetic-event-test-password';
 const origin = 'http://localhost:5173';
 const valid = { title: '  Event fixture  ', startsAt: '2026-12-01T09:00:00+07:00', endsAt: '2026-12-01T11:00:00+07:00', location: ' Building A ', capacity: 3 };
 let pool: pg.Pool, prisma: PrismaClient, server: Server, base: string, safe = false;
-async function request(path: string, opts: { method?: string; cookie?: string; token?: string; body?: unknown; origin?: string } = {}) {
-  return fetch(`${base}${path}`, { method: opts.method ?? 'GET', headers: { ...(opts.cookie ? { Cookie: opts.cookie } : {}), ...(opts.method ? { Origin: opts.origin ?? origin, 'Content-Type': 'application/json' } : {}), ...(opts.token ? { 'X-CSRF-Token': opts.token } : {}) }, ...(opts.body === undefined ? {} : { body: JSON.stringify(opts.body) }) });
+async function request(path: string, opts: { method?: string; cookie?: string; token?: string; body?: unknown; origin?: string } = {}, url = base) {
+  return fetch(`${url}${path}`, { method: opts.method ?? 'GET', headers: { ...(opts.cookie ? { Cookie: opts.cookie } : {}), ...(opts.method ? { Origin: opts.origin ?? origin, 'Content-Type': 'application/json' } : {}), ...(opts.token ? { 'X-CSRF-Token': opts.token } : {}) }, ...(opts.body === undefined ? {} : { body: JSON.stringify(opts.body) }) });
 }
-async function login(id: string) {
-  const boot = await request('/api/auth/csrf'); const cookie = boot.headers.get('set-cookie')!.split(';')[0]; const token = (await boot.json()).data.csrfToken as string;
-  const response = await request('/api/auth/login', { method: 'POST', cookie, token, body: { email: `${id}@events.test`, password: secret } });
+async function login(id: string, url = base) {
+  const boot = await request('/api/auth/csrf', {}, url); const cookie = boot.headers.get('set-cookie')!.split(';')[0]; const token = (await boot.json()).data.csrfToken as string;
+  const response = await request('/api/auth/login', { method: 'POST', cookie, token, body: { email: `${id}@events.test`, password: secret } }, url);
   expect(response.status).toBe(200); return { cookie: response.headers.get('set-cookie')!.split(';')[0], token: (await response.json()).data.csrfToken as string };
 }
 beforeAll(async () => {
@@ -190,6 +193,10 @@ describe('F-03 registration APIs', () => {
     const p = await login(participant), p2 = await login(participant2), o = await login(owner);
     await prisma.event.update({ where: { id: visible }, data: { capacity: 1 } });
     const before = await prisma.registration.count({ where: { eventId: visible } });
+    const anonymous = await request(`/api/events/${visible}/registrations`, { method: 'POST', body: {} });
+    expect(anonymous.status).toBe(401);
+    const badCsrf = await request(`/api/events/${visible}/registrations`, { method: 'POST', cookie: p2.cookie, token: 'invalid-token', body: {} });
+    expect(badCsrf.status).toBe(403); expect((await badCsrf.json()).error.code).toBe('CSRF_INVALID');
     const duplicate = await request(`/api/events/${visible}/registrations`, { method: 'POST', cookie: p.cookie, token: p.token, body: {} });
     expect(duplicate.status).toBe(409); expect((await duplicate.json()).error).toMatchObject({ code: 'ALREADY_REGISTERED' });
     expect((await request(`/api/events/${visible}/registrations`, { method: 'POST', cookie: p2.cookie, token: p2.token, body: {} })).status).toBe(409);
@@ -198,6 +205,8 @@ describe('F-03 registration APIs', () => {
     expect((await request('/api/events/not-a-uuid/registrations', { method: 'POST', cookie: p2.cookie, token: p2.token, body: {} })).status).toBe(422);
     expect((await request(`/api/events/${visible}/registrations`, { method: 'POST', cookie: o.cookie, token: o.token, body: {} })).status).toBe(403);
     expect((await request(`/api/events/${visible}/registrations`, { method: 'POST', cookie: p2.cookie, token: p2.token, body: { participantId: owner } })).status).toBe(422);
+    expect((await request('/api/me/registrations?participantId=' + participant2, { cookie: p2.cookie })).status).toBe(422);
+    expect((await request('/api/me/registrations/not-a-uuid', { cookie: p2.cookie })).status).toBe(422);
     expect(await prisma.registration.count({ where: { eventId: visible } })).toBe(before);
     await prisma.event.update({ where: { id: visible }, data: { capacity: 2 } });
   });
@@ -220,6 +229,23 @@ describe('F-03 registration APIs', () => {
     }
   });
 
+  it('serializes simultaneous duplicate requests for the same Participant/Event pair', async () => {
+    const duplicateEvent = randomUUID();
+    await prisma.event.create({ data: { id: duplicateEvent, organizerId: owner, title: 'Duplicate race', startsAt: new Date('2026-12-01T02:00:00Z'), endsAt: new Date('2026-12-01T04:00:00Z'), location: 'A', capacity: 3, publicationStatus: 'PUBLISHED' } });
+    try {
+      const [firstSession, secondSession] = await Promise.all([login(participant2), login(participant2)]);
+      const responses = await Promise.all([firstSession, secondSession].map(p => request(`/api/events/${duplicateEvent}/registrations`, { method: 'POST', cookie: p.cookie, token: p.token, body: {} })));
+      expect(responses.map(response => response.status).sort()).toEqual([201, 409]);
+      const created = responses.find(response => response.status === 201)!; const conflict = responses.find(response => response.status === 409)!;
+      const registrationId = (await created.json()).data.id as string;
+      expect((await conflict.json()).error).toMatchObject({ code: 'ALREADY_REGISTERED', registrationId });
+      expect(await prisma.registration.count({ where: { eventId: duplicateEvent, participantId: participant2, status: 'ACTIVE' } })).toBe(1);
+      await expect(prisma.registration.create({ data: { eventId: duplicateEvent, participantId: participant2, status: 'ACTIVE' } })).rejects.toMatchObject({ code: 'P2002' });
+    } finally {
+      await prisma.registration.deleteMany({ where: { eventId: duplicateEvent } }); await prisma.event.deleteMany({ where: { id: duplicateEvent } });
+    }
+  });
+
   it('returns a safe temporary-unavailable response when the Event lock times out', async () => {
     const lockEvent = randomUUID();
     await prisma.event.create({ data: { id: lockEvent, organizerId: owner, title: 'Locked event', startsAt: new Date('2026-12-01T02:00:00Z'), endsAt: new Date('2026-12-01T04:00:00Z'), location: 'A', capacity: 2, publicationStatus: 'PUBLISHED' } });
@@ -239,21 +265,27 @@ describe('F-03 registration APIs', () => {
   it('keeps a Registration readable after restarting the app with the same database', async () => {
     const persistentEvent = randomUUID();
     await prisma.event.create({ data: { id: persistentEvent, organizerId: owner, title: 'Persistent registration', startsAt: new Date('2026-12-01T02:00:00Z'), endsAt: new Date('2026-12-01T04:00:00Z'), location: 'A', capacity: 1, publicationStatus: 'PUBLISHED' } });
-    let registrationId: string | undefined;
+    let registrationId: string | undefined; let child: ChildProcess | undefined;
     try {
       const p = await login(participant2);
       const created = await request(`/api/events/${persistentEvent}/registrations`, { method: 'POST', cookie: p.cookie, token: p.token, body: {} });
       expect(created.status).toBe(201); registrationId = (await created.json()).data.id as string;
-      await new Promise<void>((resolve, reject) => server.close(error => error ? reject(error) : resolve()));
-      const config = { nodeEnv: 'test' as const, port: 3000, databaseUrl: process.env.TEST_DATABASE_URL!, sessionSecret: 'synthetic-event-session-secret-123456', appOrigin: origin };
-      server = createApp(async () => { await prisma.$queryRaw`SELECT 1`; }, { config, pool, prisma }).listen(0, '127.0.0.1');
-      await new Promise<void>(resolve => server.once('listening', resolve));
-      const address = server.address(); if (!address || typeof address === 'string') throw new Error('No address'); base = `http://127.0.0.1:${address.port}`;
-      const freshLogin = await login(participant2);
-      const reread = await request(`/api/me/registrations/${registrationId}`, { cookie: freshLogin.cookie });
+      const probe = createServer(); await new Promise<void>(resolve => probe.listen(0, '127.0.0.1', resolve));
+      const address = probe.address(); if (!address || typeof address === 'string') throw new Error('No restart-test port'); const port = address.port;
+      await new Promise<void>(resolve => probe.close(() => resolve()));
+      child = spawn(process.execPath, ['--import', 'tsx', 'src/index.ts'], { cwd: process.cwd(), env: { ...process.env, NODE_ENV: 'test', PORT: String(port), DATABASE_URL: process.env.TEST_DATABASE_URL!, APP_ORIGIN: origin, SESSION_SECRET: 'synthetic-restart-session-secret-123456' }, stdio: 'ignore' });
+      const restartedBase = `http://127.0.0.1:${port}`; let ready = false;
+      for (let attempt = 0; attempt < 100 && !ready; attempt++) {
+        if (child.exitCode !== null) throw new Error(`Restarted app exited with ${child.exitCode}`);
+        try { ready = (await fetch(`${restartedBase}/api/health`)).ok; } catch { await delay(100); }
+      }
+      expect(ready).toBe(true);
+      const freshLogin = await login(participant2, restartedBase);
+      const reread = await request(`/api/me/registrations/${registrationId}`, { cookie: freshLogin.cookie }, restartedBase);
       expect(reread.status).toBe(200); expect((await reread.json()).data).toMatchObject({ id: registrationId, event: { id: persistentEvent } });
       expect(await prisma.registration.count({ where: { id: registrationId } })).toBe(1);
     } finally {
+      if (child && child.exitCode === null) { child.kill(); await new Promise<void>(resolve => child?.once('exit', () => resolve())); }
       if (registrationId) await prisma.registration.deleteMany({ where: { id: registrationId } });
       await prisma.event.deleteMany({ where: { id: persistentEvent } });
     }

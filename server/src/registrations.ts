@@ -34,9 +34,24 @@ function isKnownContention(error: unknown): boolean {
   }
   return false;
 }
+function isConnectionLoss(error: unknown): boolean {
+  const pending: unknown[] = [error]; const seen = new Set<object>();
+  while (pending.length) {
+    const value = pending.pop();
+    if (!value || typeof value !== 'object' || seen.has(value)) continue;
+    seen.add(value);
+    const item = value as { code?: unknown; meta?: unknown; cause?: unknown; originalCode?: unknown };
+    if (['P1017', '08006', '57P01', '57P02', '57P03'].includes(String(item.code)) || ['08006', '57P01', '57P02', '57P03'].includes(String(item.originalCode))) return true;
+    if (item.meta) pending.push(item.meta);
+    if (item.cause) pending.push(item.cause);
+    for (const child of Object.values(value)) if (child && typeof child === 'object') pending.push(child);
+  }
+  return false;
+}
 
 export function registrationHandlers(prisma: PrismaClient) {
   const create: RequestHandler = async (req, res, next) => {
+    let insertedBeforeConnectionLoss = false;
     try {
       const eventId = validateRegistrationId(req.params.eventId);
       if (!eventId || Object.keys(req.query).length || !hasEmptyRegistrationBody(req.body)) { invalid(res); return; }
@@ -51,6 +66,7 @@ export function registrationHandlers(prisma: PrismaClient) {
         const event = await tx.event.findUniqueOrThrow({ where: { id: eventId }, select: { capacity: true, _count: { select: { registrations: { where: { status: 'ACTIVE' } } } } } });
         if (event._count.registrations >= event.capacity) return { kind: 'EVENT_FULL' as const };
         const registration = await tx.registration.create({ data: { eventId, participantId: participant.id, status: 'ACTIVE' }, select: ownSelection });
+        insertedBeforeConnectionLoss = true;
         return { kind: 'CREATED' as const, registration };
       }, { isolationLevel: 'ReadCommitted', maxWait: 5000, timeout: 10000 });
       if (outcome.kind === 'NOT_FOUND') { notFound(res); return; }
@@ -58,6 +74,7 @@ export function registrationHandlers(prisma: PrismaClient) {
       if (outcome.kind === 'EVENT_FULL') { res.status(409).json({ error: { code: outcome.kind, message: 'This event is full.' } }); return; }
       res.status(201).json({ data: ownDto(outcome.registration) });
     } catch (error) {
+      if (insertedBeforeConnectionLoss && isConnectionLoss(error)) { res.status(503).json({ error: { code: 'OUTCOME_UNKNOWN', message: 'We could not confirm your registration. Check your registrations before trying again.' } }); return; }
       if (isKnownContention(error)) { res.status(503).json({ error: { code: 'TEMPORARILY_UNAVAILABLE', message: 'Registration is temporarily unavailable. Please check your registrations before trying again.' } }); return; }
       next(error);
     }
