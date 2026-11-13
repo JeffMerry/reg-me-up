@@ -223,13 +223,13 @@ describe('F-03 registration APIs', () => {
   it('allows only one of two Participants to claim the last seat', async () => {
     const lastSeatEvent = randomUUID();
     await prisma.event.create({ data: { id: lastSeatEvent, organizerId: owner, title: 'Last seat', startsAt: new Date('2026-12-01T02:00:00Z'), endsAt: new Date('2026-12-01T04:00:00Z'), location: 'A', capacity: 1, publicationStatus: 'PUBLISHED' } });
-    const blocker = new pg.Client({ connectionString: process.env.TEST_DATABASE_URL });
+    const blocker = new pg.Client({ connectionString: process.env.TEST_DATABASE_URL }); const observer = new pg.Client({ connectionString: process.env.TEST_DATABASE_URL });
     let requests: Promise<Response>[] = [];
     try {
       const [p1, p2] = await Promise.all([login(participant), login(participant2)]);
-      await blocker.connect(); await blocker.query('BEGIN'); await blocker.query('SELECT id FROM events WHERE id = $1::uuid FOR UPDATE', [lastSeatEvent]);
+      await Promise.all([blocker.connect(), observer.connect()]); await blocker.query('BEGIN'); await blocker.query('SELECT id FROM events WHERE id = $1::uuid FOR UPDATE', [lastSeatEvent]);
       requests = [p1, p2].map(p => request(`/api/events/${lastSeatEvent}/registrations`, { method: 'POST', cookie: p.cookie, token: p.token, body: {} }));
-      await waitForRegistrationLockWaiters(blocker, 2);
+      await waitForRegistrationLockWaiters(observer, 2);
       await blocker.query('COMMIT');
       const results = await Promise.all(requests);
       expect(results.map(response => response.status).sort()).toEqual([201, 409]);
@@ -241,7 +241,7 @@ describe('F-03 registration APIs', () => {
     } finally {
       await blocker.query('ROLLBACK').catch(() => undefined);
       await Promise.allSettled(requests);
-      await blocker.end().catch(() => undefined);
+      await Promise.all([blocker.end().catch(() => undefined), observer.end().catch(() => undefined)]);
       await prisma.registration.deleteMany({ where: { eventId: lastSeatEvent } });
       await prisma.event.deleteMany({ where: { id: lastSeatEvent } });
     }
@@ -250,13 +250,13 @@ describe('F-03 registration APIs', () => {
   it('serializes simultaneous duplicate requests for the same Participant/Event pair', async () => {
     const duplicateEvent = randomUUID();
     await prisma.event.create({ data: { id: duplicateEvent, organizerId: owner, title: 'Duplicate race', startsAt: new Date('2026-12-01T02:00:00Z'), endsAt: new Date('2026-12-01T04:00:00Z'), location: 'A', capacity: 3, publicationStatus: 'PUBLISHED' } });
-    const blocker = new pg.Client({ connectionString: process.env.TEST_DATABASE_URL });
+    const blocker = new pg.Client({ connectionString: process.env.TEST_DATABASE_URL }); const observer = new pg.Client({ connectionString: process.env.TEST_DATABASE_URL });
     let requests: Promise<Response>[] = [];
     try {
       const [firstSession, secondSession] = await Promise.all([login(participant2), login(participant2)]);
-      await blocker.connect(); await blocker.query('BEGIN'); await blocker.query('SELECT id FROM events WHERE id = $1::uuid FOR UPDATE', [duplicateEvent]);
+      await Promise.all([blocker.connect(), observer.connect()]); await blocker.query('BEGIN'); await blocker.query('SELECT id FROM events WHERE id = $1::uuid FOR UPDATE', [duplicateEvent]);
       requests = [firstSession, secondSession].map(p => request(`/api/events/${duplicateEvent}/registrations`, { method: 'POST', cookie: p.cookie, token: p.token, body: {} }));
-      await waitForRegistrationLockWaiters(blocker, 2);
+      await waitForRegistrationLockWaiters(observer, 2);
       await blocker.query('COMMIT');
       const responses = await Promise.all(requests);
       expect(responses.map(response => response.status).sort()).toEqual([201, 409]);
@@ -268,7 +268,7 @@ describe('F-03 registration APIs', () => {
     } finally {
       await blocker.query('ROLLBACK').catch(() => undefined);
       await Promise.allSettled(requests);
-      await blocker.end().catch(() => undefined);
+      await Promise.all([blocker.end().catch(() => undefined), observer.end().catch(() => undefined)]);
       await prisma.registration.deleteMany({ where: { eventId: duplicateEvent } }); await prisma.event.deleteMany({ where: { id: duplicateEvent } });
     }
   }, 10_000);
