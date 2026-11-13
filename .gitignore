@@ -8,4 +8,4 @@ coverage/
 server/generated/
 playwright-report/
 test-results/
-doc/
+docs-references/
