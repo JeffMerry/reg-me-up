@@ -13,7 +13,7 @@ test.beforeAll(async () => {
 test.afterEach(async () => {
   if (!process.env.TEST_DATABASE_URL || !process.env.E2E_APP_DATABASE_URL) return;
   const app = new pg.Client({ connectionString: process.env.E2E_APP_DATABASE_URL }); const target = new pg.Client({ connectionString: process.env.TEST_DATABASE_URL });
-  try { await app.connect(); await target.connect(); await verifyTestDatabase(app, target); await target.query('DELETE FROM registrations WHERE event_id = $1::uuid AND participant_id = ANY($2::uuid[])', ['30000000-0000-4000-8000-000000000001', ['10000000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000003']]); }
+  try { await app.connect(); await target.connect(); await verifyTestDatabase(app, target); if (createdRegistrationId) await target.query('DELETE FROM registrations WHERE id = $1::uuid', [createdRegistrationId]); }
   finally { await Promise.allSettled([app.end(), target.end()]); createdRegistrationId = undefined; }
 });
 
