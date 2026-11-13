@@ -34,7 +34,7 @@ test('Participant registers, sees the server reference and opens own registratio
   const registrationRow = page.locator('li').filter({ hasText: 'Empty workshop' });
   await expect(registrationRow.getByText('Location: University room')).toBeVisible();
   await expect(registrationRow.getByText(/Registered at:/)).toBeVisible();
-  await page.getByRole('link', { name: 'View registration' }).click();
+  await registrationRow.getByRole('link', { name: 'View registration' }).click();
   await expect(page).toHaveURL(/\/my-registrations\?registrationId=[0-9a-f-]+$/i);
   const dialog = page.getByRole('dialog', { name: 'Registration details' });
   await expect(dialog).toBeVisible(); await expect(dialog.getByRole('button', { name: 'Close' })).toBeFocused();
