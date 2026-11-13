@@ -24,6 +24,15 @@ async function login(id: string, url = base) {
   const response = await request('/api/auth/login', { method: 'POST', cookie, token, body: { email: `${id}@events.test`, password: secret } }, url);
   expect(response.status).toBe(200); return { cookie: response.headers.get('set-cookie')!.split(';')[0], token: (await response.json()).data.csrfToken as string };
 }
+async function waitForRegistrationLockWaiters(observer: pg.Client, expected: number) {
+  const startedAt = Date.now();
+  while (Date.now() - startedAt < 1500) {
+    const result = await observer.query<{ waiters: number }>(`SELECT count(*)::int AS waiters FROM pg_stat_activity WHERE datname = current_database() AND pid <> pg_backend_pid() AND wait_event_type = 'Lock' AND query ILIKE '%FOR UPDATE%'`);
+    if (result.rows[0].waiters >= expected) return;
+    await delay(10);
+  }
+  throw new Error(`Expected ${expected} registration request(s) to wait on the Event row lock.`);
+}
 beforeAll(async () => {
   if (!process.env.DATABASE_URL || !process.env.TEST_DATABASE_URL) throw new Error('Both database URLs required');
   const app = new pg.Client({ connectionString: process.env.DATABASE_URL }); const test = new pg.Client({ connectionString: process.env.TEST_DATABASE_URL });
@@ -214,9 +223,15 @@ describe('F-03 registration APIs', () => {
   it('allows only one of two Participants to claim the last seat', async () => {
     const lastSeatEvent = randomUUID();
     await prisma.event.create({ data: { id: lastSeatEvent, organizerId: owner, title: 'Last seat', startsAt: new Date('2026-12-01T02:00:00Z'), endsAt: new Date('2026-12-01T04:00:00Z'), location: 'A', capacity: 1, publicationStatus: 'PUBLISHED' } });
+    const blocker = new pg.Client({ connectionString: process.env.TEST_DATABASE_URL });
+    let requests: Promise<Response>[] = [];
     try {
       const [p1, p2] = await Promise.all([login(participant), login(participant2)]);
-      const results = await Promise.all([p1, p2].map(p => request(`/api/events/${lastSeatEvent}/registrations`, { method: 'POST', cookie: p.cookie, token: p.token, body: {} })));
+      await blocker.connect(); await blocker.query('BEGIN'); await blocker.query('SELECT id FROM events WHERE id = $1::uuid FOR UPDATE', [lastSeatEvent]);
+      requests = [p1, p2].map(p => request(`/api/events/${lastSeatEvent}/registrations`, { method: 'POST', cookie: p.cookie, token: p.token, body: {} }));
+      await waitForRegistrationLockWaiters(blocker, 2);
+      await blocker.query('COMMIT');
+      const results = await Promise.all(requests);
       expect(results.map(response => response.status).sort()).toEqual([201, 409]);
       const conflict = results.find(response => response.status === 409)!;
       expect((await conflict.json()).error.code).toBe('EVENT_FULL');
@@ -224,6 +239,9 @@ describe('F-03 registration APIs', () => {
       const event = await prisma.event.findUniqueOrThrow({ where: { id: lastSeatEvent }, select: { capacity: true, _count: { select: { registrations: { where: { status: 'ACTIVE' } } } } } });
       expect(event._count.registrations).toBe(event.capacity);
     } finally {
+      await blocker.query('ROLLBACK').catch(() => undefined);
+      await Promise.allSettled(requests);
+      await blocker.end().catch(() => undefined);
       await prisma.registration.deleteMany({ where: { eventId: lastSeatEvent } });
       await prisma.event.deleteMany({ where: { id: lastSeatEvent } });
     }
@@ -232,9 +250,15 @@ describe('F-03 registration APIs', () => {
   it('serializes simultaneous duplicate requests for the same Participant/Event pair', async () => {
     const duplicateEvent = randomUUID();
     await prisma.event.create({ data: { id: duplicateEvent, organizerId: owner, title: 'Duplicate race', startsAt: new Date('2026-12-01T02:00:00Z'), endsAt: new Date('2026-12-01T04:00:00Z'), location: 'A', capacity: 3, publicationStatus: 'PUBLISHED' } });
+    const blocker = new pg.Client({ connectionString: process.env.TEST_DATABASE_URL });
+    let requests: Promise<Response>[] = [];
     try {
       const [firstSession, secondSession] = await Promise.all([login(participant2), login(participant2)]);
-      const responses = await Promise.all([firstSession, secondSession].map(p => request(`/api/events/${duplicateEvent}/registrations`, { method: 'POST', cookie: p.cookie, token: p.token, body: {} })));
+      await blocker.connect(); await blocker.query('BEGIN'); await blocker.query('SELECT id FROM events WHERE id = $1::uuid FOR UPDATE', [duplicateEvent]);
+      requests = [firstSession, secondSession].map(p => request(`/api/events/${duplicateEvent}/registrations`, { method: 'POST', cookie: p.cookie, token: p.token, body: {} }));
+      await waitForRegistrationLockWaiters(blocker, 2);
+      await blocker.query('COMMIT');
+      const responses = await Promise.all(requests);
       expect(responses.map(response => response.status).sort()).toEqual([201, 409]);
       const created = responses.find(response => response.status === 201)!; const conflict = responses.find(response => response.status === 409)!;
       const registrationId = (await created.json()).data.id as string;
@@ -242,6 +266,9 @@ describe('F-03 registration APIs', () => {
       expect(await prisma.registration.count({ where: { eventId: duplicateEvent, participantId: participant2, status: 'ACTIVE' } })).toBe(1);
       await expect(prisma.registration.create({ data: { eventId: duplicateEvent, participantId: participant2, status: 'ACTIVE' } })).rejects.toMatchObject({ code: 'P2002' });
     } finally {
+      await blocker.query('ROLLBACK').catch(() => undefined);
+      await Promise.allSettled(requests);
+      await blocker.end().catch(() => undefined);
       await prisma.registration.deleteMany({ where: { eventId: duplicateEvent } }); await prisma.event.deleteMany({ where: { id: duplicateEvent } });
     }
   });
@@ -259,6 +286,28 @@ describe('F-03 registration APIs', () => {
     } finally {
       await blocker.query('ROLLBACK').catch(() => undefined); await blocker.end();
       await prisma.registration.deleteMany({ where: { eventId: lockEvent } }); await prisma.event.deleteMany({ where: { id: lockEvent } });
+    }
+  });
+
+  it('rolls back a registration when the database fails after the insert', async () => {
+    const rollbackEvent = randomUUID(); const suffix = rollbackEvent.replaceAll('-', '');
+    const functionName = `f03_fail_after_insert_${suffix}`; const triggerName = `f03_fail_after_insert_${suffix}`;
+    const triggerClient = new pg.Client({ connectionString: process.env.TEST_DATABASE_URL });
+    await prisma.event.create({ data: { id: rollbackEvent, organizerId: owner, title: 'Rollback registration', startsAt: new Date('2026-12-01T02:00:00Z'), endsAt: new Date('2026-12-01T04:00:00Z'), location: 'A', capacity: 1, publicationStatus: 'PUBLISHED' } });
+    try {
+      await triggerClient.connect();
+      await triggerClient.query(`CREATE FUNCTION "${functionName}"() RETURNS trigger LANGUAGE plpgsql AS $f03$ BEGIN IF NEW.event_id = '${rollbackEvent}'::uuid THEN RAISE EXCEPTION 'intentional F-03 rollback test' USING ERRCODE = 'P0001'; END IF; RETURN NEW; END; $f03$`);
+      await triggerClient.query(`CREATE TRIGGER "${triggerName}" AFTER INSERT ON registrations FOR EACH ROW EXECUTE FUNCTION "${functionName}"()`);
+      const p = await login(participant2);
+      const response = await request(`/api/events/${rollbackEvent}/registrations`, { method: 'POST', cookie: p.cookie, token: p.token, body: {} });
+      expect(response.status).toBe(500); expect((await response.json()).error.code).toBe('INTERNAL_ERROR');
+      expect(await prisma.registration.count({ where: { eventId: rollbackEvent } })).toBe(0);
+    } finally {
+      await triggerClient.query(`DROP TRIGGER IF EXISTS "${triggerName}" ON registrations`).catch(() => undefined);
+      await triggerClient.query(`DROP FUNCTION IF EXISTS "${functionName}"()`).catch(() => undefined);
+      await triggerClient.end().catch(() => undefined);
+      await prisma.registration.deleteMany({ where: { eventId: rollbackEvent } });
+      await prisma.event.deleteMany({ where: { id: rollbackEvent } });
     }
   });
 
