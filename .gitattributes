@@ -1,0 +1,2 @@
+# Prisma records checksums of migration bytes; keep them stable across platforms.
+server/prisma/migrations/**/migration.sql text eol=lf

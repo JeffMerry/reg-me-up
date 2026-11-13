@@ -1,0 +1,75 @@
+# RegMeUp — Dependency version baseline
+
+Version 0.6 — 2026-11-12 (Asia/Bangkok). **SYS-01 implementation targets; metadata is not installation or build evidence.** Local checks and THN4's reported fresh setup are recorded in [SYS-01 evidence](sprints/sprint-1/sys-01-evidence.md).
+
+## 1. Runtime and database
+
+| Component | Selected exact version | Evidence / reason |
+|---|---|---|
+| Node.js | 22.23.4 LTS (Jod) | Official Node distribution index and release page; retains the installed Node22 major while selecting its current patched release |
+| npm | 10.9.9 | Bundled with selected Node22 distribution; package engine accepts Node ^18.17.0 or >=20.5.0, including target runtime |
+| PostgreSQL | 17.11 | Official versioning table lists supported17/current minor17.11; use same engine/version for local and integration test DB |
+
+Initially observed in the developer machine PATH: Node22.15.0 and npm11.5.2; `psql` was not on PATH. For foundation verification, Node22.23.4/npm10.9.9 and PostgreSQL17.11 binaries were subsequently prepared locally in ignored workspace tooling; the existing PostgreSQL18 service was not replaced. THN4 later reported a fresh setup using the target versions at commit `645e044`.
+
+Provision local PostgreSQL17.11 with separate application/test databases and roles; native Windows installation or an existing team-managed matching instance is acceptable after documenting actual setup. Isolated temporary PostgreSQL17.11 and 18.1 clusters were started for tests; no existing database was reset. No app-container/cloud provisioning is required for this step.
+
+Sources: [official Node22.23.4 release](https://nodejs.org/en/blog/release/v22.23.4), [Node distribution index](https://nodejs.org/dist/index.json), [PostgreSQL supported versions](https://www.postgresql.org/support/versioning/).
+
+## 2. Exact direct dependency targets
+
+Versions/engines/peer ranges were read from the authoritative npm registry on 6 November 2026. Preserve exact versions in package manifests when foundation starts; commit a generated workspace lockfile after actual resolution. Do not use unbounded latest or floating caret/tilde ranges for these baseline direct dependencies.
+
+| Area | Package | Version |
+|---|---|---|
+| Client runtime | react | 19.3.1 |
+| Client runtime | react-dom | 19.3.1 |
+| Client build | vite | 8.3.6 |
+| Client build | @vitejs/plugin-react | 6.2.1 |
+| Shared compiler | typescript | 7.0.2 |
+| Client styling | tailwindcss | 4.3.5 |
+| Client styling | @tailwindcss/vite | 4.3.5 |
+| Server runtime | express | 5.3.0 |
+| Environment file loading | dotenv | 17.2.3 |
+| PostgreSQL driver target | pg | 8.23.1 |
+| ORM, CLI and PostgreSQL adapter | prisma, @prisma/client, @prisma/adapter-pg | 7.10.1 each |
+| Auth dependency prepared for F-01 | express-session | 1.19.0 |
+| Auth dependency prepared for F-01 | connect-pg-simple | 10.0.0 |
+| Auth dependency prepared for F-01 | argon2 | 0.45.2 |
+| Test tooling | vitest | 5.1.0 |
+| Test tooling | @playwright/test | 1.65.0 |
+| Server/script development | tsx | 4.23.15 |
+| Type declarations for Node22 | @types/node | 22.20.5 |
+| Type declarations | @types/react | 19.3.0 |
+| Type declarations | @types/react-dom | 19.3.0 |
+| Type declarations | @types/express | 5.0.6 |
+| Type declarations | @types/pg | 8.23.1 |
+| Type declarations | @types/express-session | 1.19.0 |
+| Type declarations | @types/connect-pg-simple | 7.0.3 |
+
+Metadata endpoints use `https://registry.npmjs.org/<URL-encoded-package>/<version>`; for example [React](https://registry.npmjs.org/react/19.3.1), [Vite](https://registry.npmjs.org/vite/8.3.6), [Vitest](https://registry.npmjs.org/vitest/5.1.0), [React plugin](https://registry.npmjs.org/@vitejs%2Fplugin-react/6.2.1), [npm](https://registry.npmjs.org/npm/10.9.9). Current `@types/node` global latest targets a different major; selected22.20.5 was obtained from the published22.x versions to match Node22.
+
+Prisma v7 is the stable-major target; v8 is documented as a release candidate. On 11 November registry metadata for Prisma and Client 7.10.1 reported Node `^20.19 || ^22.12 || >=24.0`; Client peers include TypeScript `>=5.4.0`, and adapter-pg 7.10.1 depends on pg `^8.16.3`. This supports, but does not prove, compatibility with selected Node22.23.4, TypeScript7.0.2 and pg8.23.1. The `pg` driver also supports `connect-pg-simple`; verify pool configuration/lifecycle and avoid unnecessary duplicate pools. Prisma v7 uses an adapter and generated client; see [Prisma 7](https://www.prisma.io/docs/orm/v7), [PostgreSQL adapter](https://www.prisma.io/docs/orm/v7/core-concepts/supported-databases/postgresql), and [Prisma 7 upgrade requirements](https://www.prisma.io/docs/guides/upgrade-prisma-orm/v7). Do not infer successful installation or compatibility from metadata.
+
+## 3. Compatibility boundary
+
+Metadata inspection supports the target: Vite/plugin-react engines accept Node>=22.12; plugin-react peers Vite8; Tailwind Vite plugin peers include Vite8; Vitest5.1 engines include Node22>=22.12 and peer Vite8; React DOM19.3.1 peers React^19.3.1; Express5/pg8/session-store/Playwright/tsx engines include selected Node22.
+
+The React plugin's oxc-transform-react, Babel integration and React compiler peers are **optional**, not automatically required project dependencies. Do not install a latest optional peer blindly: observed latest oxc0.157.0 is outside the plugin's declared `>=0.152.0 <0.157.0` optional range. Use the documented default setup; if an optional compiler path is needed, select a compatible version and revise this baseline before its implementation.
+
+The local foundation installation and lockfile resolution, typecheck/build, native Argon2 and isolated PostgreSQL 17.11 checks have run; exact results and THN4's reported fresh setup are in [SYS-01 evidence](sprints/sprint-1/sys-01-evidence.md). The teammate did not provide raw command output or OS details in the review. Metadata alone does not prove runtime compatibility; the committed lockfile records the resolved transitive versions/integrities.
+
+## 4. Implementation handoff
+
+Use root npm workspaces for client/server with shared tooling and one lockfile. Foundation creates runtime version files/engines/packageManager declaration matching the table, actual install scripts, appropriate project tsconfigs and Tailwind/Vite integration. Auth packages can be pinned/prepared without implementing login/logout in SYS-01. Native crypto and browser/toolchain checks must be recorded separately from feature acceptance results.
+
+ENG-01 records exact targets, local install/lockfile/build/PostgreSQL checks and THN4's fresh-setup report at `645e044`; raw teammate output and OS details were not provided. [SYS-01 contract](sprints/sprint-1/sys-01.md) defines bounded foundation acceptance and test design; full TEST-13 remains a release-level reproducibility check.
+
+| Version | Date | Change | Review |
+|---|---|---|---|
+| 0.1 | 2026-11-06 | Selected runtime/database/direct versions from official metadata; documented observed local mismatch and pending executable validation | Pending THN4 review; no install/build/tests |
+| 0.2 | 2026-11-10 | Added Prisma v7 direction and reopened exact Prisma version/compatibility selection | Pending teammate review; no install/build/tests |
+| 0.3 | 2026-11-11 | Selected matching Prisma 7.10.1 targets from registry metadata | Actual install/build/database verification pending |
+| 0.4 | 2026-11-11 | Linked actual local installation/build and PostgreSQL 17.11 evidence | Teammate setup pending |
+| 0.5 | 2026-11-11 | Updated local runtime and isolated database provisioning observations | Teammate setup pending |
+| 0.6 | 2026-11-12 | Recorded THN4's fresh-setup report at `645e044` | Reported PASS; raw output not supplied |

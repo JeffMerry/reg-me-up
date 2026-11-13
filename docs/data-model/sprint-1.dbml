@@ -1,0 +1,56 @@
+// Sprint 1 design baseline only: not an applied schema or migration.
+// Review against schema.prisma and generated/custom migration SQL in SYS-01.
+
+Project regmeup_sprint_1 {
+  database_type: 'PostgreSQL'
+  Note: 'Conceptual Sprint 1 model; constraints and session adapter shape require implementation verification.'
+}
+
+Table users {
+  id uuid [pk, not null]
+  email text [not null, unique, note: 'Trimmed and lowercased before storage.']
+  password_hash text [not null]
+  display_name text [not null]
+  role text [not null, note: 'PARTICIPANT or ORGANIZER in Sprint 1.']
+  created_at timestamptz [not null]
+}
+
+Table events {
+  id uuid [pk, not null]
+  organizer_id uuid [not null, ref: > users.id]
+  title text [not null]
+  starts_at timestamptz [not null]
+  ends_at timestamptz [not null, note: 'Must be later than starts_at.']
+  location text [not null]
+  capacity integer [not null, note: 'Positive integer; must be greater than zero.']
+  description text [null]
+  publication_status text [not null, note: 'PUBLISHED or UNPUBLISHED.']
+  created_at timestamptz [not null]
+}
+
+Table registrations {
+  id uuid [pk, not null]
+  event_id uuid [not null, ref: > events.id]
+  participant_id uuid [not null, ref: > users.id]
+  status text [not null, note: 'ACTIVE in Sprint 1.']
+  registered_at timestamptz [not null]
+
+  Note: 'PostgreSQL partial unique index on (event_id, participant_id) WHERE status = ACTIVE: only one active registration per participant and event. The predicate must be implemented and verified in the actual migration; this note does not create the index.'
+}
+
+Table sessions {
+  sid varchar [pk, not null]
+  sess json [not null]
+  expire timestamp(6) [not null]
+
+  Note: 'Logical name for the connect-pg-simple session store. Its shipped default table is session; configure tableName if sessions is used and verify schema against the selected package. Session data can contain an authenticated user ID, but is serialized and has no users foreign key.'
+
+  indexes {
+    expire
+  }
+}
+
+// _prisma_migrations is Prisma Migrate-managed history, not a domain table.
+// Capacity safety additionally requires the event-row locking protocol in SDS;
+// a partial unique index alone does not prevent registrations over capacity.
+// Foreign keys are intended to use RESTRICT for domain history.
