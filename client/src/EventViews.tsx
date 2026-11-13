@@ -97,7 +97,49 @@ function MyRegistrations({ expireSession }: { expireSession: (returnTo: string) 
     if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
     else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
   }
-  return <><h1 className="text-3xl font-bold">My Registrations</h1>{state === 'loading' ? <p role="status" className="mt-6">Loading registrations…</p> : state === 'error' ? <div role="alert" className="mt-6"><p>Unable to load registrations.</p><button className={link} onClick={() => setRetry(value => value + 1)}>Try again</button></div> : rows.length === 0 ? <p className="mt-6">You have no registrations yet. <a className={link} href="/events">Browse events</a></p> : <><ul className="mt-6 grid gap-4">{rows.map(row => <li key={row.id} className="rounded-2xl bg-white p-5 shadow"><h2 className="text-xl font-bold"><a id={`registration-trigger-${row.id}`} className={link} href={`/my-registrations?registrationId=${row.id}`} onClick={event => { event.preventDefault(); triggerIdRef.current = event.currentTarget.id; history.pushState({}, '', `/my-registrations?registrationId=${row.id}`); setSelected(row); }}>{row.event.title}</a></h2><p className="mt-2">{dateRange(row.event)}</p><p className="mt-1">Registration reference: {row.id}</p><p className="mt-1">Status: {row.status}</p></li>)}</ul><div className="mt-6 flex items-center gap-4"><button className="min-h-11 underline disabled:opacity-40" disabled={page <= 1} onClick={() => setPage(value => value - 1)}>Previous</button><span>Page {page} · {total} total</span><button className="min-h-11 underline disabled:opacity-40" disabled={page * 20 >= total} onClick={() => setPage(value => value + 1)}>Next</button></div></>}{selected && <div role="presentation" className="fixed inset-0 z-10 grid place-items-center bg-black/50 p-4" onMouseDown={event => { if (event.target === event.currentTarget) closeDetail(); }}><section role="dialog" aria-modal="true" aria-labelledby="registration-title" onKeyDown={trapDialogKeyboard} className="w-full max-w-xl rounded-2xl bg-white p-6 shadow-xl"><h2 id="registration-title" className="text-2xl font-bold">Registration details</h2><p className="mt-4">{selected.event.title}</p><p className="mt-2">Reference: {selected.id}</p><p className="mt-2">Registered: {new Date(selected.registeredAt).toLocaleString()}</p><p className="mt-2">Status: {selected.status}</p><a className={`${link} mt-4 inline-block`} href={`/events/${selected.event.id}`}>View event</a><button ref={closeRef} className={`${button} mt-6`} onClick={closeDetail}>Close</button></section></div>}</>;
+  return <>
+    <h1 className="text-3xl font-bold">My Registrations</h1>
+    {state === 'loading' ? <p role="status" className="mt-6">Loading registrations…</p> : state === 'error' ? <div role="alert" className="mt-6"><p>Unable to load registrations.</p><button className={link} onClick={() => setRetry(value => value + 1)}>Try again</button></div> : rows.length === 0 ? <p className="mt-6">You have no registrations yet. <a className={link} href="/events">Browse events</a></p> : <>
+      <ul className="mt-6 grid gap-4">
+        {rows.map(row => <li key={row.id} className="rounded-2xl bg-white p-5 shadow">
+          <h2 className="text-xl font-bold"><a id={`registration-trigger-${row.id}`} className={link} href={`/my-registrations?registrationId=${row.id}`} onClick={event => { event.preventDefault(); triggerIdRef.current = event.currentTarget.id; history.pushState({}, '', `/my-registrations?registrationId=${row.id}`); setSelected(row); }}>{row.event.title}</a></h2>
+          <p className="mt-3">{dateRange(row.event)}</p>
+          <p className="mt-1">Location: {row.event.location}</p>
+          <p className="mt-1">Registration reference: {row.id}</p>
+          <p className="mt-1">Registered at: {dateFormat.format(new Date(row.registeredAt))} (Thailand time, UTC+7)</p>
+          <p className="mt-1">Status: {row.status}</p>
+          <a className={`${link} mt-3 inline-block min-h-11 py-2`} href={`/my-registrations?registrationId=${row.id}`} onClick={event => { event.preventDefault(); triggerIdRef.current = `registration-trigger-${row.id}`; history.pushState({}, '', `/my-registrations?registrationId=${row.id}`); setSelected(row); }}>View registration</a>
+        </li>)}
+      </ul>
+      <div className="mt-6 flex items-center gap-4"><button className="min-h-11 underline disabled:opacity-40" disabled={page <= 1} onClick={() => setPage(value => value - 1)}>Previous</button><span>Page {page} · {total} total</span><button className="min-h-11 underline disabled:opacity-40" disabled={page * 20 >= total} onClick={() => setPage(value => value + 1)}>Next</button></div>
+    </>}
+    {selected && <div role="presentation" className="fixed inset-0 z-10 grid place-items-center bg-black/50 p-4" onMouseDown={event => { if (event.target === event.currentTarget) closeDetail(); }}>
+      <section role="dialog" aria-modal="true" aria-labelledby="registration-title" onKeyDown={trapDialogKeyboard} className="max-h-[calc(100vh-2rem)] w-full max-w-xl overflow-y-auto rounded-2xl bg-white p-6 shadow-xl">
+        <h2 id="registration-title" className="text-2xl font-bold">Registration details</h2>
+        <section className="mt-6 rounded-xl bg-neutral-50 p-5">
+          <h3 className="text-lg font-bold">Event details</h3>
+          <dl className="mt-4 grid gap-x-6 gap-y-4 sm:grid-cols-2">
+            <div className="sm:col-span-2"><dt className="text-sm font-semibold text-neutral-600">Event</dt><dd className="mt-1 text-lg font-semibold">{selected.event.title}</dd></div>
+            <div><dt className="text-sm font-semibold text-neutral-600">Date and time</dt><dd className="mt-1 leading-6">{dateRange(selected.event)}</dd></div>
+            <div><dt className="text-sm font-semibold text-neutral-600">Location</dt><dd className="mt-1 leading-6">{selected.event.location}</dd></div>
+          </dl>
+        </section>
+        <section className="mt-4 rounded-xl border border-neutral-200 p-5">
+          <h3 className="text-lg font-bold">Registration</h3>
+          <dl className="mt-4 grid gap-x-6 gap-y-4 sm:grid-cols-2">
+            <div><dt className="text-sm font-semibold text-neutral-600">Registrant</dt><dd className="mt-1">{selected.participant.displayName}</dd></div>
+            <div><dt className="text-sm font-semibold text-neutral-600">Status</dt><dd className="mt-1">{selected.status}</dd></div>
+            <div><dt className="text-sm font-semibold text-neutral-600">Registration reference</dt><dd className="mt-1 break-all">{selected.id}</dd></div>
+            <div><dt className="text-sm font-semibold text-neutral-600">Registered at</dt><dd className="mt-1">{dateFormat.format(new Date(selected.registeredAt))} (Thailand time, UTC+7)</dd></div>
+          </dl>
+        </section>
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+          <a className={`${button} bg-neutral-800 hover:bg-neutral-700`} href={`/events/${selected.event.id}`}>View event</a>
+          <button ref={closeRef} className={`${button} bg-orange-700`} onClick={closeDetail}>Close</button>
+        </div>
+      </section>
+    </div>}
+  </>;
 }
 function CreateEvent({ navigate, expireSession }: { navigate: (target: string) => void; expireSession: (returnTo: string) => void }) {
   const [values, setValues] = useState<FormData>(initial); const [errors, setErrors] = useState<Record<string, string>>({}); const [pending, setPending] = useState(false); const [message, setMessage] = useState(''); const [uncertain, setUncertain] = useState(false); const form = useRef<HTMLFormElement>(null);
