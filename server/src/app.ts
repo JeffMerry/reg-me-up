@@ -4,6 +4,7 @@ import type { PrismaClient } from '../generated/prisma/client.js';
 import type { ServerConfig } from './config.js';
 import { authHandlers, authMiddleware } from './auth.js';
 import { eventHandlers } from './events.js';
+import { registrationHandlers } from './registrations.js';
 
 export function createApp(checkDatabase: () => Promise<void>, auth?: { config: ServerConfig; pool: pg.Pool; prisma: PrismaClient; now?: () => number }) {
   const app = express();
@@ -21,10 +22,14 @@ export function createApp(checkDatabase: () => Promise<void>, auth?: { config: S
     app.get('/api/auth/me', h.requireUser, h.me);
     app.post('/api/auth/logout', h.requireUser, h.csrf, h.jsonBody, h.logout);
     const events = eventHandlers(auth.prisma);
+    const registrations = registrationHandlers(auth.prisma);
     app.get('/api/events', events.publicList);
     app.get('/api/events/:eventId', events.detail);
     app.post('/api/events', h.requireUser, h.requireRole('ORGANIZER'), h.csrf, h.jsonBody, events.publish);
     app.get('/api/me/events', h.requireUser, h.requireRole('ORGANIZER'), events.ownList);
+    app.post('/api/events/:eventId/registrations', h.requireUser, h.requireRole('PARTICIPANT'), h.csrf, h.jsonBody, registrations.create);
+    app.get('/api/me/registrations', h.requireUser, h.requireRole('PARTICIPANT'), registrations.ownList);
+    app.get('/api/me/registrations/:registrationId', h.requireUser, h.requireRole('PARTICIPANT'), registrations.ownDetail);
     app.use(h.errorHandler);
   }
   return app;
