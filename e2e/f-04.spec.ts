@@ -70,14 +70,14 @@ test('event owner opens the registrations list from My Events', async ({ page })
   await page.locator(`a[href="/organizer/events/${eventId}/registrations"]`).first().click();
   await expect(page).toHaveURL(`/organizer/events/${eventId}/registrations`);
   await expect(page.getByRole('heading', { name: `${title} — Registrations` })).toBeVisible();
-  await expect(page.getByText('F-04 Participant', { exact: true })).toBeVisible();
-  await expect(page.getByText(registrationId, { exact: true })).toBeVisible();
+  await expect(page.getByRole('cell', { name: 'F-04 Participant', exact: true })).toBeVisible();
+  await expect(page.getByRole('cell', { name: registrationId, exact: true })).toBeVisible();
   await expect(page.getByText('Active registrations').locator('..')).toContainText('1');
   await expect(page.getByText('Capacity').locator('..')).toContainText('3');
   await expect(page.getByText('Remaining seats').locator('..')).toContainText('2');
   await expect(page.getByText(participantEmail)).toHaveCount(0);
   await page.setViewportSize({ width: 390, height: 844 });
-  await expect(page.getByText(registrationId, { exact: true })).toBeVisible();
+  await expect(page.locator('li').getByText(registrationId, { exact: true })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
 
@@ -114,5 +114,5 @@ test('registration read errors show retry instead of an empty list', async ({ pa
   await expect(page.getByText('No participants have registered for this event yet.')).toHaveCount(0);
   await page.unroute(endpoint);
   await page.getByRole('button', { name: 'Try again' }).click();
-  await expect(page.getByText(registrationId, { exact: true })).toBeVisible();
+  await expect(page.getByRole('cell', { name: registrationId, exact: true })).toBeVisible();
 });
