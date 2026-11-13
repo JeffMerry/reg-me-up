@@ -43,6 +43,20 @@ async function login(page: Page, email = 'o1@example.test') {
   await page.getByRole('button', { name: 'Log in', exact: true }).click();
 }
 
+test('browser Back restores the signed-in navigation after login', async ({ page }) => {
+  await page.goto('/events');
+  await expect(page.getByRole('link', { name: 'Log in' })).toBeVisible();
+  await page.getByRole('link', { name: 'Log in' }).click();
+  await page.getByLabel('Email').fill('o1@example.test');
+  await page.getByLabel('Password').fill(password!);
+  await page.getByRole('button', { name: 'Log in', exact: true }).click();
+  await expect(page.getByRole('link', { name: 'My Events' })).toBeVisible();
+  await page.goBack();
+  await expect(page).toHaveURL(/\/events$/);
+  await expect(page.getByRole('link', { name: 'My Events' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Log in' })).toHaveCount(0);
+});
+
 test('event owner opens the registrations list from My Events', async ({ page }) => {
   await login(page);
   await expect(page).toHaveURL(/\/organizer\/events$/);

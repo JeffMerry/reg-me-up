@@ -38,7 +38,14 @@ function App() {
     catch { setIdentity(null); setError('Unable to check your session. Please try again.'); }
     finally { setLoading(false); }
   }
-  useEffect(() => { void refresh(); const back = () => { setPath(location.pathname); void refresh(); }; window.addEventListener('popstate', back); return () => window.removeEventListener('popstate', back); }, []);
+  useEffect(() => {
+    void refresh();
+    const back = () => { setPath(location.pathname); void refresh(); };
+    const restored = (event: PageTransitionEvent) => { if (event.persisted) void refresh(); };
+    window.addEventListener('popstate', back);
+    window.addEventListener('pageshow', restored);
+    return () => { window.removeEventListener('popstate', back); window.removeEventListener('pageshow', restored); };
+  }, []);
   useEffect(() => { const key = (event: KeyboardEvent) => { if (event.key === 'Escape') setMenuOpen(false); }; window.addEventListener('keydown', key); return () => window.removeEventListener('keydown', key); }, []);
   useEffect(() => {
     if (loading) return;
