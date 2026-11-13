@@ -403,3 +403,68 @@ describe('F-03 registration APIs', () => {
     }
   });
 });
+
+describe('F-04 Organizer registration list API', () => {
+  it('authorizes the owner before returning a private, paginated read-only snapshot', async () => {
+    const eventId = randomUUID(), emptyEventId = randomUUID();
+    const participantIds = Array.from({ length: 21 }, () => randomUUID());
+    const registrationIds = Array.from({ length: 21 }, () => randomUUID());
+    const registeredAt = new Date('2026-11-01T10:00:00.000Z');
+    try {
+      await prisma.event.createMany({ data: [eventId, emptyEventId].map(id => ({
+        id, organizerId: owner, title: `Private list ${id}`, startsAt: new Date('2026-12-01T02:00:00Z'),
+        endsAt: new Date('2026-12-01T04:00:00Z'), location: 'Private room', capacity: 25, publicationStatus: 'PUBLISHED',
+      })) });
+      await prisma.user.createMany({ data: participantIds.map((id, index) => ({
+        id, email: `${id}@events.test`, passwordHash: 'test-only-hash', displayName: `Registrant ${String(index + 1).padStart(2, '0')}`, role: 'PARTICIPANT',
+      })) });
+      await prisma.registration.createMany({ data: participantIds.map((participantId, index) => ({
+        id: registrationIds[index], eventId, participantId, status: 'ACTIVE', registeredAt,
+      })) });
+
+      const organizer = await login(owner), otherOrganizer = await login(other), p = await login(participant);
+      const beforeCount = await prisma.registration.count({ where: { eventId } });
+      const path = `/api/organizer/events/${eventId}/registrations`;
+
+      expect((await request(path)).status).toBe(401);
+      expect((await request(path, { cookie: p.cookie })).status).toBe(403);
+
+      const denied = await request(path, { cookie: otherOrganizer.cookie });
+      const unknown = await request(`/api/organizer/events/${randomUUID()}/registrations`, { cookie: otherOrganizer.cookie });
+      expect(denied.status).toBe(404); expect(unknown.status).toBe(404);
+      expect(await denied.json()).toEqual(await unknown.json());
+      expect((await request(`/api/events/${eventId}`)).status).toBe(200);
+
+      expect((await request('/api/organizer/events/not-a-uuid/registrations', { cookie: organizer.cookie })).status).toBe(422);
+      expect((await request(`${path}?pageSize=101`, { cookie: organizer.cookie })).status).toBe(422);
+
+      const firstResponse = await request(path, { cookie: organizer.cookie });
+      expect(firstResponse.status).toBe(200);
+      expect(firstResponse.headers.get('cache-control')).toContain('no-store');
+      const first = await firstResponse.json();
+      expect(first.data.event).toMatchObject({ id: eventId, title: `Private list ${eventId}`, capacity: 25, remainingSeats: 4 });
+      expect(first.data.summary).toEqual({ capacity: 25, activeRegistrations: 21, remainingSeats: 4 });
+      expect(first.meta).toEqual({ page: 1, pageSize: 20, total: 21 });
+      expect(first.data.registrations).toHaveLength(20);
+      expect(first.data.registrations.map((row: { id: string }) => row.id)).toEqual([...registrationIds].sort().slice(0, 20));
+      expect(Object.keys(first.data.registrations[0]).sort()).toEqual(['displayName', 'id', 'registeredAt', 'status']);
+      expect(first.data.registrations[0]).toMatchObject({ displayName: expect.stringMatching(/^Registrant /), registeredAt: registeredAt.toISOString(), status: 'ACTIVE' });
+      const serialized = JSON.stringify(first);
+      for (const forbidden of ['@events.test', 'passwordHash', 'password_hash', 'participantId', 'phone', 'email']) expect(serialized).not.toContain(forbidden);
+
+      const second = await (await request(`${path}?page=2`, { cookie: organizer.cookie })).json();
+      expect(second.meta).toEqual({ page: 2, pageSize: 20, total: 21 });
+      expect(second.data.registrations.map((row: { id: string }) => row.id)).toEqual([...registrationIds].sort().slice(20));
+
+      const empty = await (await request(`/api/organizer/events/${emptyEventId}/registrations`, { cookie: organizer.cookie })).json();
+      expect(empty.data.registrations).toEqual([]);
+      expect(empty.data.summary).toEqual({ capacity: 25, activeRegistrations: 0, remainingSeats: 25 });
+      expect(empty.meta).toEqual({ page: 1, pageSize: 20, total: 0 });
+      expect(await prisma.registration.count({ where: { eventId } })).toBe(beforeCount);
+    } finally {
+      await prisma.registration.deleteMany({ where: { eventId } });
+      await prisma.event.deleteMany({ where: { id: { in: [eventId, emptyEventId] } } });
+      await prisma.user.deleteMany({ where: { id: { in: participantIds } } });
+    }
+  });
+});
