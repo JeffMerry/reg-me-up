@@ -79,6 +79,8 @@ test('event owner opens the registrations list from My Events', async ({ page })
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.locator('li').getByText(registrationId, { exact: true })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.setViewportSize({ width: 320, height: 800 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
 
 test('owner sees an empty list separately from an error', async ({ page }) => {
