@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { randomUUID } from 'node:crypto';
+import { randomInt, randomUUID } from 'node:crypto';
 import { spawn, type ChildProcess } from 'node:child_process';
 import { createServer } from 'node:net';
 import { setTimeout as delay } from 'node:timers/promises';
@@ -24,14 +24,23 @@ async function login(id: string, url = base) {
   const response = await request('/api/auth/login', { method: 'POST', cookie, token, body: { email: `${id}@events.test`, password: secret } }, url);
   expect(response.status).toBe(200); return { cookie: response.headers.get('set-cookie')!.split(';')[0], token: (await response.json()).data.csrfToken as string };
 }
-async function waitForRegistrationLockWaiters(observer: pg.Client, expected: number) {
+async function waitForRegistrationLockWaiters(observer: pg.Client, expected: number, timeoutMs = 1500) {
   const startedAt = Date.now();
-  while (Date.now() - startedAt < 1500) {
+  while (Date.now() - startedAt < timeoutMs) {
     const result = await observer.query<{ waiters: number }>(`SELECT count(*)::int AS waiters FROM pg_stat_activity WHERE datname = current_database() AND pid <> pg_backend_pid() AND wait_event_type = 'Lock' AND query ILIKE '%FOR UPDATE%'`);
     if (result.rows[0].waiters >= expected) return;
     await delay(10);
   }
   throw new Error(`Expected ${expected} registration request(s) to wait on the Event row lock.`);
+}
+async function waitForAdvisoryLockWaiter(observer: pg.Client, key1: number, key2: number, timeoutMs = 700) {
+  const startedAt = Date.now();
+  while (Date.now() - startedAt < timeoutMs) {
+    const result = await observer.query<{ waiters: number }>(`SELECT count(*)::int AS waiters FROM pg_locks WHERE locktype = 'advisory' AND classid = $1::oid AND objid = $2::oid AND objsubid = 2 AND NOT granted`, [key1, key2]);
+    if (result.rows[0].waiters >= 1) return;
+    await delay(5);
+  }
+  throw new Error('The first registration request did not reach the controlled rollback barrier.');
 }
 beforeAll(async () => {
   if (!process.env.DATABASE_URL || !process.env.TEST_DATABASE_URL) throw new Error('Both database URLs required');
@@ -220,58 +229,72 @@ describe('F-03 registration APIs', () => {
     await prisma.event.update({ where: { id: visible }, data: { capacity: 2 } });
   });
 
-  it('allows only one of two Participants to claim the last seat', async () => {
-    const lastSeatEvent = randomUUID();
-    await prisma.event.create({ data: { id: lastSeatEvent, organizerId: owner, title: 'Last seat', startsAt: new Date('2026-12-01T02:00:00Z'), endsAt: new Date('2026-12-01T04:00:00Z'), location: 'A', capacity: 1, publicationStatus: 'PUBLISHED' } });
+  it('allows only one of two Participants to claim the last seat once plus 20 isolated repetitions', async () => {
     const blocker = new pg.Client({ connectionString: process.env.TEST_DATABASE_URL }); const observer = new pg.Client({ connectionString: process.env.TEST_DATABASE_URL });
-    let requests: Promise<Response>[] = [];
     try {
-      const [p1, p2] = await Promise.all([login(participant), login(participant2)]);
-      await Promise.all([blocker.connect(), observer.connect()]); await blocker.query('BEGIN'); await blocker.query('SELECT id FROM events WHERE id = $1::uuid FOR UPDATE', [lastSeatEvent]);
-      requests = [p1, p2].map(p => request(`/api/events/${lastSeatEvent}/registrations`, { method: 'POST', cookie: p.cookie, token: p.token, body: {} }));
-      await waitForRegistrationLockWaiters(observer, 2);
-      await blocker.query('COMMIT');
-      const results = await Promise.all(requests);
-      expect(results.map(response => response.status).sort()).toEqual([201, 409]);
-      const conflict = results.find(response => response.status === 409)!;
-      expect((await conflict.json()).error.code).toBe('EVENT_FULL');
-      expect(await prisma.registration.count({ where: { eventId: lastSeatEvent, status: 'ACTIVE' } })).toBe(1);
-      const event = await prisma.event.findUniqueOrThrow({ where: { id: lastSeatEvent }, select: { capacity: true, _count: { select: { registrations: { where: { status: 'ACTIVE' } } } } } });
-      expect(event._count.registrations).toBe(event.capacity);
+      await Promise.all([blocker.connect(), observer.connect()]);
+      for (let repetition = 0; repetition < 21; repetition++) {
+        const lastSeatEvent = randomUUID();
+        await prisma.event.create({ data: { id: lastSeatEvent, organizerId: owner, title: `Last seat ${repetition + 1}`, startsAt: new Date('2026-12-01T02:00:00Z'), endsAt: new Date('2026-12-01T04:00:00Z'), location: 'A', capacity: 1, publicationStatus: 'PUBLISHED' } });
+        let requests: Promise<Response>[] = [];
+        try {
+          const [p1, p2] = await Promise.all([login(participant), login(participant2)]);
+          await blocker.query('BEGIN'); await blocker.query('SELECT id FROM events WHERE id = $1::uuid FOR UPDATE', [lastSeatEvent]);
+          const contenders = repetition % 2 === 0 ? [p1, p2] : [p2, p1];
+          requests = contenders.map(p => request(`/api/events/${lastSeatEvent}/registrations`, { method: 'POST', cookie: p.cookie, token: p.token, body: {} }));
+          await waitForRegistrationLockWaiters(observer, 2);
+          await blocker.query('COMMIT');
+          const results = await Promise.all(requests);
+          expect(results.map(response => response.status).sort()).toEqual([201, 409]);
+          const conflict = results.find(response => response.status === 409)!;
+          expect((await conflict.json()).error.code).toBe('EVENT_FULL');
+          expect(await prisma.registration.count({ where: { eventId: lastSeatEvent, status: 'ACTIVE' } })).toBe(1);
+          const event = await prisma.event.findUniqueOrThrow({ where: { id: lastSeatEvent }, select: { capacity: true, _count: { select: { registrations: { where: { status: 'ACTIVE' } } } } } });
+          expect(event._count.registrations).toBe(event.capacity);
+        } finally {
+          await blocker.query('ROLLBACK').catch(() => undefined);
+          await Promise.allSettled(requests);
+          await prisma.registration.deleteMany({ where: { eventId: lastSeatEvent } });
+          await prisma.event.deleteMany({ where: { id: lastSeatEvent } });
+        }
+      }
     } finally {
-      await blocker.query('ROLLBACK').catch(() => undefined);
-      await Promise.allSettled(requests);
       await Promise.all([blocker.end().catch(() => undefined), observer.end().catch(() => undefined)]);
-      await prisma.registration.deleteMany({ where: { eventId: lastSeatEvent } });
-      await prisma.event.deleteMany({ where: { id: lastSeatEvent } });
     }
-  }, 10_000);
+  }, 120_000);
 
-  it('serializes simultaneous duplicate requests for the same Participant/Event pair', async () => {
-    const duplicateEvent = randomUUID();
-    await prisma.event.create({ data: { id: duplicateEvent, organizerId: owner, title: 'Duplicate race', startsAt: new Date('2026-12-01T02:00:00Z'), endsAt: new Date('2026-12-01T04:00:00Z'), location: 'A', capacity: 3, publicationStatus: 'PUBLISHED' } });
+  it('serializes simultaneous duplicate requests once plus 20 isolated repetitions', async () => {
     const blocker = new pg.Client({ connectionString: process.env.TEST_DATABASE_URL }); const observer = new pg.Client({ connectionString: process.env.TEST_DATABASE_URL });
-    let requests: Promise<Response>[] = [];
     try {
-      const [firstSession, secondSession] = await Promise.all([login(participant2), login(participant2)]);
-      await Promise.all([blocker.connect(), observer.connect()]); await blocker.query('BEGIN'); await blocker.query('SELECT id FROM events WHERE id = $1::uuid FOR UPDATE', [duplicateEvent]);
-      requests = [firstSession, secondSession].map(p => request(`/api/events/${duplicateEvent}/registrations`, { method: 'POST', cookie: p.cookie, token: p.token, body: {} }));
-      await waitForRegistrationLockWaiters(observer, 2);
-      await blocker.query('COMMIT');
-      const responses = await Promise.all(requests);
-      expect(responses.map(response => response.status).sort()).toEqual([201, 409]);
-      const created = responses.find(response => response.status === 201)!; const conflict = responses.find(response => response.status === 409)!;
-      const registrationId = (await created.json()).data.id as string;
-      expect((await conflict.json()).error).toMatchObject({ code: 'ALREADY_REGISTERED', registrationId });
-      expect(await prisma.registration.count({ where: { eventId: duplicateEvent, participantId: participant2, status: 'ACTIVE' } })).toBe(1);
-      await expect(prisma.registration.create({ data: { eventId: duplicateEvent, participantId: participant2, status: 'ACTIVE' } })).rejects.toMatchObject({ code: 'P2002' });
+      await Promise.all([blocker.connect(), observer.connect()]);
+      for (let repetition = 0; repetition < 21; repetition++) {
+        const duplicateEvent = randomUUID();
+        await prisma.event.create({ data: { id: duplicateEvent, organizerId: owner, title: `Duplicate race ${repetition + 1}`, startsAt: new Date('2026-12-01T02:00:00Z'), endsAt: new Date('2026-12-01T04:00:00Z'), location: 'A', capacity: 3, publicationStatus: 'PUBLISHED' } });
+        let requests: Promise<Response>[] = [];
+        try {
+          const [firstSession, secondSession] = await Promise.all([login(participant2), login(participant2)]);
+          await blocker.query('BEGIN'); await blocker.query('SELECT id FROM events WHERE id = $1::uuid FOR UPDATE', [duplicateEvent]);
+          const contenders = repetition % 2 === 0 ? [firstSession, secondSession] : [secondSession, firstSession];
+          requests = contenders.map(p => request(`/api/events/${duplicateEvent}/registrations`, { method: 'POST', cookie: p.cookie, token: p.token, body: {} }));
+          await waitForRegistrationLockWaiters(observer, 2);
+          await blocker.query('COMMIT');
+          const responses = await Promise.all(requests);
+          expect(responses.map(response => response.status).sort()).toEqual([201, 409]);
+          const created = responses.find(response => response.status === 201)!; const conflict = responses.find(response => response.status === 409)!;
+          const registrationId = (await created.json()).data.id as string;
+          expect((await conflict.json()).error).toMatchObject({ code: 'ALREADY_REGISTERED', registrationId });
+          expect(await prisma.registration.count({ where: { eventId: duplicateEvent, participantId: participant2, status: 'ACTIVE' } })).toBe(1);
+          await expect(prisma.registration.create({ data: { eventId: duplicateEvent, participantId: participant2, status: 'ACTIVE' } })).rejects.toMatchObject({ code: 'P2002' });
+        } finally {
+          await blocker.query('ROLLBACK').catch(() => undefined);
+          await Promise.allSettled(requests);
+          await prisma.registration.deleteMany({ where: { eventId: duplicateEvent } }); await prisma.event.deleteMany({ where: { id: duplicateEvent } });
+        }
+      }
     } finally {
-      await blocker.query('ROLLBACK').catch(() => undefined);
-      await Promise.allSettled(requests);
       await Promise.all([blocker.end().catch(() => undefined), observer.end().catch(() => undefined)]);
-      await prisma.registration.deleteMany({ where: { eventId: duplicateEvent } }); await prisma.event.deleteMany({ where: { id: duplicateEvent } });
     }
-  }, 10_000);
+  }, 120_000);
 
   it('returns a safe temporary-unavailable response when the Event lock times out', async () => {
     const lockEvent = randomUUID();
@@ -310,6 +333,46 @@ describe('F-03 registration APIs', () => {
       await prisma.event.deleteMany({ where: { id: rollbackEvent } });
     }
   });
+
+  it('lets a waiting Participant claim the last seat after the first contender rolls back', async () => {
+    const rollbackRaceEvent = randomUUID(); const suffix = rollbackRaceEvent.replaceAll('-', '');
+    const functionName = `f03_waiting_rollback_${suffix}`; const triggerName = `f03_waiting_rollback_${suffix}`;
+    const key1 = randomInt(1, 2_000_000_000); const key2 = randomInt(1, 2_000_000_000);
+    const barrier = new pg.Client({ connectionString: process.env.TEST_DATABASE_URL }); const observer = new pg.Client({ connectionString: process.env.TEST_DATABASE_URL });
+    let requests: Promise<Response>[] = [];
+    await prisma.event.create({ data: { id: rollbackRaceEvent, organizerId: owner, title: 'Rollback with waiting registration', startsAt: new Date('2026-12-01T02:00:00Z'), endsAt: new Date('2026-12-01T04:00:00Z'), location: 'A', capacity: 1, publicationStatus: 'PUBLISHED' } });
+    try {
+      await Promise.all([barrier.connect(), observer.connect()]);
+      await barrier.query('SELECT pg_advisory_lock($1::int, $2::int)', [key1, key2]);
+      await barrier.query(`CREATE FUNCTION "${functionName}"() RETURNS trigger LANGUAGE plpgsql AS $f03$ BEGIN IF NEW.event_id = '${rollbackRaceEvent}'::uuid AND NEW.participant_id = '${participant}'::uuid THEN PERFORM pg_advisory_lock(${key1}, ${key2}); PERFORM pg_advisory_unlock(${key1}, ${key2}); RAISE EXCEPTION 'intentional first-contender rollback' USING ERRCODE = 'P0001'; END IF; RETURN NEW; END; $f03$`);
+      await barrier.query(`CREATE TRIGGER "${triggerName}" AFTER INSERT ON registrations FOR EACH ROW EXECUTE FUNCTION "${functionName}"()`);
+
+      const firstParticipant = await login(participant); const waitingParticipant = await login(participant2);
+      requests.push(request(`/api/events/${rollbackRaceEvent}/registrations`, { method: 'POST', cookie: firstParticipant.cookie, token: firstParticipant.token, body: {} }));
+      await waitForAdvisoryLockWaiter(observer, key1, key2);
+      requests.push(request(`/api/events/${rollbackRaceEvent}/registrations`, { method: 'POST', cookie: waitingParticipant.cookie, token: waitingParticipant.token, body: {} }));
+      await waitForRegistrationLockWaiters(observer, 1, 700);
+      await barrier.query('SELECT pg_advisory_unlock($1::int, $2::int)', [key1, key2]);
+
+      const [rolledBack, succeeded] = await Promise.all(requests);
+      expect(rolledBack.status).toBe(500); expect((await rolledBack.json()).error.code).toBe('INTERNAL_ERROR');
+      expect(succeeded.status).toBe(201);
+      const created = (await succeeded.json()).data;
+      expect(created).toMatchObject({ status: 'ACTIVE', participant: { displayName: `Test ${participant2}` }, event: { id: rollbackRaceEvent } });
+      expect(await prisma.registration.count({ where: { eventId: rollbackRaceEvent, participantId: participant, status: 'ACTIVE' } })).toBe(0);
+      expect(await prisma.registration.count({ where: { eventId: rollbackRaceEvent, status: 'ACTIVE' } })).toBe(1);
+      const event = await prisma.event.findUniqueOrThrow({ where: { id: rollbackRaceEvent }, select: { capacity: true, _count: { select: { registrations: { where: { status: 'ACTIVE' } } } } } });
+      expect(event._count.registrations).toBeLessThanOrEqual(event.capacity);
+    } finally {
+      await barrier.query('SELECT pg_advisory_unlock($1::int, $2::int)', [key1, key2]).catch(() => undefined);
+      await Promise.allSettled(requests);
+      await barrier.query(`DROP TRIGGER IF EXISTS "${triggerName}" ON registrations`).catch(() => undefined);
+      await barrier.query(`DROP FUNCTION IF EXISTS "${functionName}"()`).catch(() => undefined);
+      await Promise.all([barrier.end().catch(() => undefined), observer.end().catch(() => undefined)]);
+      await prisma.registration.deleteMany({ where: { eventId: rollbackRaceEvent } });
+      await prisma.event.deleteMany({ where: { id: rollbackRaceEvent } });
+    }
+  }, 10_000);
 
   it('keeps a Registration readable after restarting the app with the same database', async () => {
     const persistentEvent = randomUUID();
