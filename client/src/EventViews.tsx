@@ -123,6 +123,7 @@ function MyRegistrations({ expireSession }: { expireSession: (returnTo: string) 
             <div><dt className="text-sm font-semibold text-neutral-600">Date and time</dt><dd className="mt-1 leading-6">{dateRange(selected.event)}</dd></div>
             <div><dt className="text-sm font-semibold text-neutral-600">Location</dt><dd className="mt-1 leading-6">{selected.event.location}</dd></div>
           </dl>
+          {selected.event.description && <div className="mt-4 border-t border-neutral-200 pt-4"><h4 className="font-semibold">About this event</h4><p className="mt-2 whitespace-pre-wrap break-words leading-7 text-neutral-700">{selected.event.description}</p></div>}
         </section>
         <section className="mt-4 rounded-xl border border-neutral-200 p-5">
           <h3 className="text-lg font-bold">Registration</h3>
