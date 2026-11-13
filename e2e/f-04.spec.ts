@@ -46,6 +46,7 @@ async function login(page: Page, email = organizerEmail) {
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password!);
   await page.getByRole('button', { name: 'Log in', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Log out' })).toBeVisible();
 }
 
 test('browser Back restores the signed-in navigation after login', async ({ page }) => {
@@ -69,12 +70,12 @@ test('event owner opens the registrations list from My Events', async ({ page })
   await page.locator(`a[href="/organizer/events/${eventId}/registrations"]`).first().click();
   await expect(page).toHaveURL(`/organizer/events/${eventId}/registrations`);
   await expect(page.getByRole('heading', { name: `${title} — Registrations` })).toBeVisible();
-  await expect(page.getByText('Participant One', { exact: true })).toBeVisible();
+  await expect(page.getByText('F-04 Participant', { exact: true })).toBeVisible();
   await expect(page.getByText(registrationId, { exact: true })).toBeVisible();
   await expect(page.getByText('Active registrations').locator('..')).toContainText('1');
   await expect(page.getByText('Capacity').locator('..')).toContainText('3');
   await expect(page.getByText('Remaining seats').locator('..')).toContainText('2');
-  await expect(page.getByText('p1@example.test')).toHaveCount(0);
+  await expect(page.getByText(participantEmail)).toHaveCount(0);
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.getByText(registrationId, { exact: true })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
@@ -100,7 +101,7 @@ test('wrong role and another Organizer cannot see private registration details',
   await page.goto(`/organizer/events/${eventId}/registrations`);
   await expect(page.getByRole('heading', { name: 'Event not found' })).toBeVisible();
   await expect(page.getByText(title)).toHaveCount(0);
-  await expect(page.getByText('Participant One')).toHaveCount(0);
+  await expect(page.getByText('F-04 Participant')).toHaveCount(0);
   await expect(page.getByText(registrationId)).toHaveCount(0);
 });
 
