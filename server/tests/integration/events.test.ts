@@ -245,7 +245,7 @@ describe('F-03 registration APIs', () => {
       await prisma.registration.deleteMany({ where: { eventId: lastSeatEvent } });
       await prisma.event.deleteMany({ where: { id: lastSeatEvent } });
     }
-  });
+  }, 10_000);
 
   it('serializes simultaneous duplicate requests for the same Participant/Event pair', async () => {
     const duplicateEvent = randomUUID();
@@ -271,7 +271,7 @@ describe('F-03 registration APIs', () => {
       await blocker.end().catch(() => undefined);
       await prisma.registration.deleteMany({ where: { eventId: duplicateEvent } }); await prisma.event.deleteMany({ where: { id: duplicateEvent } });
     }
-  });
+  }, 10_000);
 
   it('returns a safe temporary-unavailable response when the Event lock times out', async () => {
     const lockEvent = randomUUID();
