@@ -61,3 +61,47 @@ test('reconciles a lost success response before retrying registration', async ({
   await page.getByRole('link', { name: 'Check My Registrations' }).click();
   await expect(page.getByText(`Registration reference: ${createdRegistrationId}`)).toBeVisible();
 });
+
+test('clears an expired session during registration-status lookup and keeps public event details', async ({ page }) => {
+  await login(page);
+  await page.route(/\/api\/me\/registrations\?eventId=30000000-0000-4000-8000-000000000001$/, route => route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({ error: { code: 'UNAUTHENTICATED' } }) }));
+  await page.goto('/events/30000000-0000-4000-8000-000000000001');
+
+  await expect(page.getByRole('heading', { name: 'Empty workshop' })).toBeVisible();
+  await expect(page.getByRole('status').filter({ hasText: 'Your session has expired. Please log in again.' })).toBeVisible();
+  await expect(page.getByText('Participant One (PARTICIPANT)')).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'Log in', exact: true })).toHaveAttribute('href', '/login?returnTo=%2Fevents%2F30000000-0000-4000-8000-000000000001');
+});
+
+test('clears an expired session when registration is submitted and keeps public event details', async ({ page }) => {
+  await login(page);
+  await page.route(/\/api\/events\/30000000-0000-4000-8000-000000000001\/registrations$/, route => route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({ error: { code: 'UNAUTHENTICATED' } }) }));
+  await page.goto('/events/30000000-0000-4000-8000-000000000001');
+  await page.getByRole('button', { name: 'Register', exact: true }).click();
+
+  await expect(page.getByRole('heading', { name: 'Empty workshop' })).toBeVisible();
+  await expect(page.getByRole('status').filter({ hasText: 'Your session has expired. Please log in again.' })).toBeVisible();
+  await expect(page.getByText('Participant One (PARTICIPANT)')).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'Log in', exact: true })).toHaveAttribute('href', '/login?returnTo=%2Fevents%2F30000000-0000-4000-8000-000000000001');
+});
+
+test('redirects to login when an own-registration detail session expires', async ({ page }) => {
+  await login(page);
+  await page.route('**/api/me/registrations?page=1', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: [], meta: { page: 1, pageSize: 20, total: 0 } }) }));
+  await page.route(/\/api\/me\/registrations\/40000000-0000-4000-8000-000000000001$/, route => route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({ error: { code: 'UNAUTHENTICATED' } }) }));
+  await page.goto('/my-registrations?registrationId=40000000-0000-4000-8000-000000000001');
+
+  await expect(page).toHaveURL('/login?returnTo=%2Fmy-registrations%3FregistrationId%3D40000000-0000-4000-8000-000000000001');
+  await expect(page.getByRole('status').filter({ hasText: 'Your session has expired. Please log in again.' })).toBeVisible();
+  await expect(page.getByText('Participant One (PARTICIPANT)')).toHaveCount(0);
+});
+
+test('redirects to login when the own-registration list session expires', async ({ page }) => {
+  await login(page);
+  await page.route('**/api/me/registrations?page=1', route => route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({ error: { code: 'UNAUTHENTICATED' } }) }));
+  await page.goto('/my-registrations');
+
+  await expect(page).toHaveURL('/login?returnTo=%2Fmy-registrations');
+  await expect(page.getByRole('status').filter({ hasText: 'Your session has expired. Please log in again.' })).toBeVisible();
+  await expect(page.getByText('Participant One (PARTICIPANT)')).toHaveCount(0);
+});

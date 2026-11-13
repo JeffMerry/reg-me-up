@@ -27,7 +27,7 @@ function EventList({ owner, expireSession }: { owner: boolean; expireSession: (r
   }, [owner, page, retry]);
   return <><div className="flex flex-wrap items-center justify-between gap-4"><h1 className="text-3xl font-bold">{owner ? 'My Events' : 'Discover your next event'}</h1>{owner && <a className={button} href="/organizer/events/new">Create event</a>}</div>{loading ? <div className="mt-6" role="status"><p>Loading events…</p><div className="mt-4 grid gap-6 md:grid-cols-2 lg:grid-cols-3" aria-hidden="true">{[1, 2, 3].map(id => <div key={id} className="h-64 animate-pulse rounded-2xl bg-neutral-200" />)}</div></div> : error ? <div className="mt-6" role="alert"><p>Unable to load events.</p><button className={`${link} mt-2 min-h-11`} onClick={() => setRetry(retry + 1)}>Try again</button></div> : data && data.data.length === 0 ? <p className="mt-6">{owner ? 'Create your first event.' : 'No events are available yet.'}</p> : data && <>{owner && <div className="mt-6 hidden overflow-x-auto rounded-2xl bg-white shadow md:block"><table className="w-full text-left"><thead><tr><th className="p-4">Event</th><th className="p-4">Date and time</th><th className="p-4">Location</th><th className="p-4">Registrations / capacity</th><th className="p-4">Remaining</th><th className="p-4">Status</th><th className="p-4">Action</th></tr></thead><tbody>{data.data.map(event => <tr key={event.id} className="border-t border-neutral-200"><td className="p-4"><a className={link} href={`/events/${event.id}`}>{event.title}</a></td><td className="p-4">{dateRange(event)}</td><td className="p-4">{event.location}</td><td className="p-4">{event.activeRegistrationCount} / {event.capacity}</td><td className="p-4">{event.remainingSeats < 0 ? 'Unavailable' : event.remainingSeats}</td><td className="p-4">{event.remainingSeats < 0 ? 'Unavailable' : event.remainingSeats === 0 ? 'Full' : 'Seats available'}</td><td className="p-4"><a className={link} href={`/events/${event.id}`}>View details</a></td></tr>)}</tbody></table></div>}<div className={`mt-6 grid gap-6 ${owner ? 'md:hidden' : 'md:grid-cols-2 lg:grid-cols-3'}`}>{data.data.map(event => <article key={event.id} className="overflow-hidden rounded-2xl bg-white shadow"><Cover /><div className="p-5"><h2 className="text-xl font-bold"><a className={link} href={`/events/${event.id}`}>{event.title}</a></h2><EventSummary event={event} />{owner && <p className="mt-2">Active registrations: {event.activeRegistrationCount} / {event.capacity}</p>}<a className={`${link} mt-4 inline-block`} href={`/events/${event.id}`}>View details</a></div></article>)}</div><Pages meta={data.meta} onPage={setPage} /></>}</>;
 }
-function EventDetail({ id, identity }: { id: string; identity: Identity | null }) {
+function EventDetail({ id, identity, expireSession }: { id: string; identity: Identity | null; expireSession: (returnTo: string, keepPublicEvent?: boolean) => void }) {
   const [data, setData] = useState<EventData | null>(null); const [status, setStatus] = useState<'loading' | 'error' | 'missing' | 'ok'>('loading'); const [retry, setRetry] = useState(0);
   const [registration, setRegistration] = useState<{ state: 'loading' | 'error' | 'none' | 'registered' | 'pending' | 'uncertain'; id?: string }>({ state: 'none' });
   const [registrationRetry, setRegistrationRetry] = useState(0);
@@ -38,6 +38,7 @@ function EventDetail({ id, identity }: { id: string; identity: Identity | null }
     if (identity?.role !== 'PARTICIPANT') { setRegistration({ state: 'none' }); return; }
     const controller = new AbortController(); setRegistration({ state: 'loading' });
     fetch(`/api/me/registrations?eventId=${encodeURIComponent(id)}`, { signal: controller.signal, cache: 'no-store' }).then(async response => {
+      if (response.status === 401) { expireSession(`/events/${id}`, true); setRegistration({ state: 'none' }); return null; }
       if (!response.ok) throw new Error();
       const result = await response.json() as { data: Array<{ id: string }> };
       setRegistration(result.data[0] ? { state: 'registered', id: result.data[0].id } : { state: 'none' });
@@ -51,7 +52,7 @@ function EventDetail({ id, identity }: { id: string; identity: Identity | null }
       const boot = await fetch('/api/auth/csrf', { cache: 'no-store' }); if (!boot.ok) throw new Error();
       const token = (await boot.json()).data.csrfToken as string;
       const response = await fetch(`/api/events/${encodeURIComponent(id)}/registrations`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': token }, body: '{}' });
-      if (response.status === 401) { setRegistration({ state: 'error' }); return; }
+      if (response.status === 401) { expireSession(`/events/${id}`, true); setRegistration({ state: 'none' }); return; }
       const body = await response.json() as { data?: { id: string }; error?: { code: string; registrationId?: string } };
       if (response.status === 201) { setRegistration({ state: 'registered', id: body.data?.id }); setRetry(value => value + 1); return; }
       if (body.error?.code === 'ALREADY_REGISTERED' && body.error.registrationId) { setRegistration({ state: 'registered', id: body.error.registrationId }); return; }
@@ -66,19 +67,24 @@ function EventDetail({ id, identity }: { id: string; identity: Identity | null }
   return <>{published && <p role="status" className="mb-4 font-semibold">Event published successfully.</p>}<a className={link} href="/events">Events</a><article className="mt-4 overflow-hidden rounded-2xl bg-white shadow"><Cover /><div className="grid gap-8 p-6 md:grid-cols-3"><div className="md:col-span-2"><h1 className="text-3xl font-bold">{data.title}</h1><EventSummary event={data} /><p className="mt-4">Organized by {data.organizer.displayName}</p>{data.description && <section className="mt-6"><h2 className="text-xl font-bold">Description</h2><p className="mt-2 whitespace-pre-wrap">{data.description}</p></section>}</div><aside><h2 className="text-xl font-bold">Registration</h2><p className="mt-2">{data.remainingSeats < 0 ? 'Availability unavailable. Please try again.' : `${data.remainingSeats} seats remaining`}</p>{identity?.role === 'ORGANIZER' ? <p className="mt-4">Registration is available to Participant accounts.</p> : !identity ? <>{data.remainingSeats <= 0 ? <p className="mt-4">This event is full.</p> : <a className={`${button} mt-4`} href={`/login?returnTo=${encodeURIComponent(`/events/${data.id}`)}`}>Log in to register</a>}</> : registration.state === 'loading' ? <p role="status" className="mt-4">Checking your registration…</p> : registration.state === 'error' ? <div role="alert" className="mt-4"><p>Unable to check your registration.</p><button className={link} onClick={() => setRegistrationRetry(value => value + 1)}>Try again</button></div> : registration.state === 'registered' ? <p role="status" className="mt-4">You are registered. <a className={link} href={`/my-registrations?registrationId=${registration.id}`}>View registration</a></p> : registration.state === 'uncertain' ? <div role="alert" className="mt-4"><p>We could not confirm your registration. Check your registrations before trying again.</p><a className={link} href="/my-registrations">Check My Registrations</a></div> : <><button disabled={registration.state === 'pending' || data.remainingSeats <= 0} className={`${button} mt-4`} onClick={() => void register()}>{registration.state === 'pending' ? 'Registering…' : data.remainingSeats <= 0 ? 'Full' : 'Register'}</button>{data.remainingSeats <= 0 && <p className="mt-2">This event is full.</p>}</>}</aside></div></article></>;
 }
 type RegistrationOwn = { id: string; status: string; registeredAt: string; participant: { displayName: string }; event: EventData };
-function MyRegistrations() {
+function MyRegistrations({ expireSession }: { expireSession: (returnTo: string) => void }) {
   const [page, setPage] = useState(1); const [rows, setRows] = useState<RegistrationOwn[]>([]); const [total, setTotal] = useState(0);
   const [state, setState] = useState<'loading' | 'error' | 'ok'>('loading'); const [retry, setRetry] = useState(0); const [selected, setSelected] = useState<RegistrationOwn | null>(null);
   const triggerIdRef = useRef(''); const closeRef = useRef<HTMLButtonElement | null>(null);
+  const sessionExpiredRef = useRef(false);
+  function handleExpiredSession(returnTo: string) {
+    if (sessionExpiredRef.current) return;
+    sessionExpiredRef.current = true; setRows([]); setTotal(0); setSelected(null); expireSession(returnTo);
+  }
   useEffect(() => {
     const controller = new AbortController(); setState('loading');
-    fetch(`/api/me/registrations?page=${page}`, { cache: 'no-store', signal: controller.signal }).then(async response => { if (!response.ok) throw new Error(); return response.json() as Promise<{ data: RegistrationOwn[]; meta: { total: number } }> }).then(result => { setRows(result.data); setTotal(result.meta.total); setState('ok'); }).catch(() => { if (!controller.signal.aborted) setState('error'); });
+    fetch(`/api/me/registrations?page=${page}`, { cache: 'no-store', signal: controller.signal }).then(async response => { if (response.status === 401) { handleExpiredSession('/my-registrations'); return null; } if (!response.ok) throw new Error(); return response.json() as Promise<{ data: RegistrationOwn[]; meta: { total: number } }> }).then(result => { if (result) { setRows(result.data); setTotal(result.meta.total); setState('ok'); } }).catch(() => { if (!controller.signal.aborted) setState('error'); });
     return () => controller.abort();
   }, [page, retry]);
   useEffect(() => {
     const id = new URLSearchParams(location.search).get('registrationId'); if (!id) { setSelected(null); return; }
     const controller = new AbortController();
-    fetch(`/api/me/registrations/${encodeURIComponent(id)}`, { cache: 'no-store', signal: controller.signal }).then(async response => { if (!response.ok) throw new Error(); triggerIdRef.current = `registration-trigger-${id}`; setSelected((await response.json()).data as RegistrationOwn); }).catch(() => { if (!controller.signal.aborted) setSelected(null); });
+    fetch(`/api/me/registrations/${encodeURIComponent(id)}`, { cache: 'no-store', signal: controller.signal }).then(async response => { if (response.status === 401) { handleExpiredSession(`/my-registrations?registrationId=${encodeURIComponent(id)}`); return; } if (!response.ok) throw new Error(); triggerIdRef.current = `registration-trigger-${id}`; setSelected((await response.json()).data as RegistrationOwn); }).catch(() => { if (!controller.signal.aborted) setSelected(null); });
     return () => controller.abort();
   }, []);
   useLayoutEffect(() => { if (selected) closeRef.current?.focus(); else document.getElementById(triggerIdRef.current)?.focus(); }, [selected]);
@@ -135,11 +141,11 @@ function CreateEvent({ navigate, expireSession }: { navigate: (target: string) =
   ];
   return <><a className={link} href="/organizer/events">My Events</a><h1 className="mt-4 text-3xl font-bold">Create event</h1><p className="mt-2">Thailand time (UTC+7)</p><form ref={form} onSubmit={event => void submit(event)} noValidate className="mt-6 grid max-w-3xl gap-4 rounded-2xl bg-white p-6 shadow">{rows.map(({ key, label, type, required }) => <div key={key}><label className="mb-1 block font-semibold" htmlFor={`event-${key}`}>{label}{required && ' *'}</label>{type === 'textarea' ? <textarea id={`event-${key}`} className={field} value={values[key]} onChange={event => update(key, event.target.value)} aria-invalid={!!errors[key]} aria-describedby={errors[key] ? `error-${key}` : undefined} /> : <input id={`event-${key}`} type={type} className={field} value={values[key]} onChange={event => update(key, event.target.value)} required={required} aria-invalid={!!errors[key]} aria-describedby={errors[key] ? `error-${key}` : undefined} />}{errors[key] && <p id={`error-${key}`} className="mt-1 text-red-700">{errors[key]}</p>}</div>)}{message && <p role="alert" className="text-red-700">{message}</p>}<div className="flex flex-wrap gap-4"><button type="submit" className={button} disabled={pending || uncertain}>{pending ? 'Publishing…' : 'Publish event'}</button><button type="button" className="min-h-11 underline" disabled={pending} onClick={cancel}>Cancel</button>{uncertain && <a className="min-h-11 underline" href="/organizer/events">Check My Events</a>}</div></form></>;
 }
-export function EventViews({ path, identity, navigate, expireSession }: { path: string; identity: Identity | null; navigate: (target: string) => void; expireSession: (returnTo: string) => void }) {
+export function EventViews({ path, identity, navigate, expireSession }: { path: string; identity: Identity | null; navigate: (target: string) => void; expireSession: (returnTo: string, keepPublicEvent?: boolean) => void }) {
   if (path === '/events') return <EventList owner={false} expireSession={expireSession} />;
-  if (path === '/my-registrations') return <MyRegistrations />;
+  if (path === '/my-registrations') return <MyRegistrations expireSession={expireSession} />;
   if (path === '/organizer/events') return <EventList owner expireSession={expireSession} />;
   if (path === '/organizer/events/new') return <CreateEvent navigate={navigate} expireSession={expireSession} />;
-  if (path.startsWith('/events/')) return <EventDetail id={path.slice('/events/'.length)} identity={identity} />;
+  if (path.startsWith('/events/')) return <EventDetail id={path.slice('/events/'.length)} identity={identity} expireSession={expireSession} />;
   return <><h1 className="text-2xl font-bold">Page not found</h1><a className={link} href="/events">Browse events</a></>;
 }
