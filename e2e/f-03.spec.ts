@@ -29,6 +29,8 @@ test('Participant registers, sees the server reference and opens own registratio
   await page.getByRole('button', { name: 'Register', exact: true }).click();
   const payload = await (await created).json() as { data: { id: string } }; createdRegistrationId = payload.data.id;
   await expect(page.getByText('You are registered.')).toBeVisible();
+  await page.getByRole('link', { name: 'My Registrations', exact: true }).click();
+  await expect(page).toHaveURL('/my-registrations');
   const registrationRow = page.locator('li').filter({ hasText: 'Empty workshop' });
   await expect(registrationRow.getByText('Location: University room')).toBeVisible();
   await expect(registrationRow.getByText(/Registered at:/)).toBeVisible();
