@@ -1,6 +1,6 @@
 # Lab 5 — RegMeUp deployment
 
-สถานะ: **อยู่ระหว่าง setup Lab 5** อัปเดต 14 พฤศจิกายน 2026: [PR #16](https://github.com/JeffMerry/reg-me-up/pull/16) ผ่าน teammate review และ merge เข้า `lab5-staging` แล้ว; [PR #26](https://github.com/JeffMerry/reg-me-up/pull/26) สำหรับ CI กำลัง review และมี run ผ่านบน PR เข้า staging แล้ว ผล Docker และ clean clone เป็นการทดสอบ local; **GCP deployment, CI บน PR เข้า main และ required check ยังไม่ยืนยัน**
+สถานะ: **อยู่ระหว่าง setup Lab 5** อัปเดต 14 พฤศจิกายน 2026: [PR #16](https://github.com/JeffMerry/reg-me-up/pull/16) ผ่าน teammate review และ merge เข้า `lab5-staging` แล้ว; [PR #26](https://github.com/JeffMerry/reg-me-up/pull/26) สำหรับ CI ผ่าน review และ merge เข้า `lab5-staging` แล้ว; ผู้ใช้ตั้งค่า GCP prerequisites ตามภาพในแชตแล้ว ผล Docker และ clean clone เป็นการทดสอบ local; **GCP deployment, CI บน PR เข้า main และ required check ยังไม่ยืนยัน**
 
 เอกสารนี้เขียนหลังเริ่มทำ Docker แล้ว เนื่องจากพบข้อกำหนดไฟล์จาก handout ภายหลัง ไม่อ้างว่าไฟล์ฉบับนี้มีอยู่ก่อนทำ Docker ให้อัปเดตเมื่อทีมตั้งค่าและทดสอบแต่ละส่วนจริง
 
@@ -13,21 +13,21 @@
 | Database และ session | PostgreSQL 17.11 สำหรับ local Compose; server เก็บ session ด้วย `connect-pg-simple` ในตาราง `sessions` |
 | Migration | Prisma Migrate 7.10.1 ผ่าน `npm run db:migrate` ซึ่งตรวจ migration history ก่อน deploy |
 | Container | [Dockerfile](../../../Dockerfile) สร้าง frontend และ backend ด้วย npm workspaces แล้วเสิร์ฟ UI และ API จาก image เดียว/ origin เดียว; [compose.yaml](../../../compose.yaml) มี PostgreSQL, migration และ app profile สำหรับเครื่องพัฒนา |
-| GCP — แผน | Cloud Run รัน image, Artifact Registry เก็บ image, Cloud SQL for PostgreSQL เก็บข้อมูล, Secret Manager เก็บค่าลับ; ชื่อและการตั้งค่าจริง **TBD** |
+| GCP — แผน | Cloud Run รัน image, Artifact Registry เก็บ image, Cloud SQL for PostgreSQL 17 เก็บข้อมูล, Secret Manager เก็บค่าลับ; prerequisites ตาม §5 ยืนยันจากภาพผู้ใช้แล้ว; Cloud Run ยังไม่ deploy |
 | CI/CD | [CI and Docker Build](../../../.github/workflows/ci-docker.yml) กำหนดตรวจ PR เข้า `lab5-staging`/`main`; runs บน PR เข้า staging ผ่านแล้วตาม [หลักฐาน](ci-evidence.md). PR เข้า main และการบังคับ required check **รอตรวจจริง**. Deploy จาก `main` และ Workload Identity Federation ยังเป็นแผน **TBD** |
 
-บริการ GCP ที่วางแผนไว้ตรงกับ reference stack; การสร้างและเลือกค่าจริงยังไม่ยืนยัน ความต่างจากตัวอย่าง TokTickIT คือ RegMeUp ใช้ Node 22 และ PostgreSQL 17.11 ใน local แทนเวอร์ชันของตัวอย่าง, ใช้ npm workspaces และ image เดียวสำหรับ local app กับ Cloud ที่วางแผนไว้ เพื่อให้ frontend/API ใช้ origin เดียว และคง migration-history guard กับ synthetic seed ที่ห้าม production ของ RegMeUp ไว้ การเลือก PostgreSQL version บน Cloud SQL และการเชื่อมต่อ **TBD** ไม่อ้างว่าตรงกับ local โดยอัตโนมัติ
+บริการ GCP ที่วางแผนไว้ตรงกับ reference stack; prerequisites ที่สร้างแล้วอยู่ใน §5 ความต่างจากตัวอย่าง TokTickIT คือ RegMeUp ใช้ Node 22 และ PostgreSQL 17.11 ใน local แทนเวอร์ชันของตัวอย่าง, ใช้ npm workspaces และ image เดียวสำหรับ local app กับ Cloud ที่วางแผนไว้ เพื่อให้ frontend/API ใช้ origin เดียว และคง migration-history guard กับ synthetic seed ที่ห้าม production ของ RegMeUp ไว้ Cloud SQL เลือก PostgreSQL 17 (major version ตรง local; minor version บน Cloud ยังไม่บันทึก) แทน PostgreSQL 16 ของ starter kit; Enterprise, `db-f1-micro`, SSD 10 GB อิงตัวอย่างแล็บ และปิด storage auto-resize เพื่อควบคุมขนาด การเชื่อมต่อจริงยังไม่ทดสอบ
 
 ## 2. Environment variables
 
-ชื่อ runtime/seed/demo ตรงกับ [server/.env.example](../../../server/.env.example); ตัวแปร Compose, Vite และ browser tests แสดงเพิ่มเพื่อให้ setup ได้ครบ ห้ามนำค่าจริงของ secret หรือ connection string ลง Git, รายงาน, screenshot หรือ chat ชื่อ Secret Manager ด้านล่างเป็น **TBD** จนสร้างจริง
+ชื่อ runtime/seed/demo ตรงกับ [server/.env.example](../../../server/.env.example); ตัวแปร Compose, Vite และ browser tests แสดงเพิ่มเพื่อให้ setup ได้ครบ ห้ามนำค่าจริงของ secret หรือ connection string ลง Git, รายงาน, screenshot หรือ chat ชื่อ runtime secrets ยืนยันจากภาพผู้ใช้แล้ว; demo secrets ยัง TBD
 
 | Variable | ใช้ทำอะไร | จำเป็นเมื่อใด / ค่าเริ่มต้น | Secret | ค่ามาจากไหน |
 |---|---|---|---|---|
 | `NODE_ENV` | เลือกโหมดและกำหนด Secure cookie; seed ปฏิเสธ production | ค่าเริ่มต้น `development`; image ระบุ `production`; local Compose app ใช้ `development` | No | ผู้รัน / image / Cloud Run |
 | `PORT` | port ที่ backend รับ request | ค่าเริ่มต้น `3000`; Cloud Run กำหนดตอนรัน | No | ผู้รัน / Cloud Run |
-| `DATABASE_URL` | เชื่อม PostgreSQL สำหรับ API, Prisma, migration และ seed | จำเป็นสำหรับ server/migration/seed/demo | **Yes** | local จาก `server/.env` หรือ Compose; Cloud จาก Secret Manager ชื่อ **TBD** |
-| `SESSION_SECRET` | ลงนาม session cookie | จำเป็นสำหรับ server; อย่างน้อย 32 ตัวอักษร | **Yes** | local ผู้รันกำหนด; Cloud จาก Secret Manager ชื่อ **TBD** |
+| `DATABASE_URL` | เชื่อม PostgreSQL สำหรับ API, Prisma, migration และ seed | จำเป็นสำหรับ server/migration/seed/demo | **Yes** | local จาก `server/.env` หรือ Compose; Cloud จาก Secret Manager `regmeup-database-url:1` |
+| `SESSION_SECRET` | ลงนาม session cookie | จำเป็นสำหรับ server; อย่างน้อย 32 ตัวอักษร | **Yes** | local ผู้รันกำหนด; Cloud จาก Secret Manager `regmeup-session-secret:1` |
 | `APP_ORIGIN` | origin ที่อนุญาตในการตรวจ CSRF | จำเป็นสำหรับ server; ต้องเป็น origin ตรงกับ URL ของ browser ไม่มี path/trailing slash | No | local `server/.env` / Compose; Cloud Run config **TBD** |
 | `TRUST_PROXY_HOPS` | ให้ Express เชื่อถือ forwarded headers จาก proxy | ปกติไม่ตั้ง; ตั้ง `1` ได้เฉพาะ production หลัง proxy หนึ่งชั้นที่เชื่อถือได้ | No | Cloud Run config **TBD** หลังตรวจ topology และจำกัด direct access |
 | `FRONTEND_DIR` | path ของ frontend build ที่ Express เสิร์ฟ | ไม่จำเป็นสำหรับ local Vite; image ตั้ง `/app/client/dist` | No | Docker image / ผู้รัน |
@@ -60,7 +60,7 @@
 ```powershell
 git clone https://github.com/JeffMerry/reg-me-up.git
 cd reg-me-up
-git switch lab5-staging  # branch รวมงาน Lab 5; สำหรับตรวจ CI ที่ยังอยู่ระหว่าง review ให้ใช้ ci/lab5-pr-checks
+git switch lab5-staging  # branch รวมงาน Lab 5; first-deploy work ต้องผ่าน PR ก่อน
 node --version
 npm --version
 npm ci
@@ -159,22 +159,27 @@ Synthetic seed สร้าง Participant 3 บัญชี, Organizer 2 บั
 
 ## 5. GCP project และ resources
 
-ผู้ใช้แจ้งว่าเตรียมบัญชี/Project และ Budget แล้ว แต่ยังไม่ได้ตรวจชื่อหรือค่าจาก GCP ในรอบเขียนเอกสาร จึงไม่ใส่ค่าที่คาดเดา
+ค่าด้านล่างยืนยันจาก screenshots ที่ผู้ใช้ส่งในแชตวันที่ 14 พฤศจิกายน 2026 ไม่ใช่ผลที่ Codex เรียก GCP เอง ภาพ IAM ยืนยันสิทธิ์ที่ตั้งไว้ แต่ยังไม่ยืนยันการเชื่อมต่อจริง ลิงก์หลักฐานถาวรในชุดส่ง **TBD**; Billing แสดง `True`; รายละเอียด Budget ยังไม่บันทึก
 
 | รายการ | ชื่อ / ค่าที่ใช้ | หน้าที่ |
 |---|---|---|
-| Project ID | **TBD — รอยืนยัน** | GCP Project ของทีม |
-| Region | **TBD — รอยืนยัน** | พื้นที่ deploy และจัดเก็บทรัพยากร |
-| App service | **TBD — ยังไม่ยืนยัน** | Cloud Run service |
-| Image registry / repository | **TBD — ยังไม่ยืนยัน** | Artifact Registry |
-| Database instance / database | **TBD — ยังไม่ยืนยัน** | Cloud SQL PostgreSQL และฐานข้อมูลที่ใช้จริง |
-| Secret names | **TBD — ยังไม่สร้าง/ยืนยัน** | ชื่อ secrets สำหรับ database, session และ demo ตามที่ใช้จริง; ไม่ใส่ค่า |
-| Runtime/deployer service accounts | **TBD — ยังไม่ยืนยัน** | ตัวตนของแอปและ pipeline |
-| Migration job | **TBD — ยังไม่ยืนยัน** | รัน migration ก่อน release หากทีมเลือกวิธีนี้ |
+| Project ID | `cpe334-reg-me-up-513615` | GCP Project ของทีม |
+| Region | `asia-southeast1` | พื้นที่ตั้ง Artifact Registry/Cloud SQL และแผน deploy Cloud Run |
+| App service | **ข้อเสนอ:** `regmeup` — ยังไม่ deploy | Cloud Run service |
+| Image registry / repository | `asia-southeast1-docker.pkg.dev` / `regmeup`, format `DOCKER` | Artifact Registry สร้างแล้ว; image ยังไม่ push |
+| Database instance / database | `regmeup-pg` / `regmeup`; PostgreSQL 17; instance `RUNNABLE` | Cloud SQL Enterprise `db-f1-micro`, SSD 10 GB; `storageAutoResize: false`; ยังไม่รัน app migration |
+| SQL connection name | `cpe334-reg-me-up-513615:asia-southeast1:regmeup-pg` | socket path ที่ Cloud Run จะ mount เมื่อตั้ง Cloud SQL connection |
+| Database user | `regmeup_app` (BUILT_IN) | บัญชีฐานข้อมูลของแอป; ไม่ใช่บัญชี login หน้าเว็บ; DB grants/connection ยังไม่ทดสอบ |
+| Runtime secret references | `regmeup-database-url:1`, `regmeup-session-secret:1`; ทั้งคู่ `enabled`, automatic replication | เก็บค่าลับ; ไม่อ่านหรือบันทึกค่าในเอกสาร; demo secrets ยัง TBD |
+| Runtime service account | `regmeup-runtime@cpe334-reg-me-up-513615.iam.gserviceaccount.com` | `roles/cloudsql.client` ระดับ project และ `roles/secretmanager.secretAccessor` เฉพาะ secrets สองตัวข้างต้น; ภาพ IAM ยืนยันแล้ว |
+| Deployer service account | **TBD — ยังไม่ยืนยัน** | ตัวตน pipeline; runtime account ไม่ใช่ deployer |
+| Migration job | **ข้อเสนอ:** `regmeup-migrate` — ยังไม่สร้าง | รัน migration ก่อน service deploy |
 | Workload Identity provider / GitHub environment | **TBD — ยังไม่ยืนยัน** | ยืนยันตัวตน pipeline โดยไม่ใช้ key file |
 | Public URL | **TBD — ยังไม่ deploy** | URL สำหรับใช้งานและตรวจระบบ |
 
 ## 6. Release procedure และ commit ที่กำลังรัน
+
+การเตรียม first deploy อยู่ใน [setup และข้อจำกัด](first-deploy-setup.md), [contract](first-deploy-contract.md) และ `deploy/deploy.sh` ซึ่ง default เป็น dry run; prerequisites ตาม §5 ยืนยันจากภาพแล้ว; service/job และการ deploy จริงยังไม่ทดสอบ
 
 เส้นทางที่ทีมเลือก: `Issue → feature/fix branch จาก lab5-staging → PR เข้า lab5-staging → เพื่อน review + CI ผ่าน → merge → release PR lab5-staging → main → เพื่อน review + CI ผ่าน → merge → deploy จาก main` ผู้เขียนไม่ approve PR ของตนเอง; ติด label งาน Lab 5 และบันทึกหลักฐานจริงตาม handout
 
@@ -183,7 +188,7 @@ Synthetic seed สร้าง Participant 3 บัญชี, Organizer 2 บั
 3. เปิด release PR จาก `lab5-staging` เข้า `main` ให้ผู้ที่ไม่ใช่ผู้เขียน review และตรวจ CI ผ่านก่อน merge
 4. **แผน [#23](https://github.com/JeffMerry/reg-me-up/issues/23) ยังไม่ทำ:** workflow จาก `main` build/test, สร้าง image, รัน migration, deploy และ smoke test; บันทึก release แรก แล้วทำ visible change อีกครั้งผ่าน reviewed staging PR → release PR → pipeline พร้อมหลักฐาน commit → image → running revision ของทั้งสอง release; trigger, ชื่อ workflow, job, image tag/digest และการอนุมัติภายใน pipeline **TBD** หากมี manual approval ต้องบันทึกชื่อ environment และตำแหน่งปุ่มหลังตั้งค่าจริง
 5. ตรวจผลใน GitHub → Actions → workflow/run และ Cloud Run → service → revision/logs รวมทั้ง health/readiness และ domain workflow ที่ public URL; ชื่อ run/URL จริง **TBD**
-6. บันทึก SHA ของ merge commit จาก PR และเชื่อม SHA/tag → image digest → Cloud Run revision ที่รับ traffic 100% พร้อมลิงก์หลักฐาน แนวทางใช้ full commit SHA เป็น image tag และ deploy ด้วย digest เป็น **ข้อเสนอ ยังไม่ตั้งค่า** วิธีตรวจว่า public URL เสิร์ฟ commit ใดต้องยืนยัน mapping จาก revision/traffic และหลักฐาน image digest; ยังไม่มี endpoint แสดง commit ที่ตรวจยืนยันแล้ว
+6. บันทึก SHA ของ merge commit จาก PR และเชื่อม SHA/tag → image digest → Cloud Run revision ที่รับ traffic 100% พร้อมลิงก์หลักฐาน สคริปต์ first deploy เตรียมใช้ full commit SHA เป็น image tag และ deploy ด้วย digest; ยังไม่ทดสอบบน GCP วิธีตรวจว่า public URL เสิร์ฟ commit ใดต้องยืนยัน mapping จาก revision/traffic และหลักฐาน image digest; ยังไม่มี endpoint แสดง commit ที่ตรวจยืนยันแล้ว
 
 ## 7. Persistence, verification และข้อจำกัด
 
