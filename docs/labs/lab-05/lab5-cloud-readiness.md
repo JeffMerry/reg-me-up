@@ -2,6 +2,8 @@
 
 Status: proposed for teammate review; tests and cloud deployment not yet evidenced here.
 
+Subsequent status: [PR #15](https://github.com/JeffMerry/reg-me-up/pull/15) received teammate approval and was merged into `lab5-staging` on 14 November 2026. This design snapshot does not establish a completed cloud deployment.
+
 ## Scope and expected behavior
 
 - Keep `/api/health` unchanged and add `/api/ready` with the same database check: 200 `{"status":"ok"}` when available, 503 `{"status":"unavailable"}` otherwise; do not expose database errors.
