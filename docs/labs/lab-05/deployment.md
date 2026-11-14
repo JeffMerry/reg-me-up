@@ -1,6 +1,6 @@
 # Lab 5 — RegMeUp deployment
 
-สถานะ: **ฉบับเริ่มต้น / อยู่ระหว่าง setup** อัปเดตล่าสุด 14 พฤศจิกายน 2026 จาก branch `build/lab5-docker` และ [PR #16](https://github.com/JeffMerry/reg-me-up/pull/16) ซึ่งยังรอ review ณ เวลาบันทึก ผล Docker ในเอกสารนี้เป็นการทดสอบในเครื่อง; **ยังไม่ยืนยัน GCP deployment, CI/CD หรือ clean-clone check**
+สถานะ: **อยู่ระหว่าง setup Lab 5** อัปเดต 14 พฤศจิกายน 2026: [PR #16](https://github.com/JeffMerry/reg-me-up/pull/16) ผ่าน teammate review และ merge เข้า `lab5-staging` แล้ว; [PR #26](https://github.com/JeffMerry/reg-me-up/pull/26) สำหรับ CI กำลัง review และมี run ผ่านบน PR เข้า staging แล้ว ผล Docker และ clean clone เป็นการทดสอบ local; **GCP deployment, CI บน PR เข้า main และ required check ยังไม่ยืนยัน**
 
 เอกสารนี้เขียนหลังเริ่มทำ Docker แล้ว เนื่องจากพบข้อกำหนดไฟล์จาก handout ภายหลัง ไม่อ้างว่าไฟล์ฉบับนี้มีอยู่ก่อนทำ Docker ให้อัปเดตเมื่อทีมตั้งค่าและทดสอบแต่ละส่วนจริง
 
@@ -14,7 +14,7 @@
 | Migration | Prisma Migrate 7.10.1 ผ่าน `npm run db:migrate` ซึ่งตรวจ migration history ก่อน deploy |
 | Container | [Dockerfile](../../../Dockerfile) สร้าง frontend และ backend ด้วย npm workspaces แล้วเสิร์ฟ UI และ API จาก image เดียว/ origin เดียว; [compose.yaml](../../../compose.yaml) มี PostgreSQL, migration และ app profile สำหรับเครื่องพัฒนา |
 | GCP — แผน | Cloud Run รัน image, Artifact Registry เก็บ image, Cloud SQL for PostgreSQL เก็บข้อมูล, Secret Manager เก็บค่าลับ; ชื่อและการตั้งค่าจริง **TBD** |
-| CI/CD | [CI and Docker Build](../../../.github/workflows/ci-docker.yml) กำหนดตรวจ PR เข้า `lab5-staging`/`main`; run แรกบน PR เข้า staging ผ่านแล้วตาม [หลักฐาน](ci-evidence.md). PR เข้า main และการบังคับ required check **รอตรวจจริง**. Deploy จาก `main` และ Workload Identity Federation ยังเป็นแผน **TBD** |
+| CI/CD | [CI and Docker Build](../../../.github/workflows/ci-docker.yml) กำหนดตรวจ PR เข้า `lab5-staging`/`main`; runs บน PR เข้า staging ผ่านแล้วตาม [หลักฐาน](ci-evidence.md). PR เข้า main และการบังคับ required check **รอตรวจจริง**. Deploy จาก `main` และ Workload Identity Federation ยังเป็นแผน **TBD** |
 
 บริการ GCP ที่วางแผนไว้ตรงกับ reference stack; การสร้างและเลือกค่าจริงยังไม่ยืนยัน ความต่างจากตัวอย่าง TokTickIT คือ RegMeUp ใช้ Node 22 และ PostgreSQL 17.11 ใน local แทนเวอร์ชันของตัวอย่าง, ใช้ npm workspaces และ image เดียวสำหรับ local app กับ Cloud ที่วางแผนไว้ เพื่อให้ frontend/API ใช้ origin เดียว และคง migration-history guard กับ synthetic seed ที่ห้าม production ของ RegMeUp ไว้ การเลือก PostgreSQL version บน Cloud SQL และการเชื่อมต่อ **TBD** ไม่อ้างว่าตรงกับ local โดยอัตโนมัติ
 
@@ -55,12 +55,12 @@
 
 คำสั่งด้านล่างเป็น PowerShell บน Windows และรันจาก **root ของ repository** เว้นแต่ระบุอย่างอื่น ต้องมี Git, Node.js **22.23.4**, npm **10.9.9**, Docker Desktop ที่ใช้ Linux containers และ Docker Compose หากรัน browser tests ต้องติดตั้ง Playwright Chromium ด้วย อย่าใช้ฐานข้อมูลที่มีข้อมูลจริงสำหรับ fixtures หรือ tests
 
-**สถานะ:** clean clone ของ commit `a231b89149eefd2a90be86557e0ff9ec6e86e267` ผ่านการติดตั้ง, migrate/seed, build/test และตรวจ UI/API/DB ใน Compose project แยกโดย Codex เมื่อ 14 พฤศจิกายน 2026; ดู [ผลและคำสั่ง](../../sprints/sprint-1/lab5-docker-evidence.md) การรันซ้ำโดยสมาชิกอีกคนยังไม่ทดสอบ และ Cloud ยังไม่ทดสอบ
+**สถานะ:** clean clone ของ commit `a231b89149eefd2a90be86557e0ff9ec6e86e267` ผ่านการติดตั้ง, migrate/seed, build/test และตรวจ UI/API/DB ใน Compose project แยกโดย Codex เมื่อ 14 พฤศจิกายน 2026; ดู [ผลและคำสั่ง](lab5-docker-evidence.md) PR #16 ได้รับ approval และ merge แล้ว; การรัน clean clone ซ้ำโดยสมาชิกอีกคนและการทดสอบบน Cloud ยังไม่ยืนยัน
 
 ```powershell
 git clone https://github.com/JeffMerry/reg-me-up.git
 cd reg-me-up
-git switch build/lab5-docker  # PR #16; หลัง merge ให้ใช้ lab5-staging ที่มีงานนี้
+git switch lab5-staging  # branch รวมงาน Lab 5; สำหรับตรวจ CI ที่ยังอยู่ระหว่าง review ให้ใช้ ci/lab5-pr-checks
 node --version
 npm --version
 npm ci
@@ -179,7 +179,7 @@ Synthetic seed สร้าง Participant 3 บัญชี, Organizer 2 บั
 เส้นทางที่ทีมเลือก: `Issue → feature/fix branch จาก lab5-staging → PR เข้า lab5-staging → เพื่อน review + CI ผ่าน → merge → release PR lab5-staging → main → เพื่อน review + CI ผ่าน → merge → deploy จาก main` ผู้เขียนไม่ approve PR ของตนเอง; ติด label งาน Lab 5 และบันทึกหลักฐานจริงตาม handout
 
 1. สร้าง Issue และ branch จาก `lab5-staging` ล่าสุด ทำการเปลี่ยนแปลงพร้อม tests แล้วเปิด PR เข้า staging
-2. งาน [#20](https://github.com/JeffMerry/reg-me-up/issues/20): workflow `CI and Docker Build` job `test-and-docker` กำหนดให้รันใน PR เข้า `lab5-staging` และ `main` รวม install, migrations/seed ใน DB ชั่วคราว, unit/integration/Playwright, typecheck/build และ Docker build พร้อม `workflow_call`. GitHub แสดง check `test-and-docker` และมี [run ที่ผ่านบน PR #26](https://github.com/JeffMerry/reg-me-up/actions/runs/43593623092); ให้ตรวจ run ของ commit ล่าสุดก่อน merge และคง CI/history หลัง Lab 5. PR เข้า `main`, `workflow_call` และการตั้ง required check **ยังต้องตรวจ / TBD ใน Episode ที่เกี่ยวข้อง**
+2. งาน [#20](https://github.com/JeffMerry/reg-me-up/issues/20): workflow `CI and Docker Build` job `test-and-docker` กำหนดให้รันใน PR เข้า `lab5-staging` และ `main` รวม install, migrations/seed ใน DB ชั่วคราว, unit/integration/Playwright, typecheck/build และ Docker build พร้อม `workflow_call`. GitHub แสดง check `test-and-docker`; [run ของ PR #26 ที่ head 49338a9](https://github.com/JeffMerry/reg-me-up/actions/runs/43594158681) ผ่านแล้ว ให้ตรวจ run ของ commit ล่าสุดก่อน merge และคง CI/history หลัง Lab 5. PR เข้า `main`, `workflow_call` และการตั้ง required check **ยังต้องตรวจ / TBD ใน Episode ที่เกี่ยวข้อง**
 3. เปิด release PR จาก `lab5-staging` เข้า `main` ให้ผู้ที่ไม่ใช่ผู้เขียน review และตรวจ CI ผ่านก่อน merge
 4. **แผน [#23](https://github.com/JeffMerry/reg-me-up/issues/23) ยังไม่ทำ:** workflow จาก `main` build/test, สร้าง image, รัน migration, deploy และ smoke test; บันทึก release แรก แล้วทำ visible change อีกครั้งผ่าน reviewed staging PR → release PR → pipeline พร้อมหลักฐาน commit → image → running revision ของทั้งสอง release; trigger, ชื่อ workflow, job, image tag/digest และการอนุมัติภายใน pipeline **TBD** หากมี manual approval ต้องบันทึกชื่อ environment และตำแหน่งปุ่มหลังตั้งค่าจริง
 5. ตรวจผลใน GitHub → Actions → workflow/run และ Cloud Run → service → revision/logs รวมทั้ง health/readiness และ domain workflow ที่ public URL; ชื่อ run/URL จริง **TBD**
@@ -193,11 +193,11 @@ Synthetic seed สร้าง Participant 3 บัญชี, Organizer 2 บั
 
 | Check | สิ่งที่ต้องพิสูจน์ / คำสั่งหรือ test | ผล / commit | หลักฐาน |
 |---|---|---|---|
-| C-01 | PR ปกติรัน build, automated tests และ Docker build บน staging/main | **บางส่วน:** PR เข้า staging ผ่านที่ head `b95a3df`; tested merge `db0bb5e`; PR เข้า main ยังไม่ทดสอบ | [PR #26](https://github.com/JeffMerry/reg-me-up/pull/26), [Actions run](https://github.com/JeffMerry/reg-me-up/actions/runs/43593623092), [รายละเอียด](ci-evidence.md); [#20](https://github.com/JeffMerry/reg-me-up/issues/20) |
+| C-01 | PR ปกติรัน build, automated tests และ Docker build บน staging/main | **บางส่วน:** PR เข้า staging ผ่านที่ head `49338a9`; tested merge `0cedccf`; PR เข้า main ยังไม่ทดสอบ | [PR #26](https://github.com/JeffMerry/reg-me-up/pull/26), [Actions run](https://github.com/JeffMerry/reg-me-up/actions/runs/43594158681), [รายละเอียด](ci-evidence.md); [#20](https://github.com/JeffMerry/reg-me-up/issues/20) |
 | C-02 | temporary PR ที่ test ล้มเหลวถูกบล็อก merge แล้วปิด PR โดย **ไม่ merge** และเก็บประวัติ | **ยังไม่ทดสอบ / commit TBD** | PR, failed check และภาพ blocked merge **TBD**; [#22](https://github.com/JeffMerry/reg-me-up/issues/22) |
-| C-03 | clean clone เติม `.env.example` แล้ว build/run กับ DB / คำสั่ง §3 | **ผ่านเฉพาะ local โดย Codex**, tested app commit `a231b89149eefd2a90be86557e0ff9ec6e86e267`; peer review **TBD** | [คำสั่ง, ผลและ image IDs](../../sprints/sprint-1/lab5-docker-evidence.md); [#19](https://github.com/JeffMerry/reg-me-up/issues/19) |
+| C-03 | clean clone เติม `.env.example` แล้ว build/run กับ DB / คำสั่ง §3 | **ผ่านเฉพาะ local โดย Codex**, tested app commit `a231b89149eefd2a90be86557e0ff9ec6e86e267`; PR #16 approved/merged; teammate clean-clone rerun ยังไม่ยืนยัน | [คำสั่ง, ผลและ image IDs](lab5-docker-evidence.md); [#19](https://github.com/JeffMerry/reg-me-up/issues/19) |
 | C-04 | public URL: Organizer เผยแพร่ → Participant ลงทะเบียน → อย่างน้อยหนึ่งกรณีผิดกฎหรือไม่มีสิทธิ์ | **ยังไม่ทดสอบบน Cloud / commit TBD** | URL และ screenshots **TBD**; [#21](https://github.com/JeffMerry/reg-me-up/issues/21) |
-| C-05 | record identifiers เดิมอยู่หลัง application restart **และ** แยกตรวจอีกครั้งหลัง redeploy | **บางส่วน:** local Docker restart ผ่าน; cloud restart/redeploy ยังไม่ทดสอบ / release commit **TBD** | [local evidence](../../sprints/sprint-1/lab5-docker-evidence.md); ภาพก่อน/หลังพร้อม URL, run และ revision **TBD**; [#24](https://github.com/JeffMerry/reg-me-up/issues/24) |
+| C-05 | record identifiers เดิมอยู่หลัง application restart **และ** แยกตรวจอีกครั้งหลัง redeploy | **บางส่วน:** local Docker restart ผ่าน; cloud restart/redeploy ยังไม่ทดสอบ / release commit **TBD** | [local evidence](lab5-docker-evidence.md); ภาพก่อน/หลังพร้อม URL, run และ revision **TBD**; [#24](https://github.com/JeffMerry/reg-me-up/issues/24) |
 | C-06 | release แรกและ visible change รอบถัดไปผ่าน reviewed staging → main → deploy; running revision ตรง commit | **ยังไม่ทดสอบ / commit TBD** | PR, pipeline run, image และ revision **TBD**; [#23](https://github.com/JeffMerry/reg-me-up/issues/23) |
 
 Evidence index สำหรับงานส่ง: ใช้ตาราง C-01–C-06 นี้เป็นจุดเริ่มต้น แล้วจัด index อย่างน้อยหนึ่งแถวต่อ rubric part พร้อม artifact/direct link, IDs/version และผลจริง รวม PDF Answer Part 0–4 ตาม [#25](https://github.com/JeffMerry/reg-me-up/issues/25); ตำแหน่งไฟล์ index/PDF และลิงก์ส่งจริง **TBD** ไม่ถือว่าตารางนี้คือชุดส่งท้ายที่เสร็จแล้ว

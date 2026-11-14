@@ -2,6 +2,8 @@
 
 Status: design for teammate review. No deployment or test result is claimed here.
 
+Subsequent status: [PR #16](https://github.com/JeffMerry/reg-me-up/pull/16) received teammate approval and was merged into `lab5-staging`; actual local verification is recorded in [Docker evidence](lab5-docker-evidence.md).
+
 ## Contract
 
 - A root multi-stage Dockerfile builds the npm workspaces and runs the built frontend and Express API on one `PORT`, listening on all interfaces. SPA routes fall back to the frontend, but unknown `/api` routes never return the frontend.

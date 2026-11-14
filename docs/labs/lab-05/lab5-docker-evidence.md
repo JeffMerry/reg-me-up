@@ -2,6 +2,8 @@
 
 วันที่ 14 พฤศจิกายน 2026 (Asia/Bangkok), ผู้รัน Codex; peer review **รอดำเนินการ**. ทดสอบ application จาก clean clone ของ PR #16 ที่ commit `a231b89149eefd2a90be86557e0ff9ec6e86e267` โดยเริ่มจาก working tree สะอาด; การทดสอบไม่ใช่ GCP deploy หรือ cloud redeploy. Docker build ใช้ cached layers สำหรับ base/dependencies ตามปกติ ไม่ได้ใช้ `--no-cache`.
 
+สถานะเพิ่มเติมภายหลัง: [PR #16](https://github.com/JeffMerry/reg-me-up/pull/16) ได้รับ approval จาก THN4 และ merge เข้า `lab5-staging` เมื่อ 14 พฤศจิกายน 2026; approval ของ PR ไม่ได้ยืนยันว่าเพื่อนรัน clean clone ซ้ำเอง
+
 หลัง Docker build จาก commit ข้างต้น ได้คัดลอก smoke-test helper เข้า clone แยกเพื่อรัน browser check; helper ถูกเพิ่มใน PR ภายหลังและไม่ใช่ส่วนหนึ่งของ commit/image ที่ทดสอบ. SHA-256 ของ helper ที่ใช้: `da0b762dcefa8a04d44a186e209d00eba7bde07b55d187a3d6d91ca95b59c0a9`. ไฟล์ helper ที่รวมใน PR คือ [`scripts/lab5-docker-smoke.cjs`](../../../scripts/lab5-docker-smoke.cjs). Commit เอกสาร/helper หลังจากนี้ไม่ได้รับการอ้างว่าเป็น tested app commit.
 
 ## Target และ setup
@@ -10,7 +12,7 @@
 - ใช้ Compose project **`regmeup-c03-a231-1411`**, named volume ของ project นั้น, PostgreSQL host port `55434`, web port `5176`; ตรวจชื่อ project/volume ว่ายังไม่มีมาก่อนเริ่ม. ไม่ใช้ volume หรือ DB ปกติของผู้ใช้.
 - คัดลอก `server/.env.example` เป็น `.env` ภายใน clone แล้วปรับ port ไป `55434` และตั้ง session secret สังเคราะห์ในเครื่อง ไม่บันทึกค่าลับในเอกสาร. ตั้ง `REGMEUP_PG_PORT=55434`, `REGMEUP_WEB_PORT=5176`, `REGMEUP_APP_ORIGIN=http://localhost:5176` และ `SEED_PASSWORD` สังเคราะห์ใน environment.
 - จาก root ของ clone รัน `npm ci` (ผ่าน; ติดตั้งจาก lockfile), `docker compose -p regmeup-c03-a231-1411 up -d --wait`, `npm run db:generate`, `npm run db:migrate` และ `npm run db:seed` โดยตั้ง `ALLOW_SYNTHETIC_SEED=1`. Migration `20261111000000_initial` สำเร็จและ seed รายงาน `Synthetic fixtures are present.`
-- เตรียม `regmeup_test` ที่แยกจาก app DB: ตั้ง `DATABASE_URL` เป็น `TEST_DATABASE_URL` สำหรับ `npm run db:migrate` และ `npm run db:seed`, จากนั้นติดตั้ง marker ผ่าน `docker/postgres/enable-test-guard.sql` กับ `docker compose -p regmeup-c03-a231-1411 exec -T postgres psql -v ON_ERROR_STOP=1 -U regmeup_app -d regmeup_test`. ตั้ง `DATABASE_URL` กลับเป็น app DB ก่อน integration test ตาม [deployment.md §3](../../labs/lab-05/deployment.md#3-build-test-และ-run-จาก-clean-clone).
+- เตรียม `regmeup_test` ที่แยกจาก app DB: ตั้ง `DATABASE_URL` เป็น `TEST_DATABASE_URL` สำหรับ `npm run db:migrate` และ `npm run db:seed`, จากนั้นติดตั้ง marker ผ่าน `docker/postgres/enable-test-guard.sql` กับ `docker compose -p regmeup-c03-a231-1411 exec -T postgres psql -v ON_ERROR_STOP=1 -U regmeup_app -d regmeup_test`. ตั้ง `DATABASE_URL` กลับเป็น app DB ก่อน integration test ตาม [deployment.md §3](deployment.md#3-build-test-และ-run-จาก-clean-clone).
 
 ## Automated tests และ Docker image
 
