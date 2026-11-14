@@ -1,6 +1,6 @@
 # Lab 5 Episode 4 — PR CI contract and test design
 
-Status: implementation planned; no passing GitHub Actions run or enforced required check is claimed by this document.
+Status: workflow implemented on the Episode 4 branch; no passing GitHub Actions run or enforced required check is claimed by this document. The initial design was committed before implementation.
 
 ## Contract
 

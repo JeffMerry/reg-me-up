@@ -14,7 +14,7 @@
 | Migration | Prisma Migrate 7.10.1 ผ่าน `npm run db:migrate` ซึ่งตรวจ migration history ก่อน deploy |
 | Container | [Dockerfile](../../../Dockerfile) สร้าง frontend และ backend ด้วย npm workspaces แล้วเสิร์ฟ UI และ API จาก image เดียว/ origin เดียว; [compose.yaml](../../../compose.yaml) มี PostgreSQL, migration และ app profile สำหรับเครื่องพัฒนา |
 | GCP — แผน | Cloud Run รัน image, Artifact Registry เก็บ image, Cloud SQL for PostgreSQL เก็บข้อมูล, Secret Manager เก็บค่าลับ; ชื่อและการตั้งค่าจริง **TBD** |
-| CI/CD — แผน | GitHub Actions ตรวจ PR และ deploy จาก `main` โดยใช้ Workload Identity Federation ตามแนวทางแล็บ; **ยังไม่มี workflow ใน branch นี้ และยังไม่ทดสอบบน GCP** |
+| CI/CD | [CI and Docker Build](../../../.github/workflows/ci-docker.yml) ใน branch งาน Episode 4 ถูกออกแบบให้ตรวจ PR เข้า `lab5-staging`/`main`; ผล GitHub Actions และการบังคับ required check **รอตรวจจริง**. Deploy จาก `main` และ Workload Identity Federation ยังเป็นแผน **TBD** |
 
 บริการ GCP ที่วางแผนไว้ตรงกับ reference stack; การสร้างและเลือกค่าจริงยังไม่ยืนยัน ความต่างจากตัวอย่าง TokTickIT คือ RegMeUp ใช้ Node 22 และ PostgreSQL 17.11 ใน local แทนเวอร์ชันของตัวอย่าง, ใช้ npm workspaces และ image เดียวสำหรับ local app กับ Cloud ที่วางแผนไว้ เพื่อให้ frontend/API ใช้ origin เดียว และคง migration-history guard กับ synthetic seed ที่ห้าม production ของ RegMeUp ไว้ การเลือก PostgreSQL version บน Cloud SQL และการเชื่อมต่อ **TBD** ไม่อ้างว่าตรงกับ local โดยอัตโนมัติ
 
@@ -45,6 +45,8 @@
 | `REGMEUP_DOCKER_SESSION_SECRET` | ส่ง `SESSION_SECRET` ให้ Compose app | ไม่จำเป็นเฉพาะ local; Compose มี fallback สาธารณะสำหรับ local เท่านั้น | **Yes** เมื่อกำหนดจริง | shell/Compose; ห้ามใช้ fallback กับ Cloud |
 | `E2E_APP_DATABASE_URL` | ระบุ app DB เพื่อตรวจว่า E2E test DB แยกจริง | จำเป็นสำหรับ Playwright tests | **Yes** | ผู้ทดสอบกำหนดจาก test environment |
 | `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` | เลือก Chromium executable ที่ติดตั้งไว้ | ไม่จำเป็น; ปกติใช้ browser ที่ Playwright จัดการ | No | ผู้ทดสอบ / CI |
+| `CI_PG_PORT`, `CI_PG_CONTAINER` | port และ container ID ของ PostgreSQL service สำหรับ CI | เฉพาะ CI setup; มาจาก `job.services.postgres` | No | GitHub Actions service context; ไม่ใช้กับ Cloud app |
+| `GITHUB_ENV`, `GITHUB_SHA`, `GITHUB_STEP_SUMMARY` | ส่งค่าระหว่าง CI steps, ระบุ commit ที่ runner ตรวจ และเขียนสรุป | GitHub Actions กำหนดอัตโนมัติใน workflow | No | GitHub Actions runner |
 | `LAB5_SMOKE_BASE_URL` | origin ของแอปสำหรับ local Docker smoke test | จำเป็นสำหรับ `scripts/lab5-docker-smoke.cjs`; รับเฉพาะ HTTP localhost | No | ผู้ทดสอบกำหนดให้ตรงกับพอร์ต Compose แยก |
 | `LAB5_SMOKE_CONFIRM` | ยืนยันว่าผู้รันเลือกเป้าหมาย local ที่แยกเพื่อทดสอบ | ต้องเป็น `isolated-local-only` เมื่อรัน smoke test | No | ผู้ทดสอบตั้งใน shell หลังตรวจ project/DB |
 | `LAB5_SMOKE_RECORD_PATH` | ที่เก็บ ID ของกิจกรรมและทะเบียนสังเคราะห์สำหรับตรวจหลัง restart | จำเป็นสำหรับ smoke test ทั้ง `create` และ `verify` | No | ผู้ทดสอบตั้ง path ของไฟล์ชั่วคราวในเครื่อง |
@@ -177,7 +179,7 @@ Synthetic seed สร้าง Participant 3 บัญชี, Organizer 2 บั
 เส้นทางที่ทีมเลือก: `Issue → feature/fix branch จาก lab5-staging → PR เข้า lab5-staging → เพื่อน review + CI ผ่าน → merge → release PR lab5-staging → main → เพื่อน review + CI ผ่าน → merge → deploy จาก main` ผู้เขียนไม่ approve PR ของตนเอง; ติด label งาน Lab 5 และบันทึกหลักฐานจริงตาม handout
 
 1. สร้าง Issue และ branch จาก `lab5-staging` ล่าสุด ทำการเปลี่ยนแปลงพร้อม tests แล้วเปิด PR เข้า staging
-2. แผน [#20](https://github.com/JeffMerry/reg-me-up/issues/20): ให้ CI รันทุก PR เข้า `lab5-staging` และ `main` รวม install, build, automated tests และ Docker build; ให้เพื่อนตรวจและตรวจผล CI ก่อน merge และคง CI/history ไว้หลัง Lab 5 ชื่อ workflow/job จริงและ required check **TBD / ยังไม่ตั้งค่าใน repo นี้** อย่าอ้างว่า check ผ่านเพียงเพราะไม่มี check
+2. งาน [#20](https://github.com/JeffMerry/reg-me-up/issues/20): workflow `CI and Docker Build` job `test-and-docker` กำหนดให้รันใน PR เข้า `lab5-staging` และ `main` รวม install, migrations/seed ใน DB ชั่วคราว, unit/integration/Playwright, typecheck/build และ Docker build พร้อม `workflow_call`. ให้เพื่อนตรวจและตรวจผล CI ก่อน merge และคง CI/history ไว้หลัง Lab 5; การรันจริงและชื่อ check ที่ GitHub แสดง **รอตรวจใน PR**, การตั้งเป็น required check **TBD ใน Episode 6** อย่าอ้างว่าผ่านเพียงเพราะมี workflow
 3. เปิด release PR จาก `lab5-staging` เข้า `main` ให้ผู้ที่ไม่ใช่ผู้เขียน review และตรวจ CI ผ่านก่อน merge
 4. **แผน [#23](https://github.com/JeffMerry/reg-me-up/issues/23) ยังไม่ทำ:** workflow จาก `main` build/test, สร้าง image, รัน migration, deploy และ smoke test; บันทึก release แรก แล้วทำ visible change อีกครั้งผ่าน reviewed staging PR → release PR → pipeline พร้อมหลักฐาน commit → image → running revision ของทั้งสอง release; trigger, ชื่อ workflow, job, image tag/digest และการอนุมัติภายใน pipeline **TBD** หากมี manual approval ต้องบันทึกชื่อ environment และตำแหน่งปุ่มหลังตั้งค่าจริง
 5. ตรวจผลใน GitHub → Actions → workflow/run และ Cloud Run → service → revision/logs รวมทั้ง health/readiness และ domain workflow ที่ public URL; ชื่อ run/URL จริง **TBD**
