@@ -14,7 +14,8 @@
     "test:integration": "npm run test:integration --workspace server",
     "db:generate": "npm run db:generate --workspace server",
     "db:migrate": "npm run db:migrate --workspace server",
-    "db:seed": "npm run db:seed --workspace server"
+    "db:seed": "npm run db:seed --workspace server",
+    "db:provision-demo": "npm run db:provision-demo --workspace server"
   },
   "devDependencies": { "@playwright/test": "1.65.0", "@types/node": "22.20.5", "typescript": "7.0.2" }
 }
