@@ -17,5 +17,39 @@ services:
       retries: 20
       start_period: 10s
 
+  migrate:
+    profiles: [app]
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://regmeup_app:regmeup-local-only@postgres:5432/regmeup_dev
+    command: ["npm", "run", "db:migrate"]
+    restart: "no"
+
+  app:
+    profiles: [app]
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DATABASE_URL: postgresql://regmeup_app:regmeup-local-only@postgres:5432/regmeup_dev
+      SESSION_SECRET: ${REGMEUP_DOCKER_SESSION_SECRET:-local-docker-session-secret-not-for-cloud}
+      APP_ORIGIN: ${REGMEUP_APP_ORIGIN:-http://localhost:5173}
+    ports:
+      - "127.0.0.1:${REGMEUP_WEB_PORT:-5173}:3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+      start_period: 10s
+
 volumes:
   regmeup_postgres_data:

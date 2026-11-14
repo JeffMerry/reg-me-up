@@ -32,6 +32,27 @@ docker compose ps
 
 On a new named volume PostgreSQL creates `regmeup_dev` and an initially empty `regmeup_test`. The volume keeps data across stops and restarts. `docker compose stop` stops the service without deleting data; `docker compose up -d --wait` starts it again. Initialization scripts only run on the first creation of a volume. If port 55432 is already in use, set `REGMEUP_PG_PORT` before starting Compose and change the port in both URLs in `server/.env` to match. Do not delete an existing volume to troubleshoot without first deciding what data to preserve.
 
+### Run the app in Docker (local development)
+
+The optional `app` Compose profile builds a single image containing the React frontend and API, checks and applies migrations, and starts the app at `http://localhost:5173` using the existing local PostgreSQL volume. It does not seed accounts automatically:
+
+```powershell
+docker compose --profile app up --build -d --wait
+docker compose --profile app ps -a
+```
+
+To create the documented synthetic local fixtures, explicitly supply the same synthetic password used when first seeding the database:
+
+```powershell
+$env:SEED_PASSWORD = 'synthetic-password-for-test-only'
+docker compose --profile app run --rm -e NODE_ENV=development -e ALLOW_SYNTHETIC_SEED=1 -e SEED_PASSWORD migrate npm run db:seed
+Remove-Item Env:SEED_PASSWORD
+```
+
+Run this only against the local development database. Re-running seed leaves existing accounts and their passwords unchanged. To stop the app and database while retaining their data, use `docker compose --profile app stop`; start them again with the first command. Do not use `down -v` on data you need.
+
+If port 5173 is occupied, set `REGMEUP_WEB_PORT` and `REGMEUP_APP_ORIGIN` together, for example `5175` and `http://localhost:5175`. The local Compose session-secret fallback and database credentials are for local use only. The root image defaults to production; production deployments must supply their own secret settings and reviewed HTTPS proxy configuration. Docker does not create demo/UAT accounts or perform Cloud Run deployment.
+
 The migration command uses `DATABASE_URL` from `server/.env` without resetting the database. It checks the checksums of previously applied migrations before deployment and stops if a file has been changed or removed, or if a failed migration has not been resolved. Do not bypass this check by calling Prisma deploy directly in the normal workflow:
 
 ```powershell
