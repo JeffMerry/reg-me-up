@@ -45,12 +45,15 @@
 | `REGMEUP_DOCKER_SESSION_SECRET` | ส่ง `SESSION_SECRET` ให้ Compose app | ไม่จำเป็นเฉพาะ local; Compose มี fallback สาธารณะสำหรับ local เท่านั้น | **Yes** เมื่อกำหนดจริง | shell/Compose; ห้ามใช้ fallback กับ Cloud |
 | `E2E_APP_DATABASE_URL` | ระบุ app DB เพื่อตรวจว่า E2E test DB แยกจริง | จำเป็นสำหรับ Playwright tests | **Yes** | ผู้ทดสอบกำหนดจาก test environment |
 | `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` | เลือก Chromium executable ที่ติดตั้งไว้ | ไม่จำเป็น; ปกติใช้ browser ที่ Playwright จัดการ | No | ผู้ทดสอบ / CI |
+| `LAB5_SMOKE_BASE_URL` | origin ของแอปสำหรับ local Docker smoke test | จำเป็นสำหรับ `scripts/lab5-docker-smoke.cjs`; รับเฉพาะ HTTP localhost | No | ผู้ทดสอบกำหนดให้ตรงกับพอร์ต Compose แยก |
+| `LAB5_SMOKE_CONFIRM` | ยืนยันว่าผู้รันเลือกเป้าหมาย local ที่แยกเพื่อทดสอบ | ต้องเป็น `isolated-local-only` เมื่อรัน smoke test | No | ผู้ทดสอบตั้งใน shell หลังตรวจ project/DB |
+| `LAB5_SMOKE_RECORD_PATH` | ที่เก็บ ID ของกิจกรรมและทะเบียนสังเคราะห์สำหรับตรวจหลัง restart | จำเป็นสำหรับ smoke test ทั้ง `create` และ `verify` | No | ผู้ทดสอบตั้ง path ของไฟล์ชั่วคราวในเครื่อง |
 
 ## 3. Build, test และ run จาก clean clone
 
 คำสั่งด้านล่างเป็น PowerShell บน Windows และรันจาก **root ของ repository** เว้นแต่ระบุอย่างอื่น ต้องมี Git, Node.js **22.23.4**, npm **10.9.9**, Docker Desktop ที่ใช้ Linux containers และ Docker Compose หากรัน browser tests ต้องติดตั้ง Playwright Chromium ด้วย อย่าใช้ฐานข้อมูลที่มีข้อมูลจริงสำหรับ fixtures หรือ tests
 
-**สถานะ:** คำสั่งตาม scripts และการทดสอบ Docker ที่มีอยู่; การทำขั้นตอนทั้งหมดจาก clean clone โดยสมาชิกอีกคน **ยังไม่ทดสอบ (C-03)**
+**สถานะ:** clean clone ของ commit `a231b89149eefd2a90be86557e0ff9ec6e86e267` ผ่านการติดตั้ง, migrate/seed, build/test และตรวจ UI/API/DB ใน Compose project แยกโดย Codex เมื่อ 14 พฤศจิกายน 2026; ดู [ผลและคำสั่ง](../../sprints/sprint-1/lab5-docker-evidence.md) การรันซ้ำโดยสมาชิกอีกคนยังไม่ทดสอบ และ Cloud ยังไม่ทดสอบ
 
 ```powershell
 git clone https://github.com/JeffMerry/reg-me-up.git
@@ -174,9 +177,9 @@ Synthetic seed สร้าง Participant 3 บัญชี, Organizer 2 บั
 เส้นทางที่ทีมเลือก: `Issue → feature/fix branch จาก lab5-staging → PR เข้า lab5-staging → เพื่อน review + CI ผ่าน → merge → release PR lab5-staging → main → เพื่อน review + CI ผ่าน → merge → deploy จาก main` ผู้เขียนไม่ approve PR ของตนเอง; ติด label งาน Lab 5 และบันทึกหลักฐานจริงตาม handout
 
 1. สร้าง Issue และ branch จาก `lab5-staging` ล่าสุด ทำการเปลี่ยนแปลงพร้อม tests แล้วเปิด PR เข้า staging
-2. ให้เพื่อนตรวจและตรวจผล CI ก่อน merge; workflow/job จริงและ required check ที่บังคับ merge **TBD / ยังไม่ตั้งค่าใน repo นี้** อย่าอ้างว่า check ผ่านเพียงเพราะไม่มี check
+2. แผน [#20](https://github.com/JeffMerry/reg-me-up/issues/20): ให้ CI รันทุก PR เข้า `lab5-staging` และ `main` รวม install, build, automated tests และ Docker build; ให้เพื่อนตรวจและตรวจผล CI ก่อน merge และคง CI/history ไว้หลัง Lab 5 ชื่อ workflow/job จริงและ required check **TBD / ยังไม่ตั้งค่าใน repo นี้** อย่าอ้างว่า check ผ่านเพียงเพราะไม่มี check
 3. เปิด release PR จาก `lab5-staging` เข้า `main` ให้ผู้ที่ไม่ใช่ผู้เขียน review และตรวจ CI ผ่านก่อน merge
-4. **แผน ยังไม่ทำ:** workflow จาก `main` build/test, สร้าง image, รัน migration, deploy และ smoke test; trigger, ชื่อ workflow, job, image tag/digest และการอนุมัติภายใน pipeline **TBD** หากมี manual approval ต้องบันทึกชื่อ environment และตำแหน่งปุ่มหลังตั้งค่าจริง
+4. **แผน [#23](https://github.com/JeffMerry/reg-me-up/issues/23) ยังไม่ทำ:** workflow จาก `main` build/test, สร้าง image, รัน migration, deploy และ smoke test; บันทึก release แรก แล้วทำ visible change อีกครั้งผ่าน reviewed staging PR → release PR → pipeline พร้อมหลักฐาน commit → image → running revision ของทั้งสอง release; trigger, ชื่อ workflow, job, image tag/digest และการอนุมัติภายใน pipeline **TBD** หากมี manual approval ต้องบันทึกชื่อ environment และตำแหน่งปุ่มหลังตั้งค่าจริง
 5. ตรวจผลใน GitHub → Actions → workflow/run และ Cloud Run → service → revision/logs รวมทั้ง health/readiness และ domain workflow ที่ public URL; ชื่อ run/URL จริง **TBD**
 6. บันทึก SHA ของ merge commit จาก PR และเชื่อม SHA/tag → image digest → Cloud Run revision ที่รับ traffic 100% พร้อมลิงก์หลักฐาน แนวทางใช้ full commit SHA เป็น image tag และ deploy ด้วย digest เป็น **ข้อเสนอ ยังไม่ตั้งค่า** วิธีตรวจว่า public URL เสิร์ฟ commit ใดต้องยืนยัน mapping จาก revision/traffic และหลักฐาน image digest; ยังไม่มี endpoint แสดง commit ที่ตรวจยืนยันแล้ว
 
@@ -188,14 +191,14 @@ Synthetic seed สร้าง Participant 3 บัญชี, Organizer 2 บั
 
 | Check | สิ่งที่ต้องพิสูจน์ / คำสั่งหรือ test | ผล / commit | หลักฐาน |
 |---|---|---|---|
-| C-01 | PR ปกติรัน build และ automated tests ทั้งหมดผ่าน / CI run **TBD** | **ยังไม่ทดสอบ / commit TBD** | CI run link **TBD** |
-| C-02 | temporary PR ที่ test ล้มเหลวถูกบล็อก merge / required check **TBD** | **ยังไม่ทดสอบ / commit TBD** | PR, failed check และภาพ blocked merge **TBD** |
-| C-03 | clean clone เติม `.env.example` แล้ว build/run กับ DB / คำสั่ง §3 | **ยังไม่ทดสอบครบจาก clean clone / commit TBD** | local Docker ใช้แอปและ DB ได้บางส่วนใน [evidence](../../sprints/sprint-1/lab5-docker-evidence.md); ไม่ใช่หลักฐาน clean clone |
-| C-04 | public URL: login, domain action และ rule rejection/access restriction | **ยังไม่ทดสอบ / commit TBD** | URL และ screenshots **TBD** |
-| C-05 | record เดิมยังอยู่หลัง restart และ redeploy | **บางส่วน:** local Docker restart ผ่าน; cloud redeploy ยังไม่ทดสอบ / commit ที่ทดสอบ **TBD** | [local evidence](../../sprints/sprint-1/lab5-docker-evidence.md); ภาพก่อน/หลัง cloud redeploy **TBD** |
-| C-06 | reviewed change ผ่าน staging → main → deploy และ running revision ตรง commit | **ยังไม่ทดสอบ / commit TBD** | PR, pipeline run และ revision **TBD** |
+| C-01 | PR ปกติรัน build, automated tests และ Docker build บน staging/main / CI run **TBD** | **ยังไม่ทดสอบ / commit TBD** | CI run link **TBD**; [#20](https://github.com/JeffMerry/reg-me-up/issues/20) |
+| C-02 | temporary PR ที่ test ล้มเหลวถูกบล็อก merge แล้วปิด PR โดย **ไม่ merge** และเก็บประวัติ | **ยังไม่ทดสอบ / commit TBD** | PR, failed check และภาพ blocked merge **TBD**; [#22](https://github.com/JeffMerry/reg-me-up/issues/22) |
+| C-03 | clean clone เติม `.env.example` แล้ว build/run กับ DB / คำสั่ง §3 | **ผ่านเฉพาะ local โดย Codex**, tested app commit `a231b89149eefd2a90be86557e0ff9ec6e86e267`; peer review **TBD** | [คำสั่ง, ผลและ image IDs](../../sprints/sprint-1/lab5-docker-evidence.md); [#19](https://github.com/JeffMerry/reg-me-up/issues/19) |
+| C-04 | public URL: Organizer เผยแพร่ → Participant ลงทะเบียน → อย่างน้อยหนึ่งกรณีผิดกฎหรือไม่มีสิทธิ์ | **ยังไม่ทดสอบบน Cloud / commit TBD** | URL และ screenshots **TBD**; [#21](https://github.com/JeffMerry/reg-me-up/issues/21) |
+| C-05 | record identifiers เดิมอยู่หลัง application restart **และ** แยกตรวจอีกครั้งหลัง redeploy | **บางส่วน:** local Docker restart ผ่าน; cloud restart/redeploy ยังไม่ทดสอบ / release commit **TBD** | [local evidence](../../sprints/sprint-1/lab5-docker-evidence.md); ภาพก่อน/หลังพร้อม URL, run และ revision **TBD**; [#24](https://github.com/JeffMerry/reg-me-up/issues/24) |
+| C-06 | release แรกและ visible change รอบถัดไปผ่าน reviewed staging → main → deploy; running revision ตรง commit | **ยังไม่ทดสอบ / commit TBD** | PR, pipeline run, image และ revision **TBD**; [#23](https://github.com/JeffMerry/reg-me-up/issues/23) |
 
-Local verification ที่บันทึกเมื่อทำ Episode 3: unit **55/55**, integration **40/40**, typecheck/build ผ่าน; Docker HTTP health/readiness, SPA route, API 404, Organizer login, event creation และ persistence หลัง restart ผ่านบนฐานข้อมูลทดสอบแยก ดู [PR #16](https://github.com/JeffMerry/reg-me-up/pull/16) และ [local evidence](../../sprints/sprint-1/lab5-docker-evidence.md) การรันเกิดก่อน commit ผลลัพธ์สุดท้าย จึงยังไม่ระบุ tested SHA ว่าได้รับการตรวจแบบ exact commit
+Evidence index สำหรับงานส่ง: ใช้ตาราง C-01–C-06 นี้เป็นจุดเริ่มต้น แล้วจัด index อย่างน้อยหนึ่งแถวต่อ rubric part พร้อม artifact/direct link, IDs/version และผลจริง รวม PDF Answer Part 0–4 ตาม [#25](https://github.com/JeffMerry/reg-me-up/issues/25); ตำแหน่งไฟล์ index/PDF และลิงก์ส่งจริง **TBD** ไม่ถือว่าตารางนี้คือชุดส่งท้ายที่เสร็จแล้ว
 
 ## 8. Rollback และ cost control
 
