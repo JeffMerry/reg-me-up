@@ -49,6 +49,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Offline deployment script checks
+        run: |
+          bash -n deploy/deploy.sh
+          python3 -m unittest discover -s deploy/tests -p 'test_*.py'
+
       - name: Configure disposable databases and synthetic credentials
         env:
           CI_PG_PORT: ${{ job.services.postgres.ports['5432'] }}
