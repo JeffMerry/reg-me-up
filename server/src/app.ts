@@ -10,7 +10,8 @@ import { organizerRegistrationHandlers } from './organizer-registrations.js';
 export function createApp(checkDatabase: () => Promise<void>, auth?: { config: ServerConfig; pool: pg.Pool; prisma: PrismaClient; now?: () => number }) {
   const app = express();
   app.disable('x-powered-by');
-  app.get('/api/health', async (_req, res) => {
+  if (auth?.config.nodeEnv === 'production' && auth.config.trustProxyHops === 1) app.set('trust proxy', 1);
+  app.get(['/api/health', '/api/ready'], async (_req, res) => {
     try { await checkDatabase(); res.status(200).json({ status: 'ok' }); }
     catch { res.status(503).json({ status: 'unavailable' }); }
   });

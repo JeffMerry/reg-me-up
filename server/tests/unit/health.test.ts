@@ -11,8 +11,10 @@ describe('health endpoint', () => {
     await new Promise<void>(resolve => server!.once('listening', resolve));
     const address = server.address();
     if (!address || typeof address === 'string') throw new Error('No HTTP address');
-    const response = await fetch(`http://127.0.0.1:${address.port}/api/health`);
-    expect(response.status).toBe(status);
-    expect(await response.json()).toEqual({ status: result });
+    for (const path of ['/api/health', '/api/ready']) {
+      const response = await fetch(`http://127.0.0.1:${address.port}${path}`);
+      expect(response.status).toBe(status);
+      expect(await response.json()).toEqual({ status: result });
+    }
   });
 });
