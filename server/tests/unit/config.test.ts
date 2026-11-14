@@ -18,6 +18,13 @@ describe('server configuration', () => {
     expect(() => parseConfig({ ...valid, PORT: '65536' })).toThrow();
     expect(() => parseConfig({ ...valid, APP_ORIGIN: 'https://example.com/path' })).toThrow();
   });
+  it('only enables one trusted proxy with explicit production configuration', () => {
+    expect(parseConfig(valid).trustProxyHops).toBeUndefined();
+    expect(parseConfig({ ...valid, NODE_ENV: 'production', TRUST_PROXY_HOPS: '1' }).trustProxyHops).toBe(1);
+    for (const settings of [{ TRUST_PROXY_HOPS: '1' }, { NODE_ENV: 'production', TRUST_PROXY_HOPS: '2' }, { NODE_ENV: 'production', TRUST_PROXY_HOPS: 'true' }]) {
+      expect(() => parseConfig({ ...valid, ...settings })).toThrow('Invalid server configuration');
+    }
+  });
   it('never includes database credentials or the secret in errors', () => {
     try { parseConfig({ ...valid, DATABASE_URL: 'postgresql://sensitive:secret@', PORT: '-1' }); }
     catch (error) { expect(String(error)).not.toContain('secret'); return; }

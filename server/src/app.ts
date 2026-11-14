@@ -7,10 +7,11 @@ import { eventHandlers } from './events.js';
 import { registrationHandlers } from './registrations.js';
 import { organizerRegistrationHandlers } from './organizer-registrations.js';
 
-export function createApp(checkDatabase: () => Promise<void>, auth?: { config: ServerConfig; pool: pg.Pool; prisma: PrismaClient; now?: () => number }) {
+export function createApp(checkDatabase: () => Promise<void>, auth?: { config: ServerConfig; pool: pg.Pool; prisma: PrismaClient; now?: () => number }, frontendDirectory?: string) {
   const app = express();
   app.disable('x-powered-by');
-  app.get('/api/health', async (_req, res) => {
+  if (auth?.config.nodeEnv === 'production' && auth.config.trustProxyHops === 1) app.set('trust proxy', 1);
+  app.get(['/api/health', '/api/ready'], async (_req, res) => {
     try { await checkDatabase(); res.status(200).json({ status: 'ok' }); }
     catch { res.status(503).json({ status: 'unavailable' }); }
   });
@@ -34,6 +35,11 @@ export function createApp(checkDatabase: () => Promise<void>, auth?: { config: S
     app.get('/api/me/registrations', h.requireUser, h.requireRole('PARTICIPANT'), registrations.ownList);
     app.get('/api/me/registrations/:registrationId', h.requireUser, h.requireRole('PARTICIPANT'), registrations.ownDetail);
     app.use(h.errorHandler);
+  }
+  if (frontendDirectory) {
+    const staticFiles = express.static(frontendDirectory, { index: false });
+    app.use((req, res, next) => /^\/api(?:\/|$)/i.test(req.path) ? next() : staticFiles(req, res, next));
+    app.get(/^\/(?!api(?:\/|$)).*/i, (_req, res) => { res.sendFile('index.html', { root: frontendDirectory }); });
   }
   return app;
 }

@@ -32,6 +32,27 @@ docker compose ps
 
 On a new named volume PostgreSQL creates `regmeup_dev` and an initially empty `regmeup_test`. The volume keeps data across stops and restarts. `docker compose stop` stops the service without deleting data; `docker compose up -d --wait` starts it again. Initialization scripts only run on the first creation of a volume. If port 55432 is already in use, set `REGMEUP_PG_PORT` before starting Compose and change the port in both URLs in `server/.env` to match. Do not delete an existing volume to troubleshoot without first deciding what data to preserve.
 
+### Run the app in Docker (local development)
+
+The optional `app` Compose profile builds a single image containing the React frontend and API, checks and applies migrations, and starts the app at `http://localhost:5173` using the existing local PostgreSQL volume. It does not seed accounts automatically:
+
+```powershell
+docker compose --profile app up --build -d --wait
+docker compose --profile app ps -a
+```
+
+To create the documented synthetic local fixtures, explicitly supply the same synthetic password used when first seeding the database:
+
+```powershell
+$env:SEED_PASSWORD = 'synthetic-password-for-test-only'
+docker compose --profile app run --rm -e NODE_ENV=development -e ALLOW_SYNTHETIC_SEED=1 -e SEED_PASSWORD migrate npm run db:seed
+Remove-Item Env:SEED_PASSWORD
+```
+
+Run this only against the local development database. Re-running seed leaves existing accounts and their passwords unchanged. To stop the app and database while retaining their data, use `docker compose --profile app stop`; start them again with the first command. Do not use `down -v` on data you need.
+
+If port 5173 is occupied, set `REGMEUP_WEB_PORT` and `REGMEUP_APP_ORIGIN` together, for example `5175` and `http://localhost:5175`. The local Compose session-secret fallback and database credentials are for local use only. The root image defaults to production; production deployments must supply their own secret settings and reviewed HTTPS proxy configuration. Docker does not create demo/UAT accounts or perform Cloud Run deployment.
+
 The migration command uses `DATABASE_URL` from `server/.env` without resetting the database. It checks the checksums of previously applied migrations before deployment and stops if a file has been changed or removed, or if a failed migration has not been resolved. Do not bypass this check by calling Prisma deploy directly in the normal workflow:
 
 ```powershell
@@ -63,6 +84,14 @@ npm run dev:client
 ```
 
 The frontend is available at `http://localhost:5173`, and Vite proxies `/api` to the server at `http://localhost:3000`. `/api/health` returns 200 when the database is reachable and 503 otherwise. F-01 supplies login, logout and current identity; F-02 supplies public event discovery and Organizer publication. Registration belongs to F-03. Use the synthetic accounts described by the seed and the password supplied when first creating them.
+
+`/api/ready` performs the same database availability check and returns 200 or 503 without exposing connection errors. It is intended for deployment readiness checks.
+
+For a production deployment behind exactly one trusted HTTPS-terminating proxy, set `TRUST_PROXY_HOPS=1`; leave it unset for local use and deployments without that trusted proxy. Enable it only when direct access to the application is restricted and the proxy controls forwarded protocol headers. Production uses Secure session cookies. Set `APP_ORIGIN` to the exact public browser origin and provide a unique `SESSION_SECRET` and database connection using the deployment's secret management. These settings have not yet been verified on Cloud Run.
+
+The synthetic seed deliberately refuses `NODE_ENV=production`. A separate, explicit `npm run db:provision-demo` command is available for a **dedicated course demo/UAT database only**, never a database containing real users. After migration and teammate review, an authorized operator must provide `DATABASE_URL`, the actual database name in `DEMO_EXPECTED_DATABASE`, `ALLOW_DEMO_PROVISION=1`, and separate `DEMO_PARTICIPANT_PASSWORD` and `DEMO_ORGANIZER_PASSWORD` values, each 16–1024 UTF-8 bytes. Supply secrets through an appropriate secure mechanism such as Secret Manager; do not place them in files, command history, logs, screenshots, PRs or chat. The operator must verify the project, database and backup before execution: checking the database name is a safeguard, not proof that the target is a safe demo environment.
+
+The command creates `participant@example.test` and `organizer@example.test` with unique IDs and independently salted Argon2id hashes. It reports `created` or `existing` per role without printing passwords. Existing matching accounts retain their current password and details, so supplying a new password when rerunning does **not** reset it. A conflicting ID, email or role aborts both creations. Resetting credentials, delivering them to testers and disabling accounts after UAT require a separately agreed procedure. Run the command explicitly as an operator, not on every app startup or deployment. `tsx`, Prisma Client and the script must be present in the runtime used to execute it; the cloud image/job and secret injection are not configured yet. Cloud migration, demo provisioning and deployment have not been performed as part of this readiness change.
 
 If port 3000 is occupied, set `PORT=3001` in `server/.env`, add `REGMEUP_API_PROXY_TARGET=http://localhost:3001` to `client/.env.local`, and restart both processes. Choose a different free port if 3001 is occupied too. The Vite proxy target and backend port must match.
 

@@ -1,0 +1,119 @@
+name: CI and Docker Build
+
+on:
+  pull_request:
+    branches: [lab5-staging, main]
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-and-docker:
+    name: test-and-docker
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:17.11
+        env:
+          POSTGRES_USER: regmeup_ci
+          POSTGRES_DB: regmeup_dev
+          # Only for this disposable GitHub-hosted service; never use in production.
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432/tcp
+        options: >-
+          --health-cmd "pg_isready -U regmeup_ci -d regmeup_dev"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22.23.4
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Offline deployment script checks
+        run: |
+          bash -n deploy/deploy.sh
+          python3 -m unittest discover -s deploy/tests -p 'test_*.py'
+
+      - name: Configure disposable databases and synthetic credentials
+        env:
+          CI_PG_PORT: ${{ job.services.postgres.ports['5432'] }}
+          CI_PG_CONTAINER: ${{ job.services.postgres.id }}
+        run: |
+          set -eu
+          docker exec "$CI_PG_CONTAINER" psql -v ON_ERROR_STOP=1 -U regmeup_ci -d regmeup_dev -c 'CREATE DATABASE regmeup_test'
+          app_url="postgresql://regmeup_ci@127.0.0.1:${CI_PG_PORT}/regmeup_dev"
+          test_url="postgresql://regmeup_ci@127.0.0.1:${CI_PG_PORT}/regmeup_test"
+          seed_password="$(openssl rand -hex 24)"
+          session_secret="$(openssl rand -hex 32)"
+          for value in "$app_url" "$test_url" "$seed_password" "$session_secret"; do echo "::add-mask::$value"; done
+          {
+            printf 'DATABASE_URL=%s\n' "$app_url"
+            printf 'TEST_DATABASE_URL=%s\n' "$test_url"
+            printf 'SEED_PASSWORD=%s\n' "$seed_password"
+            printf 'SESSION_SECRET=%s\n' "$session_secret"
+            echo 'ALLOW_SYNTHETIC_SEED=1'
+            echo 'NODE_ENV=test'
+          } >> "$GITHUB_ENV"
+
+      - name: Migrate and seed isolated databases
+        env:
+          CI_PG_CONTAINER: ${{ job.services.postgres.id }}
+        run: |
+          set -eu
+          npm run db:generate
+          npm run db:migrate
+          npm run db:seed
+          DATABASE_URL="$TEST_DATABASE_URL" npm run db:migrate
+          DATABASE_URL="$TEST_DATABASE_URL" npm run db:seed
+          docker exec -i "$CI_PG_CONTAINER" psql -v ON_ERROR_STOP=1 -U regmeup_ci -d regmeup_test < docker/postgres/enable-test-guard.sql
+
+      - name: Unit tests
+        run: npm run test:unit
+
+      - name: PostgreSQL integration tests
+        run: npm run test:integration
+
+      - name: Typecheck and build
+        run: |
+          npm run typecheck
+          NODE_ENV=production npm run build
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Browser tests on isolated database
+        run: |
+          export E2E_APP_DATABASE_URL="$DATABASE_URL"
+          export DATABASE_URL="$TEST_DATABASE_URL"
+          npx playwright test
+
+      - name: Build application image
+        run: docker build --tag "regmeup-ci:${GITHUB_SHA}" .
+
+      - name: Summarize verified checks
+        run: |
+          {
+            echo 'Unit, integration and Playwright tests; typecheck, build and Docker build completed.'
+            printf 'Tested workflow commit: `%s`\n' "$GITHUB_SHA"
+            echo 'PostgreSQL and accounts were disposable CI fixtures.'
+          } >> "$GITHUB_STEP_SUMMARY"

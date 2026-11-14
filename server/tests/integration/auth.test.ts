@@ -54,6 +54,38 @@ afterAll(async () => {
 });
 
 describe('F-01 identity with PostgreSQL sessions', () => {
+  it('issues secure sessions behind an explicitly trusted HTTPS proxy', async () => {
+    const cloudOrigin = 'https://regmeup.example.test';
+    const config = { nodeEnv: 'production' as const, port: 3000, databaseUrl: process.env.TEST_DATABASE_URL!, sessionSecret: 'synthetic-cloud-session-secret-123456', appOrigin: cloudOrigin, trustProxyHops: 1 as const };
+    const cloudServer = createApp(async () => { await prisma.$queryRaw`SELECT 1`; }, { config, pool, prisma }).listen(0, '127.0.0.1');
+    let plainToken: string | undefined; let anonymousToken: string | undefined;
+    try {
+      await new Promise<void>(resolve => cloudServer.once('listening', resolve));
+      const address = cloudServer.address(); if (!address || typeof address === 'string') throw new Error('No HTTP address');
+      const cloudBase = `http://127.0.0.1:${address.port}`;
+      const plain = await fetch(`${cloudBase}/api/auth/csrf`);
+      expect(plain.status).toBe(200); expect(plain.headers.get('set-cookie')).toBeNull();
+      plainToken = (await plain.json()).data.csrfToken;
+      const forwarded = { 'X-Forwarded-Proto': 'https' };
+      const boot = await fetch(`${cloudBase}/api/auth/csrf`, { headers: forwarded });
+      const initialCookie = boot.headers.get('set-cookie');
+      expect(initialCookie).toMatch(/; Secure/i); expect(initialCookie).toMatch(/; HttpOnly/i); expect(initialCookie).toMatch(/; SameSite=Lax/i);
+      anonymousToken = (await boot.json()).data.csrfToken;
+      const signed = await fetch(`${cloudBase}/api/auth/login`, { method: 'POST', headers: { ...forwarded, Cookie: initialCookie!.split(';')[0], Origin: cloudOrigin, 'X-CSRF-Token': anonymousToken!, 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
+      expect(signed.status).toBe(200);
+      const signedCookie = signed.headers.get('set-cookie'); expect(signedCookie).toMatch(/; Secure/i);
+      const signedData = (await signed.json()).data;
+      const headers = { ...forwarded, Cookie: signedCookie!.split(';')[0] };
+      expect((await fetch(`${cloudBase}/api/auth/me`, { headers })).status).toBe(200);
+      const logout = await fetch(`${cloudBase}/api/auth/logout`, { method: 'POST', headers: { ...headers, Origin: cloudOrigin, 'X-CSRF-Token': signedData.csrfToken, 'Content-Type': 'application/json' }, body: '{}' });
+      expect(logout.status).toBe(204);
+      expect((await fetch(`${cloudBase}/api/auth/me`, { headers })).status).toBe(401);
+    } finally {
+      await new Promise<void>(resolve => cloudServer.close(() => resolve()));
+      if (plainToken) await prisma.$executeRaw`DELETE FROM sessions WHERE sess->>'csrfToken' = ${plainToken}`;
+      if (anonymousToken) await prisma.$executeRaw`DELETE FROM sessions WHERE sess->>'csrfToken' = ${anonymousToken}`;
+    }
+  });
   it('rotates SID and CSRF, persists identity and invalidates logout replay', async () => {
     const signed = await login(); expect(signed.cookie).not.toBe(signed.anon.cookie); expect(signed.data.csrfToken).not.toBe(signed.anon.token);
     expect(signed.data.user).toEqual({ id, displayName: 'Synthetic participant', role: 'PARTICIPANT' });
