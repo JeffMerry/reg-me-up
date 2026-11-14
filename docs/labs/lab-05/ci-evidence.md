@@ -1,6 +1,6 @@
 # Lab 5 Episode 4 — CI verification
 
-Status: local rehearsal completed on 14 November 2026; actual GitHub Actions run, PR review and required-check enforcement **TBD**. Do not treat local results as proof of a hosted CI run.
+Status: local rehearsal and one GitHub Actions run completed on 14 November 2026; teammate review and required-check enforcement **TBD**. Local results are separate from hosted CI evidence.
 
 ## Local rehearsal
 
@@ -12,4 +12,6 @@ Status: local rehearsal completed on 14 November 2026; actual GitHub Actions run
 
 ## GitHub Actions
 
-Workflow: [`CI and Docker Build`](../../../.github/workflows/ci-docker.yml); job ID `test-and-docker`. PR/run URL, exact tested GitHub SHA, result and test summary: **TBD — record only after the actual run**. CI on a PR to `main`, reusable `workflow_call`, required-check configuration and failing-gate proof remain separate checks. No cloud deployment was performed.
+Workflow: [`CI and Docker Build`](../../../.github/workflows/ci-docker.yml); job ID `test-and-docker`. [PR #26](https://github.com/JeffMerry/reg-me-up/pull/26) → [Actions run 43593623092](https://github.com/JeffMerry/reg-me-up/actions/runs/43593623092) completed **success**: unit **55/55**, integration **40/40**, Playwright **33/33**, typecheck, production build and Docker build passed.
+
+The run's PR head was `b95a3df9e3bd94a578d1148ca4c28b450908aaac`; checkout logs show GitHub's test merge commit `db0bb5e393a22fb57aa620352fca2cbd7f51f6a9` was actually checked out. This evidence belongs to that run; later commits require their own run. CI on a PR to `main`, reusable `workflow_call`, required-check configuration and failing-gate proof remain separate checks. No cloud deployment was performed.
