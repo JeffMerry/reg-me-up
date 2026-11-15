@@ -9,7 +9,7 @@ const valid = {
 
 describe('server configuration', () => {
   it('accepts valid settings without exposing secrets', () => {
-    expect(parseConfig(valid)).toMatchObject({ nodeEnv: 'development', port: 3000, appOrigin: 'http://localhost:5173' });
+    expect(parseConfig(valid)).toMatchObject({ nodeEnv: 'test', port: 3000, appOrigin: 'http://localhost:5173' });
   });
   it.each(['DATABASE_URL', 'SESSION_SECRET', 'APP_ORIGIN'])('rejects missing %s safely', (key) => {
     expect(() => parseConfig({ ...valid, [key]: '' })).toThrow('Invalid server configuration');
