@@ -4,6 +4,7 @@ export interface ServerConfig {
   databaseUrl: string;
   sessionSecret: string;
   appOrigin: string;
+  trustProxyHops?: 1;
 }
 
 export function parseConfig(env: NodeJS.ProcessEnv): ServerConfig {
@@ -12,12 +13,13 @@ export function parseConfig(env: NodeJS.ProcessEnv): ServerConfig {
   const databaseUrl = env.DATABASE_URL ?? '';
   const sessionSecret = env.SESSION_SECRET ?? '';
   const appOrigin = env.APP_ORIGIN ?? '';
+  const trustProxy = env.TRUST_PROXY_HOPS ?? '';
   let validUrl = false;
   let validOrigin = false;
   try { const url = new URL(databaseUrl); validUrl = ['postgres:', 'postgresql:'].includes(url.protocol) && Boolean(url.hostname && url.pathname.slice(1)); } catch { /* invalid */ }
   try { const url = new URL(appOrigin); validOrigin = ['http:', 'https:'].includes(url.protocol) && url.origin === appOrigin; } catch { /* invalid */ }
-  if (!['development', 'test', 'production'].includes(nodeEnv) || !Number.isInteger(port) || port < 1 || port > 65535 || !validUrl || sessionSecret.length < 32 || !validOrigin) {
+  if (!['development', 'test', 'production'].includes(nodeEnv) || !Number.isInteger(port) || port < 1 || port > 65535 || !validUrl || sessionSecret.length < 32 || !validOrigin || (trustProxy !== '' && (trustProxy !== '1' || nodeEnv !== 'production'))) {
     throw new Error('Invalid server configuration');
   }
-  return { nodeEnv: nodeEnv as ServerConfig['nodeEnv'], port, databaseUrl, sessionSecret, appOrigin };
+  return { nodeEnv: nodeEnv as ServerConfig['nodeEnv'], port, databaseUrl, sessionSecret, appOrigin, ...(trustProxy === '1' ? { trustProxyHops: 1 as const } : {}) };
 }
