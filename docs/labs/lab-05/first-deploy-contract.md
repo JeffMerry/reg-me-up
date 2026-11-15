@@ -1,6 +1,6 @@
 # Episode 5 — first deployment contract and test design
 
-Status at initial design commit: design before implementation; project, region, resources and actual cloud execution were unconfirmed. Subsequent operator-confirmed setup and verification are recorded in [first-deploy setup](first-deploy-setup.md); cloud execution of this script remains untested.
+Status at initial design commit: design before implementation; project, region, resources and actual cloud execution were unconfirmed. Subsequent operator-confirmed setup and release-workflow results are recorded in [first-deploy setup](first-deploy-setup.md) and [deployment.md](deployment.md). This contract describes the separate `deploy/deploy.sh` helper; it remains unexecuted and is not the routine release path.
 
 - Deploy a reviewed `main` commit using the root image. Default to `DRY_RUN=1`, without invoking gcloud or accessing secrets. Execution requires `DRY_RUN=0`, explicit project confirmation, a clean `main` checkout matching `origin/main`, and operator review of the commands.
 - Require explicit project/region and existing registry, Cloud SQL connection, runtime service account, and secret-version references. Do not create or modify billing/IAM/database users/secrets in this script. Their provisioning needs separate human approval and setup.

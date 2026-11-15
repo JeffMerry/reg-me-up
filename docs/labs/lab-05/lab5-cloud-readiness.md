@@ -1,8 +1,8 @@
 # Lab 5 Episode 2 — Cloud readiness contract and test design
 
-Status: proposed for teammate review; tests and cloud deployment not yet evidenced here.
+Status of this design snapshot: proposed and reviewed through PR #15; it is not itself a test report. Subsequent implementation and live verification are summarized below and in [deployment.md](deployment.md).
 
-Subsequent status: [PR #15](https://github.com/JeffMerry/reg-me-up/pull/15) received teammate approval and was merged into `lab5-staging` on 14 November 2026. This design snapshot does not establish a completed cloud deployment.
+Subsequent status: [PR #15](https://github.com/JeffMerry/reg-me-up/pull/15) received teammate approval and was merged into `lab5-staging` on 14 November 2026. The release deployed from `main` on 15 November; `/api/health`, `/api/ready`, `/api/events` and the home page passed workflow smoke checks, providing evidence that the deployed service is reachable and readiness can reach the database. Persistence through scale-to-zero and redeploy is recorded in [Issue #24](https://github.com/JeffMerry/reg-me-up/issues/24). Cloud-specific multi-instance behavior has not been separately load-tested.
 
 ## Scope and expected behavior
 
@@ -16,5 +16,5 @@ Subsequent status: [PR #15](https://github.com/JeffMerry/reg-me-up/pull/15) rece
 1. Check both health paths return 200 and 503 with safe bodies when the injected database check succeeds/fails.
 2. Check proxy configuration defaults off, allows the documented production opt-in, and rejects invalid or non-production opt-in values.
 3. Against the verified isolated PostgreSQL test database, simulate HTTPS termination at the configured proxy: bootstrap CSRF, verify Secure/HttpOnly cookie, log in, access current identity, and log out. Check plain HTTP without forwarded HTTPS does not receive a secure cookie. Clean up only test-created sessions/users.
-4. Run unit and integration tests, typecheck and build; record actual results separately from this design. Real Cloud Run, real HTTPS, multi-instance behavior and cloud database connectivity remain unverified until deployed.
+4. Run unit and integration tests, typecheck and build; record actual results separately from this design. The live Cloud Run, public HTTPS, and database connectivity are now verified by release smoke checks; multi-instance behavior remains unverified by a cloud load test.
 5. In a verified isolated test database with random fixture identities, create both roles; verify separate Argon2 hashes and matching passwords; run again with different passwords and verify existing rows remain unchanged; verify collision and database-name mismatch create no partial accounts. Test missing opt-in, weak/equal secrets and malformed settings without logging secret values. Delete only fixture IDs created for the test.
