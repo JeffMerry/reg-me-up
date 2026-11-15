@@ -1,0 +1,136 @@
+name: Deploy demo
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Existing full commit SHA to redeploy; leave empty to build and deploy main"
+        type: string
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-demo
+  cancel-in-progress: false
+
+jobs:
+  test:
+    if: github.ref == 'refs/heads/main' && !inputs.image_tag
+    uses: ./.github/workflows/ci-docker.yml
+
+  deploy:
+    needs: test
+    if: >-
+      always() && !cancelled() && github.ref == 'refs/heads/main' &&
+      (needs.test.result == 'success' ||
+       (github.event_name == 'workflow_dispatch' && inputs.image_tag != '' && needs.test.result == 'skipped'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: demo
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+      REGION: ${{ vars.GCP_REGION }}
+      SERVICE_NAME: regmeup
+      MIGRATE_JOB_NAME: regmeup-migrate
+      IMAGE_NAME: regmeup
+      IMAGE_TAG: ${{ inputs.image_tag || github.sha }}
+      ROLLBACK: ${{ inputs.image_tag != '' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Validate deployment settings
+        env:
+          WIF_PROVIDER: ${{ vars.WIF_PROVIDER }}
+          WIF_SERVICE_ACCOUNT: ${{ vars.WIF_SERVICE_ACCOUNT }}
+        run: |
+          set -euo pipefail
+          test -n "$PROJECT_ID" && test -n "$REGION"
+          test -n "$WIF_PROVIDER" && test -n "$WIF_SERVICE_ACCOUNT"
+          [[ "$IMAGE_TAG" =~ ^[0-9a-f]{40}$ ]] || { echo 'Image tag must be a full 40-character commit SHA.'; exit 1; }
+
+      - name: Authenticate to Google Cloud without a key
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: ${{ vars.WIF_SERVICE_ACCOUNT }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
+
+      - name: Build and push image
+        if: env.ROLLBACK != 'true'
+        run: |
+          set -euo pipefail
+          gcloud auth configure-docker "$REGION-docker.pkg.dev" --quiet
+          IMAGE="$REGION-docker.pkg.dev/$PROJECT_ID/regmeup/$IMAGE_NAME:$IMAGE_TAG"
+          docker build --tag "$IMAGE" .
+          docker push "$IMAGE"
+
+      - name: Resolve immutable image digest
+        run: |
+          set -euo pipefail
+          IMAGE="$REGION-docker.pkg.dev/$PROJECT_ID/regmeup/$IMAGE_NAME:$IMAGE_TAG"
+          DEPLOYED_IMAGE="$(gcloud artifacts docker images describe "$IMAGE" --project="$PROJECT_ID" --format='value(image_summary.fully_qualified_digest)')"
+          [[ "$DEPLOYED_IMAGE" == "$REGION-docker.pkg.dev/$PROJECT_ID/regmeup/$IMAGE_NAME@sha256:"* ]] || { echo 'Could not resolve the pushed image digest.'; exit 1; }
+          echo "DEPLOYED_IMAGE=$DEPLOYED_IMAGE" >> "$GITHUB_ENV"
+
+      - name: Run database migration
+        if: env.ROLLBACK != 'true'
+        run: |
+          set -euo pipefail
+          gcloud run jobs update "$MIGRATE_JOB_NAME" --image="$DEPLOYED_IMAGE" --project="$PROJECT_ID" --region="$REGION" --quiet
+          gcloud run jobs execute "$MIGRATE_JOB_NAME" --wait --project="$PROJECT_ID" --region="$REGION" --quiet
+
+      - name: Deploy Cloud Run service
+        run: |
+          set -euo pipefail
+          gcloud run services update "$SERVICE_NAME" --image="$DEPLOYED_IMAGE" --project="$PROJECT_ID" --region="$REGION" --quiet
+          gcloud run services update-traffic "$SERVICE_NAME" --to-latest --project="$PROJECT_ID" --region="$REGION" --quiet
+          SERVICE_URL="$(gcloud run services describe "$SERVICE_NAME" --project="$PROJECT_ID" --region="$REGION" --format='value(status.url)')"
+          test -n "$SERVICE_URL"
+          echo "SERVICE_URL=$SERVICE_URL" >> "$GITHUB_ENV"
+
+      - name: Smoke test public URL
+        run: |
+          python3 - "$SERVICE_URL" <<'PY'
+          import json
+          import sys
+          import urllib.request
+
+          base = sys.argv[1].rstrip('/')
+          checks = {
+              '/api/health': lambda body: json.loads(body).get('status') == 'ok',
+              '/api/ready': lambda body: json.loads(body).get('status') == 'ok',
+              '/api/events': lambda body: isinstance(json.loads(body), dict),
+              '/': lambda body: b'<html' in body.lower(),
+          }
+          for path, validate in checks.items():
+              request = urllib.request.Request(base + path)
+              with urllib.request.urlopen(request, timeout=30) as response:
+                  body = response.read()
+              if not validate(body):
+                  raise SystemExit(f'Smoke check failed: {path}')
+              print(f'PASS {path}')
+          PY
+
+      - name: Record deployment
+        run: |
+          {
+            echo '### RegMeUp deployment'
+            echo "- Commit image tag: `$IMAGE_TAG`"
+            echo "- Immutable image: `$DEPLOYED_IMAGE`"
+            echo "- Rollback: $ROLLBACK"
+            echo "- URL: $SERVICE_URL"
+            echo '- Smoke checks: health, readiness, events API and home page passed.'
+          } >> "$GITHUB_STEP_SUMMARY"
