@@ -1,39 +1,43 @@
 # Lab 5 Episode 3 — clean-clone local verification
 
-วันที่ 14 พฤศจิกายน 2026 (Asia/Bangkok), ผู้รัน Codex; peer review **รอดำเนินการ**. ทดสอบ application จาก clean clone ของ PR #16 ที่ commit `a231b89149eefd2a90be86557e0ff9ec6e86e267` โดยเริ่มจาก working tree สะอาด; การทดสอบไม่ใช่ GCP deploy หรือ cloud redeploy. Docker build ใช้ cached layers สำหรับ base/dependencies ตามปกติ ไม่ได้ใช้ `--no-cache`.
+Tested on November 14, 2026 (Asia/Bangkok), run by Codex. The application was tested from a clean clone of PR #16 at commit `a231b89149eefd2a90be86557e0ff9ec6e86e267`, starting with a clean working tree. [PR #16](https://github.com/JeffMerry/reg-me-up/pull/16) received teammate approval and was merged. This was not a GCP deployment or Cloud redeployment. The Docker build used cached base/dependency layers as normal; it did not use `--no-cache`.
 
-สถานะเพิ่มเติมภายหลัง: [PR #16](https://github.com/JeffMerry/reg-me-up/pull/16) ได้รับ approval จาก THN4 และ merge เข้า `lab5-staging` เมื่อ 14 พฤศจิกายน 2026; approval ของ PR ไม่ได้ยืนยันว่าเพื่อนรัน clean clone ซ้ำเอง
+Limitation: PR approval/merge does not show that a teammate repeated the clean-clone run. No teammate rerun is recorded here.
 
-หลัง Docker build จาก commit ข้างต้น ได้คัดลอก smoke-test helper เข้า clone แยกเพื่อรัน browser check; helper ถูกเพิ่มใน PR ภายหลังและไม่ใช่ส่วนหนึ่งของ commit/image ที่ทดสอบ. SHA-256 ของ helper ที่ใช้: `da0b762dcefa8a04d44a186e209d00eba7bde07b55d187a3d6d91ca95b59c0a9`. ไฟล์ helper ที่รวมใน PR คือ [`scripts/lab5-docker-smoke.cjs`](../../../scripts/lab5-docker-smoke.cjs). Commit เอกสาร/helper หลังจากนี้ไม่ได้รับการอ้างว่าเป็น tested app commit.
+After building the Docker image from the commit above, the smoke-test helper was copied into a separate clone to run browser checks. The helper was added in a later PR and was not part of the tested commit/image. SHA-256 of the helper used: `da0b762dcefa8a04d44a186e209d00eba7bde07b55d187a3d6d91ca95b59c0a9`. The helper included in the PR is [`scripts/lab5-docker-smoke.cjs`](../../../scripts/lab5-docker-smoke.cjs). Later documentation/helper commits are not claimed as the tested application commit.
 
-## Target และ setup
+## Target and setup
 
-- clone จริงจาก GitHub, branch `build/lab5-docker`; `git rev-parse HEAD` แสดง commit ข้างต้น และ initial `git status --short` ว่าง. Node `22.23.4`, npm `10.9.9`.
-- ใช้ Compose project **`regmeup-c03-a231-1411`**, named volume ของ project นั้น, PostgreSQL host port `55434`, web port `5176`; ตรวจชื่อ project/volume ว่ายังไม่มีมาก่อนเริ่ม. ไม่ใช้ volume หรือ DB ปกติของผู้ใช้.
-- คัดลอก `server/.env.example` เป็น `.env` ภายใน clone แล้วปรับ port ไป `55434` และตั้ง session secret สังเคราะห์ในเครื่อง ไม่บันทึกค่าลับในเอกสาร. ตั้ง `REGMEUP_PG_PORT=55434`, `REGMEUP_WEB_PORT=5176`, `REGMEUP_APP_ORIGIN=http://localhost:5176` และ `SEED_PASSWORD` สังเคราะห์ใน environment.
-- จาก root ของ clone รัน `npm ci` (ผ่าน; ติดตั้งจาก lockfile), `docker compose -p regmeup-c03-a231-1411 up -d --wait`, `npm run db:generate`, `npm run db:migrate` และ `npm run db:seed` โดยตั้ง `ALLOW_SYNTHETIC_SEED=1`. Migration `20261111000000_initial` สำเร็จและ seed รายงาน `Synthetic fixtures are present.`
-- เตรียม `regmeup_test` ที่แยกจาก app DB: ตั้ง `DATABASE_URL` เป็น `TEST_DATABASE_URL` สำหรับ `npm run db:migrate` และ `npm run db:seed`, จากนั้นติดตั้ง marker ผ่าน `docker/postgres/enable-test-guard.sql` กับ `docker compose -p regmeup-c03-a231-1411 exec -T postgres psql -v ON_ERROR_STOP=1 -U regmeup_app -d regmeup_test`. ตั้ง `DATABASE_URL` กลับเป็น app DB ก่อน integration test ตาม [deployment.md §3](deployment.md#3-build-test-และ-run-จาก-clean-clone).
+- Cloned from GitHub, branch `build/lab5-docker`; `git rev-parse HEAD` showed the commit above and the initial `git status --short` was empty. Node `22.23.4`, npm `10.9.9`.
+- Used Compose project **`regmeup-c03-a231-1411`**, its named volume, PostgreSQL host port `55434`, and web port `5176`. Verified that the project/volume did not exist before starting. Did not use the user's normal volume or database.
+- Copied `server/.env.example` to `.env` inside the clone, changed the port to `55434`, and set a synthetic local session secret. No secret values are recorded. Set `REGMEUP_PG_PORT=55434`, `REGMEUP_WEB_PORT=5176`, `REGMEUP_APP_ORIGIN=http://localhost:5176`, and a synthetic `SEED_PASSWORD` in the environment.
+- From the clone root, ran `npm ci` (passed; installed from the lockfile), `docker compose -p regmeup-c03-a231-1411 up -d --wait`, `npm run db:generate`, `npm run db:migrate`, and `npm run db:seed` with `ALLOW_SYNTHETIC_SEED=1`. Migration `20261111000000_initial` succeeded and the seed reported `Synthetic fixtures are present.`
+- Prepared `regmeup_test` separately from the app DB: set `DATABASE_URL` to `TEST_DATABASE_URL` for `npm run db:migrate` and `npm run db:seed`, then installed the marker with `docker/postgres/enable-test-guard.sql` using `docker compose -p regmeup-c03-a231-1411 exec -T postgres psql -v ON_ERROR_STOP=1 -U regmeup_app -d regmeup_test`. Restored `DATABASE_URL` to the app DB before integration tests, as described in [deployment.md §3](deployment.md#3-build-test-and-run-from-a-clean-clone).
 
-## Automated tests และ Docker image
+## Automated tests and Docker image
 
-| คำสั่ง / การตรวจ | ผลจริง |
+| Command / check | Actual result |
 |---|---|
-| `npm run test:unit` | 55/55 ผ่าน |
-| `npm run test:integration` | 40/40 ผ่าน โดย test guard ตรวจ app/test DB แยก |
-| `npm run typecheck` และ `npm run build` | ผ่าน |
-| `npx playwright test` | 33/33 ผ่าน โดยใช้ Chromium และ test DB แยก |
-| `docker compose -p regmeup-c03-a231-1411 --profile app up --build -d --wait` | build ผ่าน; PostgreSQL/app healthy; migration service exited 0 |
-| `docker compose -p regmeup-c03-a231-1411 --profile app run --rm -e NODE_ENV=development -e ALLOW_SYNTHETIC_SEED=1 -e SEED_PASSWORD migrate npm run db:seed` | seed ซ้ำผ่านใน local app DB และคง fixtures เดิม |
+| `npm run test:unit` | 55/55 passed |
+| `npm run test:integration` | 40/40 passed; test guard checked that app/test DBs were separate |
+| `npm run typecheck` and `npm run build` | Passed |
+| `npx playwright test` | 33/33 passed with Chromium and a separate test DB |
+| `docker compose -p regmeup-c03-a231-1411 --profile app up --build -d --wait` | Build passed; PostgreSQL/app healthy; migration service exited 0 |
+| `docker compose -p regmeup-c03-a231-1411 --profile app run --rm -e NODE_ENV=development -e ALLOW_SYNTHETIC_SEED=1 -e SEED_PASSWORD migrate npm run db:seed` | Re-seeding the local app DB passed and retained existing fixtures |
 
-ตรวจด้วย `docker image inspect regmeup-c03-a231-1411-app --format '{{.Id}}'` ได้ app image ID `sha256:339b829668fc0cc7c7261244574cb2ba19a8bdbfe991b0f04969df21235fde6b`; migrate image ID จากคำสั่งเดียวกันกับชื่อ `regmeup-c03-a231-1411-migrate` คือ `sha256:8efebdb4db7d157cf8ae117d5f43a8ecb70326d0f92d9a2b6d3a008f84b8b46c`. เหล่านี้เป็น local image IDs ไม่ใช่ Artifact Registry digest หรือหลักฐาน deploy.
+`docker image inspect regmeup-c03-a231-1411-app --format '{{.Id}}'` returned app image ID `sha256:339b829668fc0cc7c7261244574cb2ba19a8bdbfe991b0f04969df21235fde6b`. The same command for `regmeup-c03-a231-1411-migrate` returned migration image ID `sha256:8efebdb4db7d157cf8ae117d5f43a8ecb70326d0f92d9a2b6d3a008f84b8b46c`. These are local image IDs, not Artifact Registry digests or deployment evidence.
 
-ตรวจ `docker run --rm --entrypoint node regmeup-c03-a231-1411-app -e "const fs=require('fs');const p=['/app/server/.env','/app/.git','/app/.toolchain','/app/.aws'];if(p.some(x=>fs.existsSync(x)))process.exit(1);console.log('PASS: inspected paths absent')"` ได้ PASS ทั้งสี่ path; เป็นการตรวจ path ที่ระบุ ไม่ใช่การยืนยันว่า scan secret ทั้ง image แล้ว.
+The command below returned PASS for all four paths. It checks only the listed paths; it does not claim that the entire image was scanned for secrets.
 
-## Browser/API และ restart — วิธีทำซ้ำ
+```bash
+docker run --rm --entrypoint node regmeup-c03-a231-1411-app -e "const fs=require('fs');const p=['/app/server/.env','/app/.git','/app/.toolchain','/app/.aws'];if(p.some(x=>fs.existsSync(x)))process.exit(1);console.log('PASS: inspected paths absent')"
+```
 
-เฉพาะ **ฐานข้อมูล local สังเคราะห์ที่ตั้งใจให้มี event ทดสอบ** เท่านั้น: helper จะสร้างข้อมูลจริงใน DB เป้าหมาย ก่อนเริ่มให้ตรวจ Compose project, origin และฐานข้อมูลด้วยตนเอง `SEED_PASSWORD` ต้องเป็นค่าที่ใช้ seed local DB โดยส่งผ่าน environment อย่างปลอดภัย ไม่ใส่ค่าลง logs/เอกสาร
+## Browser/API and restart — reproduction steps
 
-จาก root ของ checkout ที่มี helper แล้ว ตั้งตัวแปรและรัน:
+Use only **synthetic local data in a database intended to contain test events**. The helper creates real records in the target DB. Before starting, manually verify the Compose project, origin, and database. `SEED_PASSWORD` must match the value used to seed the local DB; provide it safely through the environment and do not place it in logs or documentation.
+
+From the root of a checkout containing the helper, set the variables and run:
 
 ```powershell
 $env:REGMEUP_PG_PORT = '55434'
@@ -43,13 +47,13 @@ $env:LAB5_SMOKE_BASE_URL = 'http://localhost:5176'
 $env:LAB5_SMOKE_CONFIRM = 'isolated-local-only'
 New-Item -ItemType Directory -Force .toolchain | Out-Null
 $env:LAB5_SMOKE_RECORD_PATH = Join-Path (Get-Location) '.toolchain/lab5-smoke-record.json'
-# ตั้ง SEED_PASSWORD สังเคราะห์อย่างปลอดภัยก่อนรัน; ติดตั้ง Chromium ด้วย npx playwright install chromium หากยังไม่มี
+# Set a synthetic SEED_PASSWORD safely before running; install Chromium with npx playwright install chromium if needed.
 node scripts/lab5-docker-smoke.cjs create
 docker compose -p regmeup-c03-a231-1411 --profile app stop app postgres
 docker compose -p regmeup-c03-a231-1411 --profile app up -d --wait
 node scripts/lab5-docker-smoke.cjs verify
 ```
 
-`create` ตรวจ `/api/health` และ `/api/ready` ได้ 200, unknown `/api` ได้ 404, browser login Organizer, เผยแพร่ event, public API lookup, login Participant และลงทะเบียนผ่าน UI ได้สำเร็จ. `verify` ตรวจ event และ registration ID เดิมหลัง restart ได้สำเร็จ. Test fixture ที่สร้าง: event ID `e2f06677-5be9-4b7e-9cef-0ddb744ee278`, registration ID `4d8726f3-bd36-45b0-9881-4f385d823911` (ข้อมูลสังเคราะห์ใน local test volume เท่านั้น). Browser ที่ใช้คือ Playwright Chromium headless shell รุ่น 1234 ซึ่งกำหนดผ่าน `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH`.
+`create` verified that `/api/health` and `/api/ready` returned 200 and an unknown `/api` route returned 404. It logged in as Organizer in a browser, published an event, looked it up through the public API, logged in as Participant, and registered through the UI. `verify` confirmed that the same event and registration IDs remained after restart. Created test fixtures: event ID `e2f06677-5be9-4b7e-9cef-0ddb744ee278`, registration ID `4d8726f3-bd36-45b0-9881-4f385d823911` (synthetic data in the local test volume only). The browser was Playwright Chromium headless shell version 1234, selected through `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH`.
 
-Test app/DB สามารถหยุดด้วย `docker compose -p regmeup-c03-a231-1411 --profile app stop app postgres` โดยเก็บ volume ไว้; อย่าใช้ `down -v` กับ volume ที่ต้องเก็บข้อมูล. การตรวจนี้ยังไม่พิสูจน์ persistence หลัง **cloud redeploy**, C-04 บน public URL, CI gate หรือการทดสอบซ้ำโดย teammate.
+Stop the test app/DB with `docker compose -p regmeup-c03-a231-1411 --profile app stop app postgres` while keeping the volume. Do not use `down -v` on a volume whose data must be retained. **This local check** does not prove persistence after Cloud redeployment, C-04 on the public URL, or the CI gate. Separate results are recorded in [Issue #21](https://github.com/JeffMerry/reg-me-up/issues/21), [Issue #22](https://github.com/JeffMerry/reg-me-up/issues/22), and [Issue #24](https://github.com/JeffMerry/reg-me-up/issues/24). There is no evidence here of a teammate repeating the clean-clone run.

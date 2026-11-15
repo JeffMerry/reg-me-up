@@ -1,6 +1,6 @@
 # Lab 5 Episode 4 — PR CI contract and test design
 
-Status: workflow implemented on the Episode 4 branch; no passing GitHub Actions run or enforced required check is claimed by this document. The initial design was committed before implementation.
+Status: historical contract/test design committed before implementation. It does not track later outcomes; see [ci-evidence.md](ci-evidence.md) for PR #31 CI, main/release workflow verification and [Issue #22](https://github.com/JeffMerry/reg-me-up/issues/22) for the required-check failure proof.
 
 ## Contract
 
