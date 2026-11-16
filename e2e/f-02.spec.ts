@@ -58,7 +58,7 @@ test('public list reports read errors and can retry on mobile', async ({ page })
   await page.goto('/events'); await expect(page.getByText('Unable to load events.')).toBeVisible();
   await page.unroute(routePattern);
   await page.getByRole('button', { name: 'Try again' }).click();
-  await expect(page.getByRole('heading', { name: 'Discover your next event' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Discover events and workshops' })).toBeVisible();
   await expect(page.getByText('Unable to load events.')).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
