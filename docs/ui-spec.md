@@ -151,7 +151,7 @@ Accept only allowlisted internal return paths accessible to the current role. Ne
 
 ### UI-02 — Event List
 
-**Layout:** Public navigation, heading **Discover your next event**, and an event grid. Search/filter functionality requiring additional implementation is outside this baseline.
+**Layout:** Public navigation, heading **Discover events and workshops**, and an event grid. Search/filter functionality requiring additional implementation is outside this baseline.
 
 **Card data:** Cover image, event name, start/end date and time, location, remaining seats, availability status, and **View details**. Do not show registrant information.
 
