@@ -11,3 +11,5 @@ test-results/
 docs-references/
 __pycache__/
 *.pyc
+tmp/
+output/
