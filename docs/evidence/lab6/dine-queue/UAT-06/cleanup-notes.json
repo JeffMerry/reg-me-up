@@ -1,0 +1,23 @@
+{
+  "method": "Codex browser-assisted in native Chrome; user logged in H1",
+  "ticket": "A-013",
+  "partySize": 5,
+  "scope": "Only A-013; no other ticket changed",
+  "captures": [
+    {
+      "file": "12.png",
+      "utc": "2026-11-23T06:08:52.027Z",
+      "state": "Waiting (1), A-013 party 5, Now called empty"
+    },
+    {
+      "file": "13.png",
+      "utc": "2026-11-23T06:09:41.755Z",
+      "state": "A-013 called, party 5, Waiting (0)"
+    },
+    {
+      "file": "14.png",
+      "utc": "2026-11-23T06:10:34.581Z",
+      "state": "Ticket A-013 completed; Now called empty; Waiting (0)"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "date": "2026-11-23",
+  "timezone": "Asia/Bangkok",
+  "method": "Codex browser-assisted via native Chrome; user signed in as C1",
+  "qualification": "After an interval without visiting; scale-to-zero and cold start NOT verified. Obtain historical metrics and new-instance logs covering the interval before user login and these captures. No cleanup performed.",
+  "captures": [
+    {
+      "file": "07.png",
+      "capturedAtUtc": "2026-11-23T04:52:39.170Z",
+      "ticket": "A-013",
+      "status": "WAITING",
+      "partySize": 5,
+      "joined": "2026-11-22 20:53 Asia/Bangkok",
+      "url": "https://dinequeue-zdfotp22gq-as.a.run.app/my-queue/4120bb67-bd08-4fef-b1fa-8643d588da59"
+    },
+    {
+      "file": "08.png",
+      "capturedAtUtc": "2026-11-23T04:52:20.319Z",
+      "ticket": "A-012",
+      "status": "COMPLETED",
+      "partySize": 4,
+      "joined": "2026-11-22 17:25 Asia/Bangkok",
+      "url": "https://dinequeue-zdfotp22gq-as.a.run.app/my-queue/c5875138-ae62-4ce6-ba68-edf99a36c0c1"
+    }
+  ]
+}
