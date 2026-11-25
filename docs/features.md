@@ -1,6 +1,6 @@
 # RegMeUp — Feature inventory
 
-Version 0.4 — 2026-11-12. User-adopted planning baseline; teammate review pending. Implementation of every feature **NOT STARTED in the inspected checkout**; verification **NOT RUN**.
+Version 0.5 — 2026-11-25. Sprint 2 contracts are **DRAFT / NOT IMPLEMENTED / NOT RUN**, pending teammate review. Earlier Sprint 1 implementation and evidence exist; historical planning paragraphs below are not a current release-wide status. See [Sprint 2 baseline and completion snapshot](sprints/sprint-2/README.md).
 
 Requirements: [SRS](srs.md). Detailed design: [System SDS](system-sds.md). Verification mapping: [Traceability](traceability.md). Sprint outcomes: [Plan](sprints/plan.md).
 
@@ -12,11 +12,11 @@ SYS-01 has a [bounded foundation preparation contract](sprints/sprint-1/sys-01.m
 | F-02 | Immediate publication, public published list/detail, Organizer own-event list; no edits/drafts/uploads | FR-02/03; BR-01/05; NFR-01/06 | F-01 for protected operations; SYS-01 DB; public reads remain usable without login | 1 | UI-02/03/05/06; [contract](sprints/sprint-1/f-02.md) |
 | F-03 | Participant registration/own list/detail/status; full/duplicate/last-seat safety; restart persistence | FR-04; BR-02/03/04; NFR-01/02/03/06 | F-01, F-02, SYS-01; consistent event-lock protocol | 1 | UI-03/04/04-D; [contract](sprints/sprint-1/f-03.md) |
 | F-04 | Owner Organizer reads authorized event metadata, registrants and totals; no check-in/export | FR-05; BR-05; NFR-01/06 | F-01/02/03; read model and privacy conventions | 1 | UI-05/07; [contract](sprints/sprint-1/f-04.md) |
-| F-05 | Cancel own registration and return seat according to policy | FR-06; BR-04/07; NFR-01/02/03/06 | F-03; Q-05; extend atomic event-lock protocol | 2 | Later contract/screens not elaborated; no controls in Sprint 1 |
-| F-06 | Owner event details/capacity/deadlines | FR-07; BR-05/06/08; NFR-01/03/06 | F-02/03; Q-04/06; lock protocol compatible with register/cancel | 2 | Later contract pending |
+| F-05 | Cancel own registration and return seat; retain history and re-register per draft policy | FR-06; BR-02/03/04/07; NFR-01/02/03/06 | F-03; reviewed Q-05; shared event-lock protocol | 2 | UI-04/04-D extension; [draft contract](sprints/sprint-2/f-05.md) |
+| F-06 | Owner event details/capacity/deadlines | FR-07; BR-01/02/03/05/06/08; NFR-01/02/03/06 | F-02/03/05; reviewed Q-04/06 and Lab7 legacy policy; F-09 scheduling guard for assigned time edits | 2 | UI-05/03 extension and owner edit; [draft contract](sprints/sprint-2/f-06.md) |
 | F-07 | Owner check-in and attendance persistence without duplicates | FR-08; BR-05/09; NFR-01/02/06 | F-03/05; Q-09 eligible state/window/correction policy | 3 | Later contract pending |
 | F-08 | Owner attendance summaries from persisted data | FR-09; BR-05/10; NFR-01/06 | F-07 and registration lifecycle; Q-09 counts | 3 | Later contract pending |
-| F-09 | Owner Instructor assignment; assigned Instructor teaching list | FR-10/11; BR-05/11/12/13; NFR-01/07/06 | F-01/02; Q-07/08; role/schema expansion via new migrations | 2 | Later contract pending |
+| F-09 | Owner Instructor assignment; assigned Instructor teaching list | FR-10/11; BR-05/11/12/13; NFR-01/07/06 | F-01/02; reviewed Q-07/08; role/schema expansion and shared schedule guard with F-06 | 2 | Owner assignment and My Teaching; [draft contract](sprints/sprint-2/f-09.md) |
 | F-10 | Cross-feature UI refinement after baseline workflows are complete: visual consistency, spacing/typography, responsive layouts, interaction feedback, and accessibility details across implemented screens; no new business rules | Existing UI contracts and NFR-06; supports usability of F-01–F-09 | F-01–F-09 implemented and integrated; known functional defects triaged first | Final hardening, after Sprint 3 feature work and before final regression/release | [refinement plan](sprints/f-10-ui-refinement.md); issue tracking pending |
 | SYS-01 | Local reproducibility, migrations/seed/config/build/test; later Docker/CI/GCP/release durability | NFR-05; supports NFR-02 | Establish alongside F-01; technical versions ENG-01; GCP guidance ENG-03 | 1–3 + Lab 5 | No domain screen; [SDS](system-sds.md), TEST-13 and later delivery verification |
 
@@ -34,3 +34,4 @@ Proposed team allocation: each feature has a lead and a different teammate revie
 | 0.2 | 2026-11-06 | Linked bounded SYS-01 preparation and exact dependency version targets | Pending teammate review; no implementation/results |
 | 0.3 | 2026-11-10 | Updated SYS-01 dependency status for the Prisma ORM decision | Pending teammate review; no implementation/results |
 | 0.4 | 2026-11-12 | Added a post-baseline cross-feature UI refinement workstream (F-10) | Planning only; issue and teammate review pending |
+| 0.5 | 2026-11-25 | Linked Sprint2 draft contracts and shared lifecycle/schedule dependencies; retained Lab7 ownership | Pending teammate review; S2 NOT IMPLEMENTED/NOT RUN |

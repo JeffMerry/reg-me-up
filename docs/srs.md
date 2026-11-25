@@ -2,10 +2,12 @@
 
 | Item | Value |
 |---|---|
-| Version / date | 0.5 / 2026-11-11 (Asia/Bangkok) |
+| Version / date | 0.6 / 2026-11-25 (Asia/Bangkok) |
 | Product | กิจกรรมอบรมและเวิร์กช็อปภายในมหาวิทยาลัย — CPE334 Topic 3 |
 | Baseline authority | บริบทที่ผู้ใช้ยืนยันและคำสั่งให้นำข้อเสนอทางเทคนิคลงเอกสาร |
-| Review / implementation | Pending teammate review / not implemented |
+| Review / implementation | Sprint 2 extension is a draft for teammate review; existing Sprint 1 implementation/evidence is separate |
+
+Sprint 2 policies below are user-selected for drafting on 25 November 2026; detailed technical choices and legacy-data policy remain proposed until teammate review. See [decision register](sprints/sprint-2/decisions.md), [contracts](sprints/sprint-2/README.md) and [shared design](sprints/sprint-2/system-design.md). This revision does not change peer-owned Lab 7 BR-01/DEC-05. The user-supplied Lab7 announcement waives Instructor/TA change-request approval; it does not establish teammate review or results.
 
 ## 1. Context and actors
 
@@ -48,8 +50,8 @@ Sprint 1 ไม่รวม editing/deleting/draft controls, Instructor pages, c
 
 | ID | Observable requirement | Sprint / feature |
 |---|---|---|
-| FR-06 | Participant ยกเลิกทะเบียนตนตาม cancellation policy | 2 / F-05 |
-| FR-07 | Organizer เปลี่ยนรายละเอียด/capacity และกำหนด deadline ของ event ตนตามกฎ | 2 / F-06 |
+| FR-06 | Participant ยกเลิก ACTIVE registration ของตนก่อน event start; คงประวัติและอ่านผลที่บันทึกได้; repeated cancel ไม่คืนที่นั่งซ้ำ ตามร่าง Q-05 | 2 / F-05 |
+| FR-07 | Organizer แก้ fields ที่อนุญาต/capacity/deadline ของ event ตนก่อนเริ่ม พร้อม version conflict protection และตรวจ Instructor overlap เมื่อแก้เวลา ตามร่าง Q-04/06 | 2 / F-06 |
 | FR-10 | Organizer มอบหมายบัญชี Instructor ที่มีอยู่ให้ event ตนและอ่าน assignment ที่ persist แล้วได้ | 2 / F-09 |
 | FR-11 | Instructor อ่านเฉพาะ assigned teaching events พร้อมชื่อ วันเวลา สถานที่ และ teaching details | 2 / F-09 |
 
@@ -76,11 +78,11 @@ Sprint 1 ไม่รวม editing/deleting/draft controls, Instructor pages, c
 
 | ID | Rule | Sprint |
 |---|---|---|
-| BR-06 | Registration หลัง deadline ถูกปฏิเสธ; boundary/timezone policy รอ Q-04 | 2 |
-| BR-07 | Cancellation เปลี่ยนสถานะและคืน seat อย่างสอดคล้อง; timing/re-registration/history รอ Q-05 | 2 |
-| BR-08 | ลด capacity แล้วต้องไม่ต่ำกว่า active registration count | 2 |
+| BR-06 | ร่าง: effective registration cutoff คือ deadline เมื่อกำหนด มิฉะนั้น startsAt; ใช้ UTC instants/Asia-Bangkok UI; now >= cutoff ปฏิเสธคำขอใหม่; deadline <= startsAt | 2 |
+| BR-07 | ร่าง: cancel ACTIVE ได้เมื่อ now < startsAt; commit แล้วคืน seat โดยสถานะ CANCELLED; repeated own cancel เป็น no-op; ลงใหม่ก่อน registration cutoff ด้วย ID ใหม่และคงประวัติ | 2 |
+| BR-08 | Capacity ใหม่ต้องไม่ต่ำกว่า ACTIVE count ภายใต้ event lock; F-06 เสนอ explicit update ช่วง 1–60 อ้าง Lab7 และ joint legacy policy; ไม่เปลี่ยน BR-01 ของ create ใน revision นี้ | 2 |
 | BR-11 | เฉพาะ owner Organizer มอบหมาย Instructor ให้ event นั้น | 2 |
-| BR-12 | Assignee ต้องเป็นบัญชี Instructor ที่มีอยู่จริง; cardinality/change/history รอ Q-07 | 2 |
+| BR-12 | ร่าง: Assignee ต้องเป็นบัญชี Instructor ที่มีอยู่จริง; current Instructor ได้หนึ่งคน/event เปลี่ยน/ถอนได้ก่อนเริ่มและคง assignment history | 2 |
 | BR-13 | Instructor อ่านเฉพาะ assigned work; ไม่แก้ event/capacity/assignment หรืออ่าน private Participant registrations | 2 |
 
 ### Sprint 3
@@ -141,11 +143,11 @@ Text limits ใน SDS เป็น technical design limits จาก proposal �
 | Q-01 | Required event fields/optional description | CLOSED — DEC-05 |
 | Q-02 | Anonymous discovery | CLOSED — DEC-06 |
 | Q-03 | Organizer registers as Participant? | CLOSED — DEC-07: ไม่ได้ใน Sprint 1 |
-| Q-04 | Deadline timezone และ exactly-at-deadline boundary | OPEN — F-06 contract, Sprint 2 |
-| Q-05 | Cancellation window, seat return, re-registration และ history | OPEN — F-05 contract, Sprint 2 |
-| Q-06 | Editable fields และ capacity change policy หลังมี registrants | OPEN — F-06 contract, Sprint 2 |
-| Q-07 | Instructor count, changes/removal และ assignment history | OPEN — F-09 contract, Sprint 2 |
-| Q-08 | Instructor multi-role และ overlapping teaching events | OPEN — F-09 contract, Sprint 2 |
+| Q-04 | Deadline timezone และ exactly-at-deadline boundary | DRAFT SELECTED — UTC/Bangkok UI; exact cutoff closed; null uses start; [review pending](sprints/sprint-2/decisions.md) |
+| Q-05 | Cancellation window, seat return, re-registration และ history | DRAFT SELECTED — before start, idempotent cancel/history/new-ID re-register; review pending |
+| Q-06 | Editable fields และ capacity change policy หลังมี registrants | DRAFT — before-start partial edits/version/ACTIVE guard; joint Lab7 legacy policy unresolved; review pending |
+| Q-07 | Instructor count, changes/removal และ assignment history | DRAFT SELECTED — one current Instructor, pre-start changes, retained history; review pending |
+| Q-08 | Instructor multi-role และ overlapping teaching events | DRAFT SELECTED — single role, reject overlap, adjacent allowed; review pending |
 | Q-09 | Check-in window/corrections และ report counting | OPEN — F-07/08 contracts, Sprint 3 |
 | ENG-01 | Exact compatible runtime/package versions และ local PostgreSQL provisioning | PARTIAL — existing targets selected, Prisma exact versions/compatibility remain open; see [versions](dependency-versions.md); install/lockfile/provisioning/build validation pending SYS-01 |
 | ENG-02 | Feature authors/reviewers, GitHub board/Issues, branch settings และ actual review findings | PARTIAL — Issues #1, #3–#6 assigned per user direction; teammate agreement, actual feature PR review approvals, board and protection remain pending |
@@ -175,3 +177,4 @@ No source baseline requirement removed. No implementation/approval/test evidence
 | 0.3 | 2026-11-10 | Recorded user-selected Prisma ORM in DEC-14, superseding DEC-08; reopened exact Prisma version selection | Pending teammate review; NOT RUN |
 | 0.4 | 2026-11-11 | Grouped FR/BR by Sprint and NFR by first Sprint with regression rounds; retained all requirement IDs | Pending teammate review; NOT RUN |
 | 0.5 | 2026-11-11 | Recorded actual GitHub Issue assignees; teammate agreement and feature reviews remain pending | NOT RUN |
+| 0.6 | 2026-11-25 | Added user-selected Sprint2 drafting policies and linked full contracts; Lab7 create BR-01/DEC-05 untouched | Teammate review pending; S2 NOT IMPLEMENTED/NOT RUN |

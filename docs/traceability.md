@@ -2,7 +2,7 @@
 
 Version 0.4 — 2026-11-11. Pending teammate review. Sources: [SRS](srs.md), [features](features.md), [System SDS](system-sds.md), [UI baseline](ui-spec.md), [Sprint 1 STS](sprints/sprint-1/sts.md).
 
-**Every actual test result is NOT RUN; actual test files/names, tested commits, command output and evidence are not available.** Planned coverage below does not mean implementation or coverage measurements exist. No baseline requirement removed.
+**Sprint 2 actual results are NOT RUN.** Older Sprint 1 rows below retain their historical planning status; they do not supersede feature evidence files/GitHub runs or establish candidate verification. The [Sprint 2 matrix](#sprint-2-extension--25-november-2026) links current drafts to planned tests; no baseline requirement is removed and no planned row establishes a pass.
 
 ## 1. Functional requirements
 
@@ -13,12 +13,12 @@ Version 0.4 — 2026-11-11. Pending teammate review. Sources: [SRS](srs.md), [fe
 | FR-03 | F-02 | 1 | UI-02/03; public DTO/query | AC-11 → TEST-11; AC-09 → TEST-09; AC-14 → TEST-14.A | Discovery gap addressed by design; NOT RUN |
 | FR-04 | F-03 | 1 | UI-03/04/04-D; registration service | AC-04 → TEST-04; AC-09/10 → TEST-09/10 | Designed; NOT RUN |
 | FR-05 | F-04 | 1 | UI-05/07; owner read model | AC-08/09 → TEST-08/09; AC-14 → TEST-14.J/L | Designed; NOT RUN |
-| FR-06 | F-05 | 2 | Later cancellation state/API/UI | Contract/AC/STS pending Q-05; verify owner cancel/state/seat return/re-registration policy | Allocated; NOT RUN |
-| FR-07 | F-06 | 2 | Event update/deadline/lock protocol | Contract/AC/STS pending Q-04/06; deadline boundary/capacity below active rejection | Allocated; NOT RUN |
+| FR-06 | F-05 | 2 | [Cancellation contract](sprints/sprint-2/f-05.md) | S2-F05-AC01–06 → S2-T05-01–07 | Draft reviewed-policy gate; NOT RUN |
+| FR-07 | F-06 | 2 | [Edit/deadline contract](sprints/sprint-2/f-06.md) | S2-F06-AC01–07 → S2-T06-01–08 | Draft; joint legacy review pending; NOT RUN |
 | FR-08 | F-07 | 3 | Attendance conceptual model | Contract/AC/STS pending Q-09; owner check-in/eligibility/duplicate | Allocated; NOT RUN |
 | FR-09 | F-08 | 3 | Summary query/count semantics | Contract/AC/STS pending Q-09; compare persisted rows/formulas incl cancelled state | Allocated; NOT RUN |
-| FR-10 | F-09 | 2 | Assignment conceptual model | Contract/AC/STS pending Q-07/08; owner assign, account/role checks, retrieval | Allocated; NOT RUN |
-| FR-11 | F-09 | 2 | Assigned Instructor reads | Contract/AC/STS pending Q-07/08; assigned-only details/empty/denial | Allocated; NOT RUN |
+| FR-10 | F-09 | 2 | [Assignment contract](sprints/sprint-2/f-09.md) | S2-F09-AC01–03/05–07 → S2-T09-01–04/06–08 | Draft; NOT RUN |
+| FR-11 | F-09 | 2 | [Own teaching reads](sprints/sprint-2/f-09.md) | S2-F09-AC04–07 → S2-T09-05–08 | Draft; NOT RUN |
 
 ## 2. Business rules
 
@@ -98,3 +98,27 @@ No instructor-approved scope changes or teammate approvals have been recorded; t
 | 0.2 | 2026-11-06 | Linked foundation-specific SYS-AC/SYS-TEST design and selected versions without claiming execution | Pending teammate review; all tests NOT RUN |
 | 0.3 | 2026-11-10 | Traced DEC-14 Prisma decision and affected design artifacts | Pending teammate review; all tests NOT RUN |
 | 0.4 | 2026-11-11 | Added explicit FR-05 to TEST-08 example and SYS-01 foundation test link | Pending teammate review; all tests NOT RUN |
+
+## Sprint 2 extension — 25 November 2026
+
+This matrix supplements historical baseline rows above for the current Sprint2 draft. [STS](sprints/sprint-2/sts.md) defines every planned ID. Actual file/name/measurement, tested commit/run and result are **TBD / NOT RUN** for every row; no measured coverage percentage or teammate approval is claimed. Baseline IDs retained. The full candidate matrix must later reconcile actual Sprint1 results and remaining Sprint3 checks under #45.
+
+| Requirement | Feature / sprint | AC | Planned tests | Actual file/test/measurement | Result / tested version |
+|---|---|---|---|---|---|
+| FR-06; BR-07 | F-05 /2 | S2-F05-AC01–04 | S2-T05-01–04 | TBD | NOT RUN / TBD |
+| BR-02/03 | F-03/05/06 /1–2 | S2-F05-AC03/04/06; S2-F06-AC03/06 | S2-T05-03/04/06; S2-T06-03/06 + TEST-05/06/07 | TBD | NOT RUN / TBD |
+| BR-04 | F-05 /2 | S2-F05-AC05 | S2-T05-05 | TBD | NOT RUN / TBD |
+| FR-07; BR-06 | F-06 /2 | S2-F06-AC01/02/05–07 | S2-T06-01/02/05–08 | TBD | NOT RUN / TBD |
+| BR-01 dependency; BR-08 | F-06 /2 + peer Lab7 | S2-F06-AC03/04/06 | S2-T06-03/04/06; Lab7 create test references pending | TBD | NOT RUN; joint legacy review pending |
+| BR-05 | F-05/06/09 /2 | S2-F05-AC05; S2-F06-AC05; S2-F09-AC05 | S2-T05-05; S2-T06-05; S2-T09-06 | TBD | NOT RUN / TBD |
+| FR-10; BR-11/12 | F-09 /2 | S2-F09-AC01–03/05 | S2-T09-01–04/06 | TBD | NOT RUN / TBD |
+| FR-11; BR-13 | F-09 /2 | S2-F09-AC04/05/07 | S2-T09-05/06/08 | TBD | NOT RUN / TBD |
+| NFR-01 | Shared auth/new APIs /2 | Access AC in all3 contracts | S2-T05-05; S2-T06-05; S2-T09-06 + TEST-09 | TBD | NOT RUN / TBD |
+| NFR-02 | F-05/06 /2 | S2-F05-AC06; S2-F06-AC07 | S2-T05-07; S2-T06-08; post-deploy retrieval | TBD | NOT RUN / TBD |
+| NFR-03 | F-03/05/06 /2 | S2-F05-AC06; S2-F06-AC06 | S2-T05-06; S2-T06-06 + TEST-06/07 | TBD | NOT RUN / TBD |
+| NFR-04 | F-01/09 role extension /1–2 | S2-F09-AC04/06 | S2-T09-05/07 + TEST-02/12 | TBD | NOT RUN / TBD |
+| NFR-05 | SYS-01 /2 | Reproducibility/DoD | S2-T09-07; migration/repeat setup; TEST-13 | TBD | NOT RUN / TBD |
+| NFR-06 | F-05/06/09 /2 | S2-F05-AC06; S2-F06-AC07; S2-F09-AC07 | S2-T05-07; S2-T06-08; S2-T09-08 | TBD | NOT RUN / TBD |
+| NFR-07 | F-09 /2 | S2-F09-AC04–06 | S2-T09-05–07 | TBD | NOT RUN / TBD |
+
+Q-04–Q-08 have user-selected draft policy, not completed review. TA change-request approval for Lab7 is waived by the supplied announcement; link its original record when available. F-07/F-08 remain planned under #44; no Sprint3 completion implied by this mapping.
