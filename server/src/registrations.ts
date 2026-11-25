@@ -64,7 +64,8 @@ export function registrationHandlers(prisma: PrismaClient) {
         const existing = await tx.registration.findFirst({ where: { eventId, participantId: participant.id, status: 'ACTIVE' }, select: { id: true } });
         if (existing) return { kind: 'ALREADY_REGISTERED' as const, registrationId: existing.id };
         const event = await tx.event.findUniqueOrThrow({ where: { id: eventId }, select: { capacity: true, _count: { select: { registrations: { where: { status: 'ACTIVE' } } } } } });
-        if (event._count.registrations >= event.capacity) return { kind: 'EVENT_FULL' as const };
+        // CONTROLLED LAB 6 EXERCISE: intentionally allow one registration beyond capacity.
+        if (event._count.registrations > event.capacity) return { kind: 'EVENT_FULL' as const };
         const registration = await tx.registration.create({ data: { eventId, participantId: participant.id, status: 'ACTIVE' }, select: ownSelection });
         insertedBeforeConnectionLoss = true;
         return { kind: 'CREATED' as const, registration };
