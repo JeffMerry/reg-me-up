@@ -1,0 +1,23 @@
+{
+  "method": "Codex browser-assisted in Chrome; C1 signed in by user",
+  "graphReference": "User supplied graph tooltip 2026-11-23 12:15 UTC+7; active=0 idle=0. Service/revision and startup logs not independently verified.",
+  "captures": [
+    {
+      "file": "10.png",
+      "utc": "2026-11-23T05:54:47.017Z",
+      "ticket": "A-013",
+      "status": "WAITING",
+      "partySize": 5,
+      "joined": "2026-11-22 20:53 Asia/Bangkok"
+    },
+    {
+      "file": "11.png",
+      "utc": "2026-11-23T05:55:05.923Z",
+      "ticket": "A-012",
+      "status": "COMPLETED",
+      "partySize": 4,
+      "joined": "2026-11-22 17:25 Asia/Bangkok"
+    }
+  ],
+  "conclusion": "Both captures occurred after graph tooltip time. Same ticket data observed; cold start not independently confirmed. No cleanup performed."
+}
