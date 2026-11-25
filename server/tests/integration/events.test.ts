@@ -185,6 +185,31 @@ describe('F-02 event APIs', () => {
 });
 
 describe('F-03 registration APIs', () => {
+  it('rejects the next Participant registration when a capacity-one event is full', async () => {
+    const fullEvent = randomUUID();
+    await prisma.event.create({ data: { id: fullEvent, organizerId: owner, title: 'Capacity-one controlled exercise', startsAt: new Date('2026-12-01T02:00:00Z'), endsAt: new Date('2026-12-01T04:00:00Z'), location: 'A', capacity: 1, publicationStatus: 'PUBLISHED' } });
+    try {
+      const firstParticipant = await login(participant);
+      const secondParticipant = await login(participant2);
+
+      const firstResponse = await request(`/api/events/${fullEvent}/registrations`, { method: 'POST', cookie: firstParticipant.cookie, token: firstParticipant.token, body: {} });
+      expect(firstResponse.status).toBe(201);
+
+      const secondResponse = await request(`/api/events/${fullEvent}/registrations`, { method: 'POST', cookie: secondParticipant.cookie, token: secondParticipant.token, body: {} });
+      expect(secondResponse.status).toBe(409);
+      expect((await secondResponse.json()).error.code).toBe('EVENT_FULL');
+
+      const activeCount = await prisma.registration.count({ where: { eventId: fullEvent, status: 'ACTIVE' } });
+      const event = await prisma.event.findUniqueOrThrow({ where: { id: fullEvent }, select: { capacity: true } });
+      expect(activeCount).toBe(1);
+      expect(activeCount).toBeLessThanOrEqual(event.capacity);
+      expect(await prisma.registration.count({ where: { eventId: fullEvent, participantId: participant2, status: 'ACTIVE' } })).toBe(0);
+    } finally {
+      await prisma.registration.deleteMany({ where: { eventId: fullEvent } });
+      await prisma.event.deleteMany({ where: { id: fullEvent } });
+    }
+  });
+
   it('registers a Participant and returns only their own persisted registration', async () => {
     const freshEvent = randomUUID();
     await prisma.event.create({ data: { id: freshEvent, organizerId: owner, title: 'Open registration', startsAt: new Date('2026-12-01T02:00:00Z'), endsAt: new Date('2026-12-01T04:00:00Z'), location: 'A', capacity: 2, publicationStatus: 'PUBLISHED' } });
