@@ -378,3 +378,20 @@ Sprint 1 may begin before Instructor, deadline, cancellation, and attendance des
 | 1.0 — English translation | 2026-11-06 | Translated the baseline into English, retaining screen/requirement IDs, behavior, scope, and pending decisions; example interface copy is also translated | Pending team review |
 
 A review entry is not evidence of approval until an actual reviewer and corresponding Issue/PR are recorded.
+
+## Sprint 2 extension — confirmed policy
+
+Version1.2 — 26 November2026. Refs #40–#43/#51. Extends the Sprint1 screens above; **policy CONFIRMED, implementation NOT STARTED / verification NOT RUN**. [Review and ownership](sprints/sprint-2/review-record.md): Kittithat F-05/F-06, Thanatip F-09, cross-review. COMMENTED policy review is not formal PR approval; follow-up approval/merge pending. Policy/API/data sources: [decisions](sprints/sprint-2/decisions.md), [shared design](sprints/sprint-2/system-design.md). Do not infer new permissions from visibility of UI controls.
+
+| Screen / route | Workflow and states | Verification |
+|---|---|---|
+| UI-04/04-D own registrations | ACTIVE/CANCELLED history keyed by registrationId; Cancel confirmation before start, pending disabled, server-confirmed status/cancelledAt, cancelled detail retained, reload own state on unknown outcome | S2-T05-07 + API/DB S2-T05-01–06 |
+| UI-05 My Events / owner detail | Add Edit event and Manage Instructor links for own events; keep active registrants/summary separate from cancellation history | S2-T06-08/S2-T09-08 + owner denial tests |
+| UI-S2-01 /organizer/events/:id/edit | Load private owner edit DTO; partial edit fields and optional deadline; show Bangkok timezone and cutoff semantics; field errors/first-invalid focus, dirty-form confirmation, pending, unknown outcome and stale-edit reload/review | S2-T06-01/05/08 |
+| UI-03 public event detail | Show effective registration cutoff; Closed at cutoff, full/duplicate states remain meaningful; backend response controls actual registration; preserve public privacy | S2-T06-02/08 + original UI tests |
+| UI-S2-02 owner Instructor management | Paginated id/displayName directory, current assignment, assign/replace/remove confirmation; empty/error/retry/version conflict/overlap rejection without disclosing other events | S2-T09-01–04/08 |
+| UI-S2-03 /my-teaching and /my-teaching/:id | INSTRUCTOR-only navigation, paginated current teaching list/detail; empty differs from failed read; removed/unassigned404; no registrant or management actions | S2-T09-05/06/08 |
+
+All new private routes authorize before displaying cached data and clear on logout/401/role changes. Add role-safe local returnTo allowlist entries, never external URLs. Use visible labels/focus, live status/error announcements, modal focus trap/Escape/restore and keyboard operation. Verify1440/390 and320px without page horizontal overflow. Server messages use safe contract errors; no implementation constants/version numbers need to be shown to end users.
+
+Separate Edit Event component from Create Event where practical to reduce concurrent Lab7 edits. Do not modify create1–60 behavior here: Lab7 owns its validation/copy/tests. In legacy edit, send capacity only when explicitly changed. API and database checks remain mandatory when UI is bypassed.

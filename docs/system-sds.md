@@ -177,3 +177,15 @@ No code/package/schema/test/migration/container deployed or executed by this doc
 | 0.4 | 2026-11-11 | Linked conceptual DBML and assigned the initial session schema to SYS-01 | Pending teammate review; schema not applied |
 | 0.5 | 2026-11-11 | Updated Issue-assignment status while retaining pending team agreement and review | Pending teammate review; NOT RUN |
 | 0.6 | 2026-11-11 | Recorded observed Prisma warning discrepancy and designed guarded migration preflight | Implementation review pending |
+
+## 9. Sprint 2 extension — confirmed policy, revised 26 November 2026
+
+The sections above preserve Sprint1 design/history; statements about unimplemented setup are historical, not a fresh inspection of main. Sprint2 starts from main `3c8b751a2646408f6fdc88209a0fef33d9030f1b`. Revision26Nov2026: policy/legacy **CONFIRMED** in [actual COMMENTED review](sprints/sprint-2/review-record.md), formal follow-up approval/merge pending; implementation NOT STARTED / acceptance NOT RUN. Shared schema owner Thanatip Nitinantakul (THN4), reviewer Kittithat Disthanakornkun (JeffMerry); shared lock/integration owner Kittithat, reviewer Thanatip; release evidence owner Thanatip, reviewer Kittithat.
+
+The complete [Sprint2 shared system design](sprints/sprint-2/system-design.md) specifies additive deadline/version/cancellation/assignment schema, endpoint and DTO contracts, access matrix, server-clock boundaries and migration/provisioning safeguards. [Policies](sprints/sprint-2/decisions.md) record confirmed rules/legacy policy separately from technical implementation choices requiring code/migration verification. The linked sections are part of this versioned design; include their full assessed content in the D2 PDF, not just links.
+
+Key extensions: all ACTIVE-count/capacity writers retain event row locking; owner edits/assignment changes serialize cross-event scheduling with a proposed transaction advisory mutex before event lock; expectedVersion prevents lost edits; single-role Instructor has current-assignment-only private reads; historical cancellations/assignments persist. Public cutoff fields change explicitly while private fields remain excluded. UI/backend role/returnTo handling must extend together. No applied migration rewrite or automatic live seed is allowed.
+
+Peer-owned Lab7 create capacity rules remain unchanged in this document's original sections. F-06 requires confirmed1–60 only for explicitly supplied capacity edits, under the confirmed legacy policy; omitted legacy capacity is not silently reduced. Do not implement a global DB<=60 constraint from this draft.
+
+Review scope: [F-05](sprints/sprint-2/f-05.md), [F-06](sprints/sprint-2/f-06.md), [F-09](sprints/sprint-2/f-09.md), [STS](sprints/sprint-2/sts.md). No runtime API/schema/config changes are made by this planning extension.

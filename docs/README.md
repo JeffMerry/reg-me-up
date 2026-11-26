@@ -2,6 +2,8 @@
 
 Version 0.4 — 11 November 2026 (Asia/Bangkok)
 
+Sprint2 planning extension (25 November2026): [baseline/contracts index](sprints/sprint-2/README.md), [decisions](sprints/sprint-2/decisions.md), [branch plan](sprints/sprint-2/branch-plan.md), [STS](sprints/sprint-2/sts.md), [DoD](sprints/sprint-2/dod.md). Policy/legacy CONFIRMED in [THN4 COMMENTED review](sprints/sprint-2/review-record.md); full named ownership matrix recorded, formal follow-up approval/merge pending; runtime work/tests NOT STARTED/NOT RUN. Older status text below is historical and must not replace actual feature/CI/deployment evidence.
+
 เอกสารชุดนี้เป็น baseline สำหรับ design และ feature review [PR #2](https://github.com/JeffMerry/reg-me-up/pull/2) ได้รับ approval และ merge แล้ว; SYS-01 foundation เริ่มพัฒนาบน `chore/sys-01-foundation` และมี [ผลตรวจบางส่วน](sprints/sprint-1/sys-01-evidence.md) ส่วน F-04 มี implementation และผลตรวจขอบเขต feature แล้วตาม [F-04 verification](sprints/sprint-1/f-04-evidence.md); shared verification และ teammate review ยัง pending
 
 | Part | Artifact | สถานะ |
