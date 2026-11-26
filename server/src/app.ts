@@ -24,7 +24,7 @@ export function createApp(checkDatabase: () => Promise<void>, auth?: { config: S
     app.get('/api/auth/me', h.requireUser, h.me);
     app.post('/api/auth/logout', h.requireUser, h.csrf, h.jsonBody, h.logout);
     const events = eventHandlers(auth.prisma);
-    const registrations = registrationHandlers(auth.prisma);
+    const registrations = registrationHandlers(auth.prisma, auth.now);
     const organizerRegistrations = organizerRegistrationHandlers(auth.prisma);
     app.get('/api/events', events.publicList);
     app.get('/api/events/:eventId', events.detail);
@@ -34,9 +34,7 @@ export function createApp(checkDatabase: () => Promise<void>, auth?: { config: S
     app.post('/api/events/:eventId/registrations', h.requireUser, h.requireRole('PARTICIPANT'), h.csrf, h.jsonBody, registrations.create);
     app.get('/api/me/registrations', h.requireUser, h.requireRole('PARTICIPANT'), registrations.ownList);
     app.get('/api/me/registrations/:registrationId', h.requireUser, h.requireRole('PARTICIPANT'), registrations.ownDetail);
-    // Test-first cancellation scaffold: return the persisted own state; mutation
-    // is added only after the intended-behavior test has demonstrated RED.
-    app.post('/api/me/registrations/:registrationId/cancel', h.requireUser, h.requireRole('PARTICIPANT'), h.csrf, h.jsonBody, registrations.ownDetail);
+    app.post('/api/me/registrations/:registrationId/cancel', h.requireUser, h.requireRole('PARTICIPANT'), h.csrf, h.jsonBody, registrations.cancel);
     app.use(h.errorHandler);
   }
   if (frontendDirectory) {

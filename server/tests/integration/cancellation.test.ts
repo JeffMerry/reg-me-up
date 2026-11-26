@@ -212,6 +212,30 @@ describe('F-05 cancellation API and persisted lifecycle', () => {
     }
   });
 
+  it('shares the event lock with a capacity writer and preserves migration constraints and old ACTIVE rows', async () => {
+    const { event, registration } = await fixture(2); const participant = await login(p1);
+    let release!: () => void, entered!: () => void;
+    const holding = new Promise<void>(resolve => { entered = resolve; });
+    const gate = new Promise<void>(resolve => { release = resolve; });
+    const observer = new pg.Client({ connectionString: process.env.TEST_DATABASE_URL });
+    const capacityWrite = withEventWrite(prisma, { eventId: event.id, scope: 'schedule' }, async tx => {
+      await tx.event.update({ where: { id: event.id }, data: { capacity: 1 } }); entered(); await gate;
+    });
+    let pending: Promise<Response> | undefined;
+    try {
+      await observer.connect(); await holding;
+      pending = cancel(registration.id, participant); await waitForWriters(observer, 1);
+      release(); await capacityWrite; expect((await pending).status).toBe(200);
+      const saved = await prisma.event.findUniqueOrThrow({ where: { id: event.id }, select: { capacity: true } });
+      expect(saved.capacity).toBe(1); expect(await active(event.id)).toBe(0);
+    } finally { release(); await Promise.allSettled([capacityWrite, ...(pending ? [pending] : [])]); await observer.end(); }
+    const old = await prisma.$queryRaw<Array<{ status: string; cancelled_at: Date | null }>>`SELECT status,cancelled_at FROM registrations WHERE id='40000000-0000-4000-8000-000000000001'::uuid`;
+    expect(old).toEqual([{ status: 'ACTIVE', cancelled_at: null }]);
+    for (const [status, cancelledAt] of [['ACTIVE', new Date(now)], ['CANCELLED', null], ['UNKNOWN', null]] as const) {
+      await expect(prisma.$transaction(tx => tx.$executeRaw`UPDATE registrations SET status=${status}, cancelled_at=${cancelledAt} WHERE id=${registration.id}::uuid`)).rejects.toMatchObject({ code: 'P2010' });
+    }
+  });
+
   it('retains cancellation history after starting a new application process on the same database', async () => {
     const { event, registration } = await fixture(); const participant = await login(p1);
     const cancelled = await cancel(registration.id, participant); expect(cancelled.status).toBe(200);

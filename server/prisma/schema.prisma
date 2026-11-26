@@ -43,6 +43,7 @@ model Registration {
   participantId String   @map("participant_id") @db.Uuid
   status        String
   registeredAt  DateTime @default(now()) @map("registered_at") @db.Timestamptz(6)
+  cancelledAt   DateTime? @map("cancelled_at") @db.Timestamptz(6)
   event         Event    @relation(fields: [eventId], references: [id], onDelete: Restrict)
   participant   User     @relation(fields: [participantId], references: [id], onDelete: Restrict)
   @@index([eventId, status, registeredAt, id])

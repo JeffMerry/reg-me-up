@@ -1,4 +1,5 @@
-import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { MyRegistrations } from './RegistrationViews';
 
 type Identity = { id: string; displayName: string; role: 'PARTICIPANT' | 'ORGANIZER' };
 type EventData = { id: string; title: string; startsAt: string; endsAt: string; location: string; capacity: number; remainingSeats: number; description: string | null; organizer: { displayName: string }; activeRegistrationCount?: number };
@@ -37,12 +38,22 @@ function EventDetail({ id, identity, expireSession }: { id: string; identity: Id
   useEffect(() => {
     if (identity?.role !== 'PARTICIPANT') { setRegistration({ state: 'none' }); return; }
     const controller = new AbortController(); setRegistration({ state: 'loading' });
-    fetch(`/api/me/registrations?eventId=${encodeURIComponent(id)}`, { signal: controller.signal, cache: 'no-store' }).then(async response => {
-      if (response.status === 401) { expireSession(`/events/${id}`, true); setRegistration({ state: 'none' }); return null; }
-      if (!response.ok) throw new Error();
-      const result = await response.json() as { data: Array<{ id: string }> };
-      setRegistration(result.data[0] ? { state: 'registered', id: result.data[0].id } : { state: 'none' });
-    }).catch(() => { if (!controller.signal.aborted) setRegistration({ state: 'error' }); });
+    void (async () => {
+      // Own reads now include cancelled history. Search all returned pages,
+      // rather than treating an old cancelled row as an active registration.
+      let page = 1;
+      while (!controller.signal.aborted) {
+        const response = await fetch(`/api/me/registrations?eventId=${encodeURIComponent(id)}${page > 1 ? `&page=${page}` : ''}`, { signal: controller.signal, cache: 'no-store' });
+        if (response.status === 401) { expireSession(`/events/${id}`, true); setRegistration({ state: 'none' }); return; }
+        if (!response.ok) throw new Error();
+        const result = await response.json() as { data: Array<{ id: string; status: string }>; meta: { page: number; pageSize: number; total: number } };
+        if (controller.signal.aborted) return;
+        const active = result.data.find(row => row.status === 'ACTIVE');
+        if (active) { setRegistration({ state: 'registered', id: active.id }); return; }
+        if (result.meta.page * result.meta.pageSize >= result.meta.total) { setRegistration({ state: 'none' }); return; }
+        page++;
+      }
+    })().catch(() => { if (!controller.signal.aborted) setRegistration({ state: 'error' }); });
     return () => controller.abort();
   }, [id, identity?.id, identity?.role, registrationRetry]);
   async function register() {
@@ -65,82 +76,6 @@ function EventDetail({ id, identity, expireSession }: { id: string; identity: Id
   if (status === 'missing') return <><h1 className="text-3xl font-bold">Event not found</h1><a className={link} href="/events">Browse events</a></>;
   if (status === 'error' || !data) return <div role="alert"><p>Unable to load event.</p><button className={link} onClick={() => setRetry(retry + 1)}>Try again</button></div>;
   return <>{published && <p role="status" className="mb-4 font-semibold">Event published successfully.</p>}<a className={link} href="/events">Events</a><article className="mt-4 overflow-hidden rounded-2xl bg-white shadow"><Cover /><div className="grid gap-8 p-6 md:grid-cols-3"><div className="md:col-span-2"><h1 className="text-3xl font-bold">{data.title}</h1><EventSummary event={data} /><p className="mt-4">Organized by {data.organizer.displayName}</p>{data.description && <section className="mt-6"><h2 className="text-xl font-bold">Description</h2><p className="mt-2 whitespace-pre-wrap">{data.description}</p></section>}</div><aside><h2 className="text-xl font-bold">Registration</h2><p className="mt-2">{data.remainingSeats < 0 ? 'Availability unavailable. Please try again.' : `${data.remainingSeats} seats remaining`}</p>{identity?.role === 'ORGANIZER' ? <p className="mt-4">Registration is available to Participant accounts.</p> : !identity ? <>{data.remainingSeats <= 0 ? <p className="mt-4">This event is full.</p> : <a className={`${button} mt-4`} href={`/login?returnTo=${encodeURIComponent(`/events/${data.id}`)}`}>Log in to register</a>}</> : registration.state === 'loading' ? <p role="status" className="mt-4">Checking your registration…</p> : registration.state === 'error' ? <div role="alert" className="mt-4"><p>Unable to check your registration.</p><button className={link} onClick={() => setRegistrationRetry(value => value + 1)}>Try again</button></div> : registration.state === 'registered' ? <p role="status" className="mt-4">You are registered. <a className={link} href={`/my-registrations?registrationId=${registration.id}`}>View registration</a></p> : registration.state === 'uncertain' ? <div role="alert" className="mt-4"><p>We could not confirm your registration. Check your registrations before trying again.</p><a className={link} href="/my-registrations">Check My Registrations</a></div> : <><button disabled={registration.state === 'pending' || data.remainingSeats <= 0} className={`${button} mt-4`} onClick={() => void register()}>{registration.state === 'pending' ? 'Registering…' : data.remainingSeats <= 0 ? 'Full' : 'Register'}</button>{data.remainingSeats <= 0 && <p className="mt-2">This event is full.</p>}</>}</aside></div></article></>;
-}
-type RegistrationOwn = { id: string; status: string; registeredAt: string; participant: { displayName: string }; event: EventData };
-function MyRegistrations({ expireSession }: { expireSession: (returnTo: string) => void }) {
-  const [page, setPage] = useState(1); const [rows, setRows] = useState<RegistrationOwn[]>([]); const [total, setTotal] = useState(0);
-  const [state, setState] = useState<'loading' | 'error' | 'ok'>('loading'); const [retry, setRetry] = useState(0); const [selected, setSelected] = useState<RegistrationOwn | null>(null);
-  const triggerIdRef = useRef(''); const closeRef = useRef<HTMLButtonElement | null>(null);
-  const sessionExpiredRef = useRef(false);
-  function handleExpiredSession(returnTo: string) {
-    if (sessionExpiredRef.current) return;
-    sessionExpiredRef.current = true; setRows([]); setTotal(0); setSelected(null); expireSession(returnTo);
-  }
-  useEffect(() => {
-    const controller = new AbortController(); setState('loading');
-    fetch(`/api/me/registrations?page=${page}`, { cache: 'no-store', signal: controller.signal }).then(async response => { if (response.status === 401) { handleExpiredSession('/my-registrations'); return null; } if (!response.ok) throw new Error(); return response.json() as Promise<{ data: RegistrationOwn[]; meta: { total: number } }> }).then(result => { if (result) { setRows(result.data); setTotal(result.meta.total); setState('ok'); } }).catch(() => { if (!controller.signal.aborted) setState('error'); });
-    return () => controller.abort();
-  }, [page, retry]);
-  useEffect(() => {
-    const id = new URLSearchParams(location.search).get('registrationId'); if (!id) { setSelected(null); return; }
-    const controller = new AbortController();
-    fetch(`/api/me/registrations/${encodeURIComponent(id)}`, { cache: 'no-store', signal: controller.signal }).then(async response => { if (response.status === 401) { handleExpiredSession(`/my-registrations?registrationId=${encodeURIComponent(id)}`); return; } if (!response.ok) throw new Error(); triggerIdRef.current = `registration-trigger-${id}`; setSelected((await response.json()).data as RegistrationOwn); }).catch(() => { if (!controller.signal.aborted) setSelected(null); });
-    return () => controller.abort();
-  }, []);
-  useLayoutEffect(() => { if (selected) closeRef.current?.focus(); else document.getElementById(triggerIdRef.current)?.focus(); }, [selected]);
-  function closeDetail() { const triggerId = triggerIdRef.current; history.replaceState({}, '', '/my-registrations'); setSelected(null); window.setTimeout(() => document.getElementById(triggerId)?.focus(), 0); }
-  function trapDialogKeyboard(event: React.KeyboardEvent<HTMLElement>) {
-    if (event.key === 'Escape') { event.preventDefault(); closeDetail(); return; }
-    if (event.key !== 'Tab') return;
-    const focusable = event.currentTarget.querySelectorAll<HTMLElement>('a[href], button:not([disabled])');
-    const first = focusable[0], last = focusable[focusable.length - 1];
-    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
-    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
-  }
-  return <>
-    <h1 className="text-3xl font-bold">My Registrations</h1>
-    {state === 'loading' ? <p role="status" className="mt-6">Loading registrations…</p> : state === 'error' ? <div role="alert" className="mt-6"><p>Unable to load registrations.</p><button className={link} onClick={() => setRetry(value => value + 1)}>Try again</button></div> : rows.length === 0 ? <p className="mt-6">You have no registrations yet. <a className={link} href="/events">Browse events</a></p> : <>
-      <ul className="mt-6 grid gap-4">
-        {rows.map(row => <li key={row.id} className="rounded-2xl bg-white p-5 shadow">
-          <h2 className="text-xl font-bold"><a id={`registration-trigger-${row.id}`} className={link} href={`/my-registrations?registrationId=${row.id}`} onClick={event => { event.preventDefault(); triggerIdRef.current = event.currentTarget.id; history.pushState({}, '', `/my-registrations?registrationId=${row.id}`); setSelected(row); }}>{row.event.title}</a></h2>
-          <p className="mt-3">{dateRange(row.event)}</p>
-          <p className="mt-1">Location: {row.event.location}</p>
-          <p className="mt-1">Registration reference: {row.id}</p>
-          <p className="mt-1">Registered at: {dateFormat.format(new Date(row.registeredAt))} (Thailand time, UTC+7)</p>
-          <p className="mt-1">Status: {row.status}</p>
-          <a className={`${link} mt-3 inline-block min-h-11 py-2`} href={`/my-registrations?registrationId=${row.id}`} onClick={event => { event.preventDefault(); triggerIdRef.current = `registration-trigger-${row.id}`; history.pushState({}, '', `/my-registrations?registrationId=${row.id}`); setSelected(row); }}>View registration</a>
-        </li>)}
-      </ul>
-      <div className="mt-6 flex items-center gap-4"><button className="min-h-11 underline disabled:opacity-40" disabled={page <= 1} onClick={() => setPage(value => value - 1)}>Previous</button><span>Page {page} · {total} total</span><button className="min-h-11 underline disabled:opacity-40" disabled={page * 20 >= total} onClick={() => setPage(value => value + 1)}>Next</button></div>
-    </>}
-    {selected && <div role="presentation" className="fixed inset-0 z-10 grid place-items-center bg-black/50 p-4" onMouseDown={event => { if (event.target === event.currentTarget) closeDetail(); }}>
-      <section role="dialog" aria-modal="true" aria-labelledby="registration-title" onKeyDown={trapDialogKeyboard} className="max-h-[calc(100vh-2rem)] w-full max-w-xl overflow-y-auto rounded-2xl bg-white p-6 shadow-xl">
-        <h2 id="registration-title" className="text-2xl font-bold">Registration details</h2>
-        <section className="mt-6 rounded-xl bg-neutral-50 p-5">
-          <h3 className="text-lg font-bold">Event details</h3>
-          <dl className="mt-4 grid gap-x-6 gap-y-4 sm:grid-cols-2">
-            <div className="sm:col-span-2"><dt className="text-sm font-semibold text-neutral-600">Event</dt><dd className="mt-1 text-lg font-semibold">{selected.event.title}</dd></div>
-            <div><dt className="text-sm font-semibold text-neutral-600">Date and time</dt><dd className="mt-1 leading-6">{dateRange(selected.event)}</dd></div>
-            <div><dt className="text-sm font-semibold text-neutral-600">Location</dt><dd className="mt-1 leading-6">{selected.event.location}</dd></div>
-          </dl>
-          {selected.event.description && <div className="mt-4 border-t border-neutral-200 pt-4"><h4 className="font-semibold">About this event</h4><p className="mt-2 whitespace-pre-wrap break-words leading-7 text-neutral-700">{selected.event.description}</p></div>}
-        </section>
-        <section className="mt-4 rounded-xl border border-neutral-200 p-5">
-          <h3 className="text-lg font-bold">Registration</h3>
-          <dl className="mt-4 grid gap-x-6 gap-y-4 sm:grid-cols-2">
-            <div><dt className="text-sm font-semibold text-neutral-600">Registrant</dt><dd className="mt-1">{selected.participant.displayName}</dd></div>
-            <div><dt className="text-sm font-semibold text-neutral-600">Status</dt><dd className="mt-1">{selected.status}</dd></div>
-            <div><dt className="text-sm font-semibold text-neutral-600">Registration reference</dt><dd className="mt-1 break-all">{selected.id}</dd></div>
-            <div><dt className="text-sm font-semibold text-neutral-600">Registered at</dt><dd className="mt-1">{dateFormat.format(new Date(selected.registeredAt))} (Thailand time, UTC+7)</dd></div>
-          </dl>
-        </section>
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
-          <a className={`${button} bg-neutral-800 hover:bg-neutral-700`} href={`/events/${selected.event.id}`}>View event</a>
-          <button ref={closeRef} className={`${button} bg-orange-700`} onClick={closeDetail}>Close</button>
-        </div>
-      </section>
-    </div>}
-  </>;
 }
 type OwnerRegistrations = {
   data: {

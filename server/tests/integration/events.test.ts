@@ -220,7 +220,8 @@ describe('F-03 registration APIs', () => {
       const created = (await response.json()).data;
       expect(created).toMatchObject({ status: 'ACTIVE', participant: { displayName: `Test ${participant}` }, event: { id: freshEvent, remainingSeats: 1 } });
       expect(created.registeredAt).toBeTruthy();
-      expect(Object.keys(created).sort()).toEqual(['event', 'id', 'participant', 'registeredAt', 'status']);
+      expect(Object.keys(created).sort()).toEqual(['cancelledAt', 'event', 'id', 'participant', 'registeredAt', 'status']);
+      expect(created.cancelledAt).toBeNull();
       const list = await request(`/api/me/registrations?eventId=${freshEvent}`, { cookie: p.cookie });
       expect(list.status).toBe(200); expect((await list.json()).data[0].id).toBe(created.id);
       expect((await request(`/api/me/registrations/${created.id}`, { cookie: p.cookie })).status).toBe(200);
