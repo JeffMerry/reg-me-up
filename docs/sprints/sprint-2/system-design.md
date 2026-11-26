@@ -2,6 +2,8 @@
 
 Version 0.2 — 26 November 2026. **Policy CONFIRMED; implementation NOT STARTED / verification NOT RUN.** [THN4's COMMENTED review and named ownership](review-record.md) cover the policy/legacy scope. Technical implementation details and this follow-up still require relevant review/approval. Extends [System SDS](../../system-sds.md); policy source [decisions](decisions.md). Refs #40–#43/#51. Shared schema owner: Thanatip Nitinantakul (THN4), reviewer Kittithat Disthanakornkun (JeffMerry); shared lock owner: Kittithat, reviewer Thanatip.
 
+Execution/ownership update26Nov2026: the paragraph above is the original design checkpoint. Planning #51, shared locks #55 and F-05 #57 have since merged. The user reassigned only the missing shared `events.version` prerequisite to Kittithat for a separate PR, reviewed by Thanatip; [actual schema evidence and consumer handoff](event-version-evidence.md). Thanatip retains F-09/Instructor schema/combined migration coordination. F-06/F-09 endpoint/feature acceptance is not established by the version prerequisite.
+
 ## 1. Compatibility and schema ownership
 
 Keep PostgreSQL/Prisma, existing session/CSRF infrastructure, event/registration UUIDs, ACTIVE partial unique index, public DTO allowlist and event-lock mechanism. No dependency upgrade is planned. Do not edit applied migrations or seed/reset a database to make migration pass.
