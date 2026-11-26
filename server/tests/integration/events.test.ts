@@ -217,6 +217,54 @@ describe('F-02 event APIs', () => {
 });
 
 describe('F-03 registration APIs', () => {
+  it('preserves legacy capacity 61 and existing registrations while admitting the last seat', async () => {
+    // Direct DB setup models a pre-change row; new publication still uses the HTTP validator.
+    const legacyEvent = randomUUID();
+    const legacyParticipants = Array.from({ length: 60 }, () => randomUUID());
+    const legacyRegistrations = Array.from({ length: 60 }, () => randomUUID());
+    const fixtureHash = (await prisma.user.findUniqueOrThrow({ where: { id: owner } })).passwordHash;
+    try {
+      await prisma.user.createMany({ data: legacyParticipants.map(id => ({ id, email: `${id}@legacy.events.test`, passwordHash: fixtureHash, displayName: `Legacy ${id}`, role: 'PARTICIPANT' })) });
+      await prisma.event.create({ data: { id: legacyEvent, organizerId: owner, title: 'Legacy capacity 61', startsAt: new Date('2026-12-01T02:00:00Z'), endsAt: new Date('2026-12-01T04:00:00Z'), location: 'A', capacity: 61, publicationStatus: 'PUBLISHED' } });
+      await prisma.registration.createMany({ data: legacyParticipants.map((id, index) => ({ id: legacyRegistrations[index], eventId: legacyEvent, participantId: id, status: 'ACTIVE' })) });
+      const beforeEvent = await prisma.event.findUniqueOrThrow({ where: { id: legacyEvent } });
+      const beforeRegistrations = await prisma.registration.findMany({ where: { eventId: legacyEvent }, orderBy: { id: 'asc' } });
+      expect(beforeRegistrations).toHaveLength(60);
+      const publicDetail = await request(`/api/events/${legacyEvent}`);
+      expect(publicDetail.status).toBe(200);
+      expect((await publicDetail.json()).data).toMatchObject({ id: legacyEvent, capacity: 61, remainingSeats: 1 });
+      const publicList = await request('/api/events?pageSize=100');
+      expect(publicList.status).toBe(200);
+      expect((await publicList.json()).data).toEqual(expect.arrayContaining([expect.objectContaining({ id: legacyEvent, capacity: 61, remainingSeats: 1 })]));
+      const o = await login(owner);
+      const owned = await request('/api/me/events?pageSize=100', { cookie: o.cookie });
+      expect(owned.status).toBe(200);
+      expect((await owned.json()).data).toEqual(expect.arrayContaining([expect.objectContaining({ id: legacyEvent, capacity: 61, activeRegistrationCount: 60, remainingSeats: 1 })]));
+      const p = await login(participant);
+      const registered = await request(`/api/events/${legacyEvent}/registrations`, { method: 'POST', cookie: p.cookie, token: p.token, body: {} });
+      expect(registered.status).toBe(201);
+      const created = (await registered.json()).data;
+      expect(created).toMatchObject({ status: 'ACTIVE', event: { id: legacyEvent, remainingSeats: 0 } });
+      expect(await prisma.registration.findUniqueOrThrow({ where: { id: created.id } })).toMatchObject({ eventId: legacyEvent, participantId: participant, status: 'ACTIVE' });
+      expect(await prisma.registration.count({ where: { eventId: legacyEvent, status: 'ACTIVE' } })).toBe(61);
+      const p2 = await login(participant2);
+      const full = await request(`/api/events/${legacyEvent}/registrations`, { method: 'POST', cookie: p2.cookie, token: p2.token, body: {} });
+      expect(full.status).toBe(409);
+      expect((await full.json()).error.code).toBe('EVENT_FULL');
+      expect(await prisma.registration.count({ where: { eventId: legacyEvent } })).toBe(61);
+      expect(await prisma.registration.count({ where: { eventId: legacyEvent, participantId: participant2 } })).toBe(0);
+      const fullDetail = await request(`/api/events/${legacyEvent}`);
+      expect(fullDetail.status).toBe(200);
+      expect((await fullDetail.json()).data).toMatchObject({ id: legacyEvent, capacity: 61, remainingSeats: 0 });
+      expect(await prisma.event.findUniqueOrThrow({ where: { id: legacyEvent } })).toEqual(beforeEvent);
+      expect(await prisma.registration.findMany({ where: { id: { in: legacyRegistrations } }, orderBy: { id: 'asc' } })).toEqual(beforeRegistrations);
+    } finally {
+      await prisma.registration.deleteMany({ where: { eventId: legacyEvent } });
+      await prisma.event.deleteMany({ where: { id: legacyEvent } });
+      await prisma.user.deleteMany({ where: { id: { in: legacyParticipants } } });
+    }
+  });
+
   it('rejects the next Participant registration when a capacity-one event is full', async () => {
     const fullEvent = randomUUID();
     await prisma.event.create({ data: { id: fullEvent, organizerId: owner, title: 'Capacity-one controlled exercise', startsAt: new Date('2026-12-01T02:00:00Z'), endsAt: new Date('2026-12-01T04:00:00Z'), location: 'A', capacity: 1, publicationStatus: 'PUBLISHED' } });
