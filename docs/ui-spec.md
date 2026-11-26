@@ -341,7 +341,7 @@ Successful Participant registration → reload or revisit → My Registrations �
 | UIV-02 | Anonymous selects registration, then logs in as Participant | Return to the same event; no automatic registration | FR-01, FR-04, AC-01, AC-04 |
 | UIV-03 | Valid/invalid login and logout | Correct identity, messages, and navigation | AC-01, AC-02 |
 | UIV-04 | Organizer opens Event Detail | No enabled registration action; verify API restriction separately | DEC-07, AC-09 |
-| UIV-05 | Publish event at capacity 1 and 60 with empty description | Both boundary values publish and retrieve successfully | DEC-05, AC-03 |
+| UIV-05 | Publish event at capacity 1, 30, and 60 with empty description | All three values publish and retrieve successfully | DEC-05, AC-03 |
 | UIV-06 | Missing required fields, capacity 0/61/fraction/nonnumeric, invalid time range | Field errors; no publication; entered values retained | DEC-05, AC-03 |
 | UIV-07 | Register and retrieve registration | Success and displayed data match server records | AC-04 |
 | UIV-08 | Full event before/during registration | Accurate full state; no false success | AC-05, AC-07 |
