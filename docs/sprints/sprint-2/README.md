@@ -20,6 +20,7 @@ Historical test evidence lives in feature evidence files and GitHub runs; old pl
 ## Documents
 
 - [Policy confirmation, actual review and ownership matrix](review-record.md)
+- [Shared lock prerequisite and actual RED/GREEN evidence](shared-lock-evidence.md)
 - [Policy decisions and Lab 7 boundary](decisions.md)
 - [F-05 cancellation contract](f-05.md)
 - [F-06 event management contract](f-06.md)
@@ -40,6 +41,8 @@ Historical test evidence lives in feature evidence files and GitHub runs; old pl
 The announcement is supplied text in the chat, with no independently verified announcement URL/date. Attach the original notice in the submission; do not invent an approval or announcement date.
 
 ## Feature completion snapshot
+
+Shared lock plumbing has a separately tested implementation candidate (see evidence above), pending peer review/staging merge. It is not a completed feature: F-05/F-06/F-09 implementation/acceptance remain as listed below. No peer-owned schema/version migration is supplied by that candidate.
 
 | Feature | AC | Implementation | Executed verification | Accepted release |
 |---|---|---|---|---|

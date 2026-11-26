@@ -32,4 +32,4 @@ The review also requested actual named ownership before merge. The user assigned
 
 ## Evidence still pending
 
-All Sprint2 implementation is **NOT STARTED**, all Sprint2 acceptance verification is **NOT RUN**, and no submitted/accepted Sprint2 main release exists. CI run45651181587 passed the existing suites on2093a5a; it is not evidence that Sprint2 features work. A new head must receive its own CI and reviewer assessment. Data audit, exact migration SQL, deployment and independent retests remain to be executed/reported honestly.
+F-05/F-06/F-09 implementation is **NOT STARTED**, all feature acceptance verification is **NOT RUN**, and no submitted/accepted Sprint2 main release exists. The [shared lock prerequisite](shared-lock-evidence.md) has its own tested candidate; its results do not establish feature acceptance. CI run45651181587 passed the existing suites on2093a5a; it is not evidence that Sprint2 features work. A new head must receive its own CI and reviewer assessment. Data audit, exact migration SQL, deployment and independent retests remain to be executed/reported honestly.
