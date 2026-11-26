@@ -24,7 +24,7 @@ RegMeUp รวมข้อมูลกิจกรรม ที่นั่ง �
 
 Sprint 1 เป็น UI → API → persistent database journey: Organizer login/publish → public discovery → Participant login/register → own persisted retrieval → owner Organizer reads registrations พร้อม login/logout/current identity, server role/ownership enforcement และ concurrent last-seat/duplicate protection
 
-Required publication fields: ชื่อ, start/end date-time, สถานที่, capacity; description optional ชื่อ/สถานที่ต้องมีข้อความ เวลาสิ้นสุดหลังเวลาเริ่ม และ capacity เป็นจำนวนเต็มบวก ทั้ง UI และ backend แสดง/บังคับ validation ตาม contract
+Required publication fields: ชื่อ, start/end date-time, สถานที่, capacity; description optional ชื่อ/สถานที่ต้องมีข้อความ เวลาสิ้นสุดหลังเวลาเริ่ม และ capacity ของ event ที่สร้างและ publish ใหม่ต้องเป็นจำนวนเต็มตั้งแต่ 1 ถึง 60 ทั้ง UI และ backend แสดง/บังคับ validation ตาม contract
 
 Sprint 2: cancellation, event details/capacity changes, registration deadlines, Instructor assignment/teaching list Sprint 3: check-in, attendance, summaries และ hardening
 
@@ -66,7 +66,7 @@ Sprint 1 ไม่รวม editing/deleting/draft controls, Instructor pages, c
 
 | ID | Rule | Sprint |
 |---|---|---|
-| BR-01 | Capacity เมื่อ publish ต้องเป็นจำนวนเต็ม > 0 | 1 |
+| BR-01 | Capacity ของ event ที่สร้างและ publish ใหม่ต้องเป็นจำนวนเต็มตั้งแต่ 1 ถึง 60 คน (รวมขอบเขต) | 1 |
 | BR-02 | Active registration count ของ event ต้องไม่เกิน capacity รวม competing requests | 1 |
 | BR-03 | Participant/event มี active ได้ไม่เกินหนึ่งรายการ รวม concurrent duplicates | 1 |
 | BR-04 | Participant อ่านเฉพาะทะเบียนส่วนตัวของตน และไม่มีสิทธิ์ publish/manage events | 1 |
@@ -121,7 +121,7 @@ DEC-01–07 คงความหมายจาก R และคำยืน�
 | DEC-02 | Cancellation/deadline ใน Sprint 2; check-in/reports ใน Sprint 3 | User context confirmed |
 | DEC-03 | เพิ่ม Instructor สำหรับ university workshops; จำกัด assigned work | User context confirmed; detail Q-07/08 open |
 | DEC-04 | F-09 ใน Sprint 2 | User context confirmed |
-| DEC-05 | Required event fields/time range/positive integer capacity; description optional | User context confirmed |
+| DEC-05 | Required event fields/time range; capacity ของ event ที่สร้างและ publish ใหม่เป็นจำนวนเต็ม 1–60; description optional | User context confirmed; Lab 7 contract change |
 | DEC-06 | Published list/detail public; registration authenticated | User context confirmed |
 | DEC-07 | Participant-only registration; Organizer direct API denied | User context confirmed |
 | DEC-08 | เดิมเลือกไม่ใช้ ORM; `pg` + parameterized SQL + versioned SQL migrations | Historical decision, superseded by DEC-14 on 2026-11-10 |
@@ -131,6 +131,7 @@ DEC-01–07 คงความหมายจาก R และคำยืน�
 | DEC-12 | REST/JSON, safe error policy, UTC API/DB instants + Asia/Bangkok UI, English UI copy, deterministic paginated lists | Proposal adopted; details in SDS |
 | DEC-13 | Bounded text fields, immediate publication, no automatic mutation retry/idempotency store, no start/end cutoff in Sprint 1 | Proposal adopted; cutoff is scope choice, not deadline policy for Sprint 2 |
 | DEC-14 | PostgreSQL + Prisma ORM/Prisma Migrate; parameterized SQL เฉพาะจุดที่ต้องใช้ เช่น event row lock; คง DEC-11 และ backend authorization | User selected 2026-11-10; design and Prisma exact versions pending teammate review and installation verification |
+| DEC-15 | BR-01 จำกัดเฉพาะ event ที่สร้างและ publish ใหม่; คง event เดิม รวม capacity ที่มากกว่า 60, ID, registrations และ ownership; event เดิมยังสมัครได้โดยเทียบ ACTIVE count กับ stored capacity ภายใต้กฎ F-03; ไม่เพิ่ม global storage constraint ที่บังคับ event เดิมให้ไม่เกิน 60 | Lab 7 legacy compatibility policy confirmed |
 
 Text limits ใน SDS เป็น technical design limits จาก proposal ไม่ใช่ข้อกำหนดดั้งเดิมของวิชา รายละเอียดเติมเพื่อให้ contract ชัด (Unicode counting/hash/lock timeout) ระบุเป็น design v0.1 และยัง pending teammate review
 
