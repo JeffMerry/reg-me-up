@@ -1,6 +1,6 @@
 # Sprint 2 policy confirmation and ownership
 
-Version 0.2 — 26 November 2026 (Asia/Bangkok). Refs #40/#51.
+Version 0.3 — 26 November 2026 (Asia/Bangkok). Refs #40/#42/#51.
 
 ## Actual review evidence and status boundary
 
@@ -16,19 +16,22 @@ The review also requested actual named ownership before merge. The user assigned
 
 ## Ownership matrix
 
+Update26Nov2026 after F-05 PR #57 merged: the user explicitly reassigned the missing `events.version` prerequisite to Kittithat in chat ("ให้คุณทำ prerequisite PR แยก"). Only the version foundation changes owner; Thanatip retains F-09/Instructor schema and migration coordination. This user-directed allocation is not a teammate approval of its implementation. See [version foundation evidence/handoff](event-version-evidence.md).
+
 | Work | Implement / accountable owner | Migration / schema owner | Tests / evidence owner | Different teammate reviewer |
 |---|---|---|---|---|
 | F-05 cancellation | Kittithat Disthanakornkun (JeffMerry) | Kittithat Disthanakornkun (JeffMerry): cancellation status/cancelledAt migration | Kittithat Disthanakornkun (JeffMerry): S2-T05-01–07 and RED/GREEN | Thanatip Nitinantakul (THN4) |
 | F-06 event edit/capacity/deadline | Kittithat Disthanakornkun (JeffMerry) | Kittithat Disthanakornkun (JeffMerry): deadline migration, coordinated with shared version foundation | Kittithat Disthanakornkun (JeffMerry): S2-T06-01–08 and RED/GREEN | Thanatip Nitinantakul (THN4) |
 | F-09 Instructor | Thanatip Nitinantakul (THN4) | Thanatip Nitinantakul (THN4): Instructor role/assignment/history migration and provisioning | Thanatip Nitinantakul (THN4): S2-T09-01–08 and RED/GREEN | Kittithat Disthanakornkun (JeffMerry) |
-| Shared schema and migration coordination | Thanatip Nitinantakul (THN4) | Thanatip Nitinantakul (THN4): shared events.version foundation, migration order/compatibility and schema coordination | Thanatip Nitinantakul (THN4): apply/repeat/preserved-data evidence | Kittithat Disthanakornkun (JeffMerry) |
+| Shared events.version foundation (reassigned by user) | Kittithat Disthanakornkun (JeffMerry) | Kittithat: one additive version migration and Prisma field | Kittithat: apply/repeat/preserved-data evidence | Thanatip Nitinantakul (THN4) |
+| Shared schema and migration coordination | Thanatip Nitinantakul (THN4) | Thanatip: Instructor schema and combined migration order/compatibility; reuse Kittithat's version prerequisite | Thanatip: combined schema verification | Kittithat Disthanakornkun (JeffMerry) |
 | Shared lock / schedule protocol | Kittithat Disthanakornkun (JeffMerry) | Coordinate with Thanatip's schema foundation; no duplicate version migration | Kittithat Disthanakornkun (JeffMerry): synchronized cross-feature race/rollback evidence, with F-09 fixtures supplied by Thanatip | Thanatip Nitinantakul (THN4) |
 | Integration into sprint/02-staging | Kittithat Disthanakornkun (JeffMerry) | Thanatip Nitinantakul (THN4) validates combined migration ordering | Kittithat Disthanakornkun (JeffMerry): Lab7 sync, candidate regression/CI and main release PR | Thanatip Nitinantakul (THN4) |
 | Release evidence / #45 compilation | Thanatip Nitinantakul (THN4) | No new feature schema ownership | Thanatip Nitinantakul (THN4): collect commit/run/digest/revision, post-deploy results, completion tables and PDF evidence; Kittithat supplies integration records | Kittithat Disthanakornkun (JeffMerry) |
 
 ## Dependency handoff
 
-- Thanatip prepares the small shared schema/version foundation in a reviewed prerequisite PR under #40 before feature migrations depend on it. No shared schema has been implemented by this documentation revision.
+- Original planning assigned the shared version foundation to Thanatip. The later user-directed reassignment above supersedes that allocation: Kittithat now supplies the small version prerequisite; both features consume the reviewed staging merge without duplicating its migration.
 - Kittithat prepares the reusable event/schedule lock protocol under #40/#42 after contract integration; Thanatip reviews it before both F-06/F-09 consume it. Coordination must not require merging incomplete assignment UI just to obtain a shared guard.
 - Every feature owner starts from staging containing the required reviewed prerequisites, owns its own test/migration/evidence and consults the shared schema owner before changes to schema.prisma. Shared owner coordinates rather than rewriting feature migrations.
 - Feature author never supplies the required teammate approval on their own feature. Integration and release evidence ownership do not authorize bypassing PR review or sending credentials.
@@ -36,4 +39,4 @@ The review also requested actual named ownership before merge. The user assigned
 
 ## Evidence still pending
 
-F-05/F-06/F-09 implementation is **NOT STARTED**, all feature acceptance verification is **NOT RUN**, and no submitted/accepted Sprint2 main release exists. The [shared lock prerequisite](shared-lock-evidence.md) has its own tested candidate; its results do not establish feature acceptance. CI run45651181587 passed the existing suites on2093a5a; it is not evidence that Sprint2 features work. A new head must receive its own CI and reviewer assessment. Data audit, exact migration SQL, deployment and independent retests remain to be executed/reported honestly.
+F-05 merged in #57; [F-05 evidence](f-05-evidence.md) records its local/CI boundary. F-06 has a separate validation work branch, without exposed edit API/UI yet. F-09 implementation is not established by this update. The [shared lock prerequisite](shared-lock-evidence.md) merged in #55; [version foundation](event-version-evidence.md) records its own verification/review status. No accepted integrated Sprint2 main release is claimed. Historical CI run45651181587 on2093a5a is not evidence of later feature behavior. Every new head needs its own CI/reviewer assessment; deployment and independent retests remain pending.
