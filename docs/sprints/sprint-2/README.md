@@ -2,7 +2,7 @@
 
 Version 0.2 — 26 November 2026 (Asia/Bangkok). Refs #40/#51.
 
-Status: **POLICY CONFIRMED — implementation NOT STARTED / verification NOT RUN**. THN4 confirmed Q-04–Q-08, related FR/BR and legacy policy in the [26Nov review](review-record.md). Review state is COMMENTED, not APPROVED; follow-up approval/merge is pending. Exact technical choices remain subject to implementation PR review. The [ownership matrix](review-record.md#ownership-matrix) assigns F-05/F-06 to Kittithat, F-09/shared schema/release evidence to Thanatip, and shared lock/integration to Kittithat with cross-review.
+Current status: **POLICY CONFIRMED; planning PR #51 APPROVED and merged at eb2ac13**. The [review record](review-record.md) preserves the initial COMMENTED confirmation and later APPROVED review6068636065 at11:40:44 Asia/Bangkok on26Nov2026. The policy-document snapshots below/central documents at a66679f describe the earlier follow-up checkpoint; the later approval is not runtime acceptance. Exact technical implementation still requires its own review. F-05/F-06/F-09 implementation NOT STARTED / acceptance NOT RUN; shared lock candidate tracked separately in [PR #55](https://github.com/JeffMerry/reg-me-up/pull/55). The [ownership matrix](review-record.md#ownership-matrix) assigns F-05/F-06 to Kittithat, F-09/shared schema/release evidence to Thanatip, and shared lock/integration to Kittithat with cross-review.
 
 ## Source and version identity
 
@@ -20,6 +20,7 @@ Historical test evidence lives in feature evidence files and GitHub runs; old pl
 ## Documents
 
 - [Policy confirmation, actual review and ownership matrix](review-record.md)
+- [Shared lock prerequisite and actual RED/GREEN evidence](shared-lock-evidence.md)
 - [Policy decisions and Lab 7 boundary](decisions.md)
 - [F-05 cancellation contract](f-05.md)
 - [F-06 event management contract](f-06.md)
@@ -40,6 +41,8 @@ Historical test evidence lives in feature evidence files and GitHub runs; old pl
 The announcement is supplied text in the chat, with no independently verified announcement URL/date. Attach the original notice in the submission; do not invent an approval or announcement date.
 
 ## Feature completion snapshot
+
+Shared lock plumbing has a separately tested implementation candidate (see evidence above), pending peer review/staging merge. It is not a completed feature: F-05/F-06/F-09 implementation/acceptance remain as listed below. No peer-owned schema/version migration is supplied by that candidate.
 
 | Feature | AC | Implementation | Executed verification | Accepted release |
 |---|---|---|---|---|

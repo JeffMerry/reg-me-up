@@ -8,7 +8,11 @@ Version 0.2 — 26 November 2026 (Asia/Bangkok). Refs #40/#51.
 
 Thanatip Nitinantakul (THN4) confirmed Q-04–Q-08 and the associated FR/BR, preserved BR-02–BR-04, and the legacy capacity policy: retain existing >60 data; omitted capacity preserves it during other edits; explicitly supplied capacity must satisfy1–60 and >=ACTIVE; no incompatible global DB constraint. Instructor overlap uses half-open intervals with adjacency allowed. These policies are **CONFIRMED**; no runtime or acceptance result follows from that confirmation.
 
-The review also requested actual named ownership before merge. The user assigned F-05/F-06 to Kittithat and F-09 to Thanatip in chat on26Nov2026 and delegated the shared-work split. The matrix below records that allocation. It describes responsibilities, not work already performed or a future reviewer approval. Review of this follow-up and formal PR approval/merge remain pending. Exact technical implementation choices must still be checked in the relevant code/migration PR.
+The review also requested actual named ownership before merge. The user assigned F-05/F-06 to Kittithat and F-09 to Thanatip in chat on26Nov2026 and delegated the shared-work split. The matrix below records that allocation. It describes responsibilities, not work already performed or a future reviewer approval. At this initial review checkpoint formal approval/merge were pending; the subsequent actual approval/merge are recorded below. Exact technical implementation choices must still be checked in the relevant code/migration PR.
+
+## Subsequent planning approval and merge
+
+[THN4 review6068636065](https://github.com/JeffMerry/reg-me-up/pull/51#pullrequestreview-6068636065) is **APPROVED**, submitted26Nov2026 at11:40:44 Asia/Bangkok (04:40:44 UTC) for head `a66679f3951dd9ce62466bee351372a0a8c22158`. It confirms the policy, legacy and ownership corrections and reports CI run45753514639 against test merge `a19d56e16b0de651d1891288359a7eda6e611dc2`. PR #51 merged into sprint/02-staging as `eb2ac13e8eec775a8262e87309d39cb4f2e0581f`. Issue #40 was observed CLOSED when preparing the next prerequisite; that state is not evidence of feature implementation or runtime acceptance. PR #55 supplies the separately reviewable shared-lock candidate, while shared schema/version and F-09 remain Thanatip's responsibility.
 
 ## Ownership matrix
 
@@ -32,4 +36,4 @@ The review also requested actual named ownership before merge. The user assigned
 
 ## Evidence still pending
 
-All Sprint2 implementation is **NOT STARTED**, all Sprint2 acceptance verification is **NOT RUN**, and no submitted/accepted Sprint2 main release exists. CI run45651181587 passed the existing suites on2093a5a; it is not evidence that Sprint2 features work. A new head must receive its own CI and reviewer assessment. Data audit, exact migration SQL, deployment and independent retests remain to be executed/reported honestly.
+F-05/F-06/F-09 implementation is **NOT STARTED**, all feature acceptance verification is **NOT RUN**, and no submitted/accepted Sprint2 main release exists. The [shared lock prerequisite](shared-lock-evidence.md) has its own tested candidate; its results do not establish feature acceptance. CI run45651181587 passed the existing suites on2093a5a; it is not evidence that Sprint2 features work. A new head must receive its own CI and reviewer assessment. Data audit, exact migration SQL, deployment and independent retests remain to be executed/reported honestly.
