@@ -2,12 +2,12 @@
 
 | Item | Value |
 |---|---|
-| Version | 1.0 — English translation |
-| Date | 6 November 2026 |
+| Version | 1.1 — Lab 7 capacity contract update |
+| Date | 26 November 2026 |
 | Status | Design and implementation baseline; pending team review and recorded acceptance |
 | Recommended repository location | `docs/ui-spec.md` |
 | Features | F-01, F-02, F-03, F-04 |
-| Referenced decisions | DEC-05, DEC-06, DEC-07 |
+| Referenced decisions | DEC-05, DEC-06, DEC-07, DEC-15 |
 | Source document | `project-cpe334-sprint-1 (1).pdf` |
 
 This document defines Sprint 1 screens, navigation, permissions reflected in the UI, validation, and interaction outcomes based on the latest SRS decisions. Proposed routes, layouts, copy, and additional interaction behavior form a design baseline for team review. This document does not constitute evidence of implementation, testing, or approval.
@@ -32,7 +32,8 @@ Instructor assignment and teaching pages, self-registration, password recovery, 
 
 ### 1.3 Authoritative Rules
 
-- **DEC-05:** Event name, start date/time, end date/time, location, and capacity are required. Description is optional. End time must be after start time. Capacity must be an integer greater than zero.
+- **DEC-05 / BR-01:** Event name, start date/time, end date/time, location, and capacity are required. Description is optional. End time must be after start time. Capacity for a newly created and published event must be an integer from 1 through 60 inclusive.
+- **DEC-15:** Existing events above capacity 60 remain readable with their stored capacity and registration data; the new-publication limit does not rewrite them.
 - **DEC-06:** Published Event List and Event Detail screens are public. Registration requires authentication.
 - **DEC-07:** Only Participant accounts may register. Organizer requests must be rejected even when submitted directly to the API.
 - The backend determines identity, role, ownership, seat availability, and the actual registration outcome. Hiding or disabling a control is not authorization.
@@ -167,7 +168,7 @@ Accept only allowlisted internal return paths accessible to the current role. Ne
 
 **Layout:** Breadcrumb → cover image → two desktop columns: approximately two-thirds event details and one-third registration card. Stack on mobile.
 
-**Public data:** Event name, start/end date and time, location, capacity, remaining seats, optional description, and organizer display name if supplied in the public response. Do not infer or expose organizer email or other private information.
+**Public data:** Event name, start/end date and time, location, stored capacity, remaining seats, optional description, and organizer display name if supplied in the public response. Display the stored capacity for existing events, including events above 60; do not clamp it to the new-publication limit. Do not infer or expose organizer email or other private information.
 
 **Optional description:** Hide the description section when empty; do not leave an empty heading.
 
@@ -239,12 +240,12 @@ Resolve identity first, then combine the Participant's registration state with a
 | Start date and time | Yes | Valid date/time | **Enter a valid start date and time.** |
 | End date and time | Yes | Valid and later than start | **End time must be after start time.** |
 | Location | Yes | Must contain text after trimming | **Enter a location.** |
-| Capacity | Yes | Integer greater than zero | **Capacity must be a positive whole number.** |
+| Capacity | Yes | Integer from 1 through 60 inclusive | **Enter a whole number from 1 to 60.** |
 | Description | No | May be empty; display as plain text | No required-field error |
 
 - Clearly mark required fields and label description **Description (optional)**.
-- Reject zero, negative values, fractions, and nonnumeric capacity values; the server validates again.
-- Do not invent future-start restrictions, maximum capacity, or minimum duration without an SRS/contract decision.
+- Reject missing, zero, negative, fractional, nonnumeric, and greater-than-60 capacity values; show an inline error and preserve the form. The server validates again.
+- Do not add future-start restrictions or minimum event duration without an SRS/contract decision.
 - Maximum field lengths must match the schema/API contract; do not invent unapproved limits.
 - Do not include deadline, Instructor picker, upload, draft/save-draft, or editing controls.
 - Use a prepared/default cover image; no required image field.
@@ -340,8 +341,8 @@ Successful Participant registration → reload or revisit → My Registrations �
 | UIV-02 | Anonymous selects registration, then logs in as Participant | Return to the same event; no automatic registration | FR-01, FR-04, AC-01, AC-04 |
 | UIV-03 | Valid/invalid login and logout | Correct identity, messages, and navigation | AC-01, AC-02 |
 | UIV-04 | Organizer opens Event Detail | No enabled registration action; verify API restriction separately | DEC-07, AC-09 |
-| UIV-05 | Publish valid event with empty description | Publish and retrieve successfully | DEC-05, AC-03 |
-| UIV-06 | Missing required fields, invalid capacity, invalid time range | Field errors; no publication | DEC-05, AC-03 |
+| UIV-05 | Publish event at capacity 1 and 60 with empty description | Both boundary values publish and retrieve successfully | DEC-05, AC-03 |
+| UIV-06 | Missing required fields, capacity 0/61/fraction/nonnumeric, invalid time range | Field errors; no publication; entered values retained | DEC-05, AC-03 |
 | UIV-07 | Register and retrieve registration | Success and displayed data match server records | AC-04 |
 | UIV-08 | Full event before/during registration | Accurate full state; no false success | AC-05, AC-07 |
 | UIV-09 | Duplicate/already registered when event is full | Existing registration takes precedence over Full | AC-06 |
@@ -376,5 +377,6 @@ Sprint 1 may begin before Instructor, deadline, cancellation, and attendance des
 |---|---|---|---|
 | 1.0 | 2026-11-06 | Defined seven main screens, public discovery under DEC-06, Participant-only registration under DEC-07, DEC-05 form validation, shared states, and planned verification | Pending team review |
 | 1.0 — English translation | 2026-11-06 | Translated the baseline into English, retaining screen/requirement IDs, behavior, scope, and pending decisions; example interface copy is also translated | Pending team review |
+| 1.1 | 2026-11-26 | Applied new-publication capacity 1–60 and preserved display of existing events above 60 | Pending team review |
 
 A review entry is not evidence of approval until an actual reviewer and corresponding Issue/PR are recorded.
