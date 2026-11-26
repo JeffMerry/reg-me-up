@@ -1,6 +1,6 @@
 export type EventInput = { title: string; startsAt: Date; endsAt: Date; location: string; capacity: number; description: string | null };
 
-function timestamp(value: unknown): Date | null {
+export function timestamp(value: unknown): Date | null {
   if (typeof value !== 'string') return null;
   const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d+))?)?(Z|[+-]\d{2}:\d{2})$/.exec(value);
   if (!m) return null;
