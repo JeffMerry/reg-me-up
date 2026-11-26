@@ -1,6 +1,6 @@
 # Sprint 2 Software Test Specification
 
-Version0.2 — 26 November2026. Refs #40–#43/#51. **Confirmed policy coverage; every acceptance case NOT RUN.** [Ownership/review record](review-record.md): Kittithat owns F-05/F-06 and integration race evidence; Thanatip owns F-09/schema/release evidence; the other teammate reviews. Contracts: [F-05](f-05.md), [F-06](f-06.md), [F-09](f-09.md), [shared design](system-design.md). IDs beginning S2- are new planned IDs, not existing executable tests or recorded results.
+Version0.3 — 26 November2026. Refs #40–#43/#51. **F-05 local verification recorded below; F-06/F-09 and integrated release cases remain NOT RUN.** [Ownership/review record](review-record.md): Kittithat owns F-05/F-06 and integration race evidence; Thanatip owns F-09/schema/release evidence; the other teammate reviews. Contracts: [F-05](f-05.md), [F-06](f-06.md), [F-09](f-09.md), [shared design](system-design.md). IDs beginning S2- are planned case IDs; only explicit executed mappings establish results.
 
 ## Setup, time and database safeguards
 
@@ -54,7 +54,7 @@ For each feature, review test design then add an executable intended-behavior te
 
 Existing regression includes server unit suites, events.test.ts registration/published/owner cases, auth/session/hash/CSRF tests and browser F-01–F-04. Explain legitimate revisions: new cutoff changes formerly allowed post-start registration; new public cutoff/cancelledAt DTO fields change exact allowlists; cancelled history changes own-list scenarios. Preserve positive/negative controls and rule invariants; do not delete old assertions to conceal failures. Lab7 create capacity61 RED belongs to Lab7, not evidence of new Sprint2 workflow.
 
-Planned root commands (not executed for this draft):
+Root commands (F-05 actual execution is recorded below; other features remain planned):
 
 ```powershell
 npm run typecheck
@@ -70,11 +70,11 @@ Integration/browser commands require the existing README guarded isolated DB/ser
 
 | Planned scope | Actual file/test | Command | Result/counts | Tested commit/run/evidence |
 |---|---|---|---|---|
-| S2-T05-01–07 | TBD | TBD | NOT RUN; counts unknown | TBD |
+| S2-T05-01–07 | `server/tests/integration/cancellation.test.ts`; `e2e/f-05.spec.ts` | `npm run test:integration`; `npx playwright test` | 13 API/DB + 10 browser cases passed locally; explicit deadline, Instructor and real F-06 endpoint contention pending | `6042373`; [exact mappings/RED/GREEN](f-05-evidence.md) |
 | S2-T06-01–08 | TBD | TBD | NOT RUN; counts unknown | TBD |
 | S2-T09-01–08 | TBD | TBD | NOT RUN; counts unknown | TBD |
-| Existing regression | Existing suites, actual selection TBD | TBD | NOT RUN for Sprint2 | TBD |
-| Migration/legacy/restart checks | TBD | TBD | NOT RUN; data audit/migration verification pending | TBD |
+| Existing regression | Unit suites, all 6 integration files, browser F-01–F-05 | `npm run test:unit`; `npm run test:integration`; `npx playwright test`; typecheck/build | 55 unit / 58 integration / 43 browser passed; typecheck/build passed | `6042373`; [F-05 evidence](f-05-evidence.md) |
+| F-05 migration/restart | Cancellation constraints/old ACTIVE read; new app subprocess, repeat migration | Same integration suite; `npm run db:migrate` | Passed locally; F-06 legacy audit/F-09 migrations/cloud restart NOT RUN | `6042373`; [scope](f-05-evidence.md) |
 
 ## Post-deployment checks under #45
 

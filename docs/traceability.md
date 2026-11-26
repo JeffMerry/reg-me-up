@@ -2,7 +2,7 @@
 
 Version 0.5 — 2026-11-26. Sprint2 policy/legacy CONFIRMED in THN4 COMMENTED review; formal follow-up approval pending. Sources: [SRS](srs.md), [features](features.md), [System SDS](system-sds.md), [UI baseline](ui-spec.md), [Sprint 1 STS](sprints/sprint-1/sts.md).
 
-**Sprint 2 actual results are NOT RUN.** Older Sprint 1 rows below retain their historical planning status; they do not supersede feature evidence files/GitHub runs or establish candidate verification. The [Sprint 2 matrix](#sprint-2-extension--25-november-2026) links confirmed policies to planned tests; no baseline requirement is removed and no planned row establishes a pass.
+**F-05 now has local executed evidence; see the [26 November F-05 execution update](#f-05-execution-update--26-november-2026).** Older Sprint 1/Sprint 2 rows below retain historical planning status; they do not supersede feature evidence files/GitHub runs or establish candidate verification. No baseline requirement is removed and no planned row establishes a pass. Integrated Sprint 2 acceptance/release remains pending.
 
 ## 1. Functional requirements
 
@@ -123,3 +123,16 @@ Revision26Nov2026: this matrix supplements historical baseline rows above for th
 | NFR-07 | F-09 /2 | S2-F09-AC04–06 | S2-T09-05–07 | TBD | NOT RUN / TBD |
 
 Q-04–Q-08/related FR/BR and legacy policy are CONFIRMED in THN4 review6068033006 (COMMENTED) on26Nov2026; formal follow-up approval/merge remains pending. TA change-request approval for Lab7 is waived by the supplied announcement; link its original record when available. F-07/F-08 remain planned under #44; no Sprint3 completion implied by this mapping.
+
+## F-05 execution update — 26 November 2026
+
+This update supersedes only F-05 NOT RUN entries above. Planning approval/merge later completed in #51; shared locks merged in #55. F-05 runtime/test GREEN is `60423732af75b4155aff13553ff3f57fe5e262ac`, preceded by real domain RED `4688652`. [Executed evidence](sprints/sprint-2/f-05-evidence.md) contains exact tests, counts, setup limitations and remaining integration. Feature peer review, accepted release and post-deployment verification are pending.
+
+| Requirement → AC → STS | Actual checks | Result / remaining scope |
+|---|---|---|
+| FR-06; BR-07 → S2-F05-AC01–04 → S2-T05-01–04 | Cancellation API/DB tests: state, returned seat, start boundaries, repeat/concurrent idempotence, history/new-ID re-registration | Passed locally for startsAt; explicit deadline integration waits for F-06 |
+| BR-04/05; NFR-01 → S2-F05-AC05 → S2-T05-05 | Auth/ownership/validation/CSRF matrix and DTO allowlists | Passed for existing roles; Instructor coverage waits for F-09 |
+| BR-02/03; NFR-03 → S2-F05-AC06 → S2-T05-06 | Observed lock waits, last-seat orderings, shared-helper capacity writer, rollback | Passed locally; real F-06 endpoint/expectedVersion and integrated contention remain pending |
+| NFR-02/06 → S2-F05-AC06 → S2-T05-07 | New app subprocess, persisted browser history, responsive/focus/expiry/pending/unknown-outcome flows | Passed locally; human UAT/cloud retrieval after restart remains under #45 |
+
+Measured selection: 13 cancellation API/DB cases and 10 F-05 browser cases; complete regression 55 unit, 58 integration and 43 browser passed, plus typecheck/build. No coverage percentage is claimed. F-06/F-09/Lab7 requirements, policy and baseline text are not changed by this execution update.

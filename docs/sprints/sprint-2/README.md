@@ -1,8 +1,8 @@
 # Sprint 2 planning and evidence
 
-Version 0.2 — 26 November 2026 (Asia/Bangkok). Refs #40/#51.
+Version 0.3 — 26 November 2026 (Asia/Bangkok). Refs #40/#41/#51.
 
-Current status: **POLICY CONFIRMED; planning PR #51 APPROVED and merged at eb2ac13**. The [review record](review-record.md) preserves the initial COMMENTED confirmation and later APPROVED review6068636065 at11:40:44 Asia/Bangkok on26Nov2026. The policy-document snapshots below/central documents at a66679f describe the earlier follow-up checkpoint; the later approval is not runtime acceptance. Exact technical implementation still requires its own review. F-05/F-06/F-09 implementation NOT STARTED / acceptance NOT RUN; shared lock candidate tracked separately in [PR #55](https://github.com/JeffMerry/reg-me-up/pull/55). The [ownership matrix](review-record.md#ownership-matrix) assigns F-05/F-06 to Kittithat, F-09/shared schema/release evidence to Thanatip, and shared lock/integration to Kittithat with cross-review.
+Current status: **POLICY CONFIRMED; planning PR #51 APPROVED and merged at eb2ac13; shared-lock PR #55 merged at ff97517; F-05 implemented and locally verified, feature review pending.** The [review record](review-record.md) preserves planning approval, which is not runtime acceptance. [F-05 evidence](f-05-evidence.md) records actual RED/GREEN and remaining integration work. F-06/F-09 implementation/acceptance is not established by F-05. The [ownership matrix](review-record.md#ownership-matrix) assigns F-05/F-06 to Kittithat, F-09/shared schema/release evidence to Thanatip, and shared lock/integration to Kittithat with cross-review.
 
 ## Source and version identity
 
@@ -15,7 +15,7 @@ Current status: **POLICY CONFIRMED; planning PR #51 APPROVED and merged at eb2ac
 | Lab 6 exercise retest | Independent UAT-03/UAT-05 evidence not established by this planning work; do not close that gap using CI |
 | Sprint 2 submitted release | TBD; no implementation/release claimed |
 
-Historical test evidence lives in feature evidence files and GitHub runs; old planning text in central documents is not a current release status. This documentation revision has no new runtime results.
+Historical test evidence lives in feature evidence files and GitHub runs; old planning text in central documents is not a current release status. This revision links executed local F-05 verification, without claiming an accepted release.
 
 ## Documents
 
@@ -23,6 +23,7 @@ Historical test evidence lives in feature evidence files and GitHub runs; old pl
 - [Shared lock prerequisite and actual RED/GREEN evidence](shared-lock-evidence.md)
 - [Policy decisions and Lab 7 boundary](decisions.md)
 - [F-05 cancellation contract](f-05.md)
+- [F-05 actual RED/GREEN, verification and integration limits](f-05-evidence.md)
 - [F-06 event management contract](f-06.md)
 - [F-09 Instructor contract](f-09.md)
 - [Shared API/data/locking design](system-design.md)
@@ -36,17 +37,17 @@ Historical test evidence lives in feature evidence files and GitHub runs; old pl
 |---|---|---|
 | #46 / Lab 6 controlled exercise | BR-02; AC-05 | Corrected main `3c8b751…` deployed; independent retest remains unverified here. GitHub CLOSED alone is not closure evidence |
 | Lab 7 / user-supplied spec-sheet announcement | BR-01 / F-02; F-06 dependency | Lab7 create remains a separate workstream; F-06 edit range1–60 is CONFIRMED. Announcement waives Instructor/TA approval. Team contract review and RED/GREEN remain required; no Lab 7 implementation/merge asserted |
-| Q-04–Q-08 / Sprint 2 | FR-06/07/10/11 and related BR/NFR | CONFIRMED in THN4 review; named ownership recorded; formal PR approval/merge pending. See decisions.md and review-record.md |
+| Q-04–Q-08 / Sprint 2 | FR-06/07/10/11 and related BR/NFR | Planning approved and merged in #51; feature implementation requires separate review. See decisions.md and review-record.md |
 
 The announcement is supplied text in the chat, with no independently verified announcement URL/date. Attach the original notice in the submission; do not invent an approval or announcement date.
 
 ## Feature completion snapshot
 
-Shared lock plumbing has a separately tested implementation candidate (see evidence above), pending peer review/staging merge. It is not a completed feature: F-05/F-06/F-09 implementation/acceptance remain as listed below. No peer-owned schema/version migration is supplied by that candidate.
+Shared lock plumbing merged in PR #55. F-05 builds on that staging version and has executed local evidence below; no peer-owned schema/version migration or accepted integrated release is supplied by F-05.
 
 | Feature | AC | Implementation | Executed verification | Accepted release |
 |---|---|---|---|---|
-| F-05 | S2-F05-AC01–06 | NOT STARTED | NOT RUN | TBD |
+| F-05 | S2-F05-AC01–06 | Candidate `6042373`; peer review pending | 13 API/DB cases + 10 browser cases; regression passed; [remaining integration](f-05-evidence.md) | TBD |
 | F-06 | S2-F06-AC01–07 | NOT STARTED | NOT RUN | TBD |
 | F-09 | S2-F09-AC01–07 | NOT STARTED | NOT RUN | TBD |
 
