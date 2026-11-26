@@ -112,9 +112,86 @@ Source: user-supplied terminal output. This historical failed attempt is retaine
 
 ![Full integration regression: 4 files and 43 tests passed](07-integration-green-regression.png)
 
+## Legacy integration verification
+
+| Field | Targeted legacy run | Full regression with legacy |
+|---|---|---|
+| Command reported | `npm run test:integration --workspace server -- -t "preserves legacy capacity 61"` | `npm run test:integration --workspace server` |
+| Run time shown | 21:10:20 | 21:13:19 |
+| Result | 1 passed, 43 intentionally skipped; 1 file passed, 3 skipped | 44 passed, no failed/skipped cases shown; all 4 files passed |
+| Source provenance | HEAD at inspection: `10f8c2d` plus uncommitted changes to `server/tests/integration/events.test.ts` adding the legacy case | Same inspected source state; screenshots do not independently display a commit SHA |
+| Evidence scope | Capacity61/ACTIVE60 legacy fixture remains readable; 61st registration succeeds; next registration is full; original event and existing registrations are preserved | Database, auth, demo provisioning and event APIs, including the added legacy case, passed in this user run |
+
+The captures begin at the Vitest RUN line; commands are documented from the requested execution flow. These results were obtained before the new test changes were committed. Do not attribute them to a committed test revision that did not yet exist. The 43-test result above is retained as earlier history.
+
+![Legacy registration case passes; other cases intentionally skipped by filter](08-integration-legacy-capacity.png)
+
+![All 44 integration tests pass, including the new legacy case](09-integration-regression-with-legacy.png)
+
 ## Remaining evidence
 
-1. Capture create-event UI behavior for invalid capacity 61 (inline range error, form retained, no publication), and successful publication/retrieval at 1, 30 and 60. Record version, expected/actual and event IDs where applicable. Unit/API evidence does not establish browser behavior.
-2. Planned legacy capacity61 read/registration coverage and target legacy-data audit are still outstanding; existing event suite does not include the synthetic capacity61/ACTIVE60 registration case. Capture after that case is implemented and actually run.
+1. Local test-database inventory succeeded and its screenshot is saved below. Actual deployment inventory remains unverified; synthetic compatibility and local inventory do not establish deployment contents.
+2. Part B report consolidation and implementation PR review/CI remain pending. Typecheck/build PNG captures are now present (observations below).
 
-All screenshots were supplied by the user. Unit and current integration suite evidence is complete for these runs; remaining UI/legacy work is not implied to have passed.
+Terminal screenshots were supplied by the user; UI attachments below were copied unchanged from the user's Playwright report. Unit, integration, browser and local test-inventory results are recorded for these runs. Deployment database inventory is unverified.
+
+## Browser verification — first run
+
+User report at 21:20:21 shows 15 browser tests: 14 passed, 1 failed, no skipped/flaky cases. All four new Lab7 capacity cases passed. The existing Organizer publish/retrieval case failed on the My Events link locator: partial accessible-name matching found the original title and all three capacity-suffixed titles (4 elements). Local `test-results/.../error-context.md` confirms a strict mode violation at the final owner-list assertion. This is a test selector failure after publication, not evidence that publication failed.
+
+The selector now uses `getByRole('link', { name: title, exact: true })`. Its subsequent full browser rerun passed, recorded below. This first run is retained as failure/fix history. Follow [verification handoff](verification-handoff.md) for reproduction and the read-only inventory.
+
+## Browser verification — passing rerun
+
+| Field | Recorded value |
+|---|---|
+| Command reported | `npx playwright test e2e/f-02.spec.ts --reporter=list,html` |
+| Result | 15 passed in 25.2s, using one worker; local `test-results/.last-run.json` also reports passed with no failed tests. |
+| Source provenance | HEAD at inspection `10f8c2d` plus uncommitted `e2e/f-02.spec.ts` changes, including the exact-name selector fix. Screenshot does not display a SHA or start time. |
+| Positive boundaries | Capacity1/30/60 each publishes successfully; reload and anonymous retrieval preserve the capacity. |
+| Negative boundary | Capacity61 retains the form and displays the range error; test asserts focus, zero publication requests and zero matching event rows. |
+| Regression | Original publish/retrieval, cancel, session expiry, unknown publication outcome, validation, pending state, read/empty states and responsive layouts all pass. |
+| Artifacts | Four UI screenshots copied directly from the latest local Playwright report attachments; terminal summary supplied by user. Test-created events are cleaned up after the suite. |
+
+![Capacity 1 after public retrieval](10-ui-capacity-1.png)
+
+![Capacity 30 after public retrieval](11-ui-capacity-30.png)
+
+![Capacity 60 after public retrieval](12-ui-capacity-60.png)
+
+![Capacity 61 inline range error with form values retained](13-ui-capacity-61-error.png)
+
+![All 15 browser tests pass after the exact-name selector fix](14-ui-test-summary.png)
+
+## Typecheck and build — user captures
+
+| Command | Observed output |
+|---|---|
+| `npm run typecheck` | Client `tsc --noEmit`; server Prisma generate followed by `tsc --noEmit`. Capture shows Prisma Client7.10.1 generated and no TypeScript diagnostics or npm error. |
+| `npm run build` | Client TypeScript/Vite8.3.6 build completes; server runs Prisma generate followed by `tsc -p tsconfig.build.json`. Capture shows no TypeScript diagnostics or npm error. |
+
+Source: user-supplied screenshots, saved as `16-typecheck.png` and `17-build.png`. Neither capture shows a numeric exit code or returned command prompt, so those details are not independently established from the images. Prisma's available-version banner is informational; no dependency update was performed. HEAD at inspection remains `10f8c2d` with uncommitted follow-up test/evidence changes. The assistant did not rerun these commands.
+
+![Typecheck output with no TypeScript diagnostics shown](16-typecheck.png)
+
+![Client/server build output with no compiler errors shown](17-build.png)
+
+## Local inventory attempt — missing schema
+
+User capture shows timestamp `2026-11-26 14:37:35.813365+00` (21:37:35 Asia/Bangkok), database `regmeup_dev`, then `ERROR: relation "events" does not exist`. No legacy count was produced. This is not evidence of zero legacy rows and does not establish a deployment inventory. Local tests were prepared in `regmeup_test`; the handoff now uses that database for the local test inventory. No migration or data changes were performed in response to this error.
+
+## Local test inventory — successful rerun
+
+| Field | Observed result |
+|---|---|
+| Database | `regmeup_test` in the reported local Docker project `lab6-capacity-regression` |
+| Database timestamp | `2026-11-26 14:40:09.077566+00` (21:40:09 Asia/Bangkok) |
+| Events with capacity >60 | 0 |
+| Detail rows | 0 rows |
+| Transaction | COMMIT displayed; no SQL error shown |
+| Endpoint details | Server address/port fields are blank in the psql output (local socket); SQL does not independently establish the host-mapped port55433. |
+| Scope | Only local test data after fixture cleanup. Not a deployment/production audit; synthetic legacy behavior is separately covered by the passing integration case. |
+
+Source: user-supplied screenshot saved as `15-legacy-inventory-local.png`. No additional database run was performed by the assistant.
+
+![Local regmeup_test inventory returns zero events above capacity60 and commits the read-only transaction](15-legacy-inventory-local.png)
