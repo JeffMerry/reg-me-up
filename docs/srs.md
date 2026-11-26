@@ -131,7 +131,7 @@ DEC-01–07 คงความหมายจาก R และคำยืน�
 | DEC-12 | REST/JSON, safe error policy, UTC API/DB instants + Asia/Bangkok UI, English UI copy, deterministic paginated lists | Proposal adopted; details in SDS |
 | DEC-13 | Bounded text fields, immediate publication, no automatic mutation retry/idempotency store, no start/end cutoff in Sprint 1 | Proposal adopted; cutoff is scope choice, not deadline policy for Sprint 2 |
 | DEC-14 | PostgreSQL + Prisma ORM/Prisma Migrate; parameterized SQL เฉพาะจุดที่ต้องใช้ เช่น event row lock; คง DEC-11 และ backend authorization | User selected 2026-11-10; design and Prisma exact versions pending teammate review and installation verification |
-| DEC-15 | BR-01 จำกัดเฉพาะ event ที่สร้างและ publish ใหม่; คง event เดิม รวม capacity ที่มากกว่า 60, ID, registrations และ ownership; ไม่เพิ่ม global storage constraint ที่บังคับ event เดิมให้ไม่เกิน 60 | Lab 7 legacy compatibility policy confirmed |
+| DEC-15 | BR-01 จำกัดเฉพาะ event ที่สร้างและ publish ใหม่; คง event เดิม รวม capacity ที่มากกว่า 60, ID, registrations และ ownership; event เดิมยังสมัครได้โดยเทียบ ACTIVE count กับ stored capacity ภายใต้กฎ F-03; ไม่เพิ่ม global storage constraint ที่บังคับ event เดิมให้ไม่เกิน 60 | Lab 7 legacy compatibility policy confirmed |
 
 Text limits ใน SDS เป็น technical design limits จาก proposal ไม่ใช่ข้อกำหนดดั้งเดิมของวิชา รายละเอียดเติมเพื่อให้ contract ชัด (Unicode counting/hash/lock timeout) ระบุเป็น design v0.1 และยัง pending teammate review
 
