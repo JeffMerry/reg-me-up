@@ -30,7 +30,7 @@ Environment: Node22.23.4/npm10.9.9, PostgreSQL17.11, existing loopback-only disp
 
 New executable checks: [`event-version.test.ts`](../../../../server/tests/integration/event-version.test.ts). They assert installed type/default/non-null and an existing synthetic row; new-event default, negative/null constraint rejection, conditional stale update affecting zero rows; and the exact migration SQL applied to a temporary old-schema events table retaining legacy capacity100, UUID/title/time. Transactions roll back; no shared rows are globally deleted. The migration rehearsal uses a connection-local temporary table, not a second migration of the shared test table. Runtime/API version enforcement and concurrent feature writes remain F-06/F-09 tests, not established by this schema test.
 
-CI including browser/Docker build is tracked in the prerequisite PR; local schema checks alone do not establish that remote result. Human acceptance, cloud migration/restart and deployment are pending. The local PostgreSQL cluster is stopped after verification with its data retained.
+Initial CI run45834020724 passed migrations/unit55/integration61/typecheck/build, then browser42 passed/1 failed: F-05 pending test read the request counter before the CSRF bootstrap had dispatched its POST (expected1, received0). The test now observes the intercepted POST before checking the gated pending state and keeps its duplicate-submit assertions; no production behavior changes. This timing failure is not version-migration RED. Updated CI/browser/Docker results are tracked in the prerequisite PR. Human acceptance, cloud migration/restart and deployment are pending. The local PostgreSQL cluster is stopped after verification with its data retained.
 
 ## Handoff to F-06 and F-09
 

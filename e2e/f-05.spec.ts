@@ -113,6 +113,9 @@ test('holds pending confirmation and prevents duplicate submits until the server
   });
   try {
     await confirm(page);
+    // The UI becomes pending before its CSRF bootstrap completes. Observe the
+    // intercepted POST before asserting request count while its response waits.
+    await expect.poll(() => count).toBe(1);
     const dialog = page.getByRole('dialog', { name: 'Cancel registration?' });
     await expect(dialog.getByRole('button', { name: 'Cancelling…' })).toBeDisabled();
     await expect(dialog.getByRole('button', { name: 'Keep registration' })).toBeDisabled();
