@@ -1,5 +1,11 @@
 # F-01 browser tests
 
+## F-05 cancellation
+
+After applying all migrations and seeding the guarded test database, use the same environment below and run `npx playwright test e2e/f-05.spec.ts` (or `npx playwright test` for regression). Verify PostgreSQL connection time zone is UTC. F-05 uses seeded P1/O1 and `SEED_PASSWORD`, creates unique event/registration fixtures, then removes only its own rows. It covers persisted cancellation/re-registration, confirmation keyboard/focus at 320/390/1440px, pending and denied requests, lost-response reconciliation including cached-detail reopening, session expiry, started-event rejection, and paginated ACTIVE lookup. Full backend boundary/race/restart checks live in `server/tests/integration/cancellation.test.ts`.
+
+## Shared setup
+
 Use two distinct disposable PostgreSQL databases on the same server. Prepare, migrate and seed the test database using the synthetic seed instructions in the root README, then create its `regmeup_test_guard` marker. Keep the application database URL separately; the suite verifies both live identities and the marker before browser actions. The suite creates synthetic-account sessions and does not reset either database.
 
 From the repository root in PowerShell, replace both example URLs and use the same synthetic password that initially seeded the test database:

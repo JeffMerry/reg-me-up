@@ -2,6 +2,8 @@
 
 An event registration system for university training sessions and workshops, developed for CPE334 Software Engineering.
 
+Sprint 2 F-05 adds own-registration cancellation and retained history. Apply the additive `20261126000000_registration_cancellation` migration with the normal `db:migrate` command before running this code. Existing ACTIVE rows remain valid; own list/detail responses now include `cancelledAt` (null for ACTIVE) and CANCELLED history. Public availability and Organizer totals continue to count ACTIVE only. See [F-05 evidence and integration limits](docs/sprints/sprint-2/f-05-evidence.md).
+
 This branch provides the project foundation, F-01 identity/login, and F-02 event publication/discovery work. Registration remains F-03. See the [documentation index](docs/README.md), [SYS-01 contract](docs/sprints/sprint-1/sys-01.md), and [UI baseline](docs/ui-spec.md).
 
 ## Prerequisites
@@ -9,6 +11,8 @@ This branch provides the project foundation, F-01 identity/login, and F-02 event
 - Node.js **22.23.4** and npm **10.9.9**; `.nvmrc` specifies the target Node version.
 - Docker Desktop with the Linux container engine running. Compose provides PostgreSQL **17.11** with separate application and test databases; Node.js runs the application outside Docker.
 - Use synthetic data only. Do not commit passwords or `.env` files.
+
+Use UTC for PostgreSQL connections with the pinned Prisma PostgreSQL adapter. Check `SHOW TIME ZONE` on the actual application/test connections; a host-native PostgreSQL installation may inherit a different zone. The F-05 local run used two disposable databases configured as UTC; this does not establish the deployed database's setting. UI timestamps are displayed in Asia/Bangkok.
 
 Install dependencies from the repository root:
 
