@@ -379,9 +379,9 @@ Sprint 1 may begin before Instructor, deadline, cancellation, and attendance des
 
 A review entry is not evidence of approval until an actual reviewer and corresponding Issue/PR are recorded.
 
-## Sprint 2 extension — draft
+## Sprint 2 extension — confirmed policy
 
-Version1.1 draft — 25 November2026. Refs #40–#43. Extends the Sprint1 screens above; **pending teammate review, NOT IMPLEMENTED / NOT RUN**. Policy/API/data sources: [decisions](sprints/sprint-2/decisions.md), [shared design](sprints/sprint-2/system-design.md). Do not infer new permissions from visibility of UI controls.
+Version1.2 — 26 November2026. Refs #40–#43/#51. Extends the Sprint1 screens above; **policy CONFIRMED, implementation NOT STARTED / verification NOT RUN**. [Review and ownership](sprints/sprint-2/review-record.md): Kittithat F-05/F-06, Thanatip F-09, cross-review. COMMENTED policy review is not formal PR approval; follow-up approval/merge pending. Policy/API/data sources: [decisions](sprints/sprint-2/decisions.md), [shared design](sprints/sprint-2/system-design.md). Do not infer new permissions from visibility of UI controls.
 
 | Screen / route | Workflow and states | Verification |
 |---|---|---|

@@ -1,14 +1,16 @@
 # Sprint 2 Definition of Done
 
-Version0.1 — 25 November2026. Refs #40–#45. **Draft for teammate review. All completion items unchecked.**
+Version0.2 — 26 November2026. Refs #40–#45/#51. **Policy CONFIRMED; implementation NOT STARTED / verification NOT RUN.** [Actual COMMENTED review and named ownership](review-record.md). Policy/ownership evidence below is recorded separately from pending formal approval, implementation and release.
 
 ## Planning acceptance — #40
 
 - [ ] Starting SHA and accepted Sprint1 baseline distinguished; findings register includes actual Lab6 retest gap and Lab7 announcement provenance
-- [ ] Q-04–Q-08, exact API/data choices and legacy proposal resolved/reviewed with actual reviewer/date/findings
+- [x] Q-04–Q-08 and legacy policy confirmed by THN4 review6068033006 on26Nov2026; scope/date/state recorded in review-record.md
+- [ ] Actual technical implementation/migration choices verified in their PRs; policy confirmation is not runtime verification
 - [ ] F-05/F-06/F-09 contracts, numbered AC, STS/DoD and UI/API/data design versioned before related implementation
 - [ ] Central SRS/inventory/System SDS/traceability updated for Sprint2 without overwriting peer-owned Lab7 rules
-- [ ] Feature lead/reviewer/dependencies/migration ownership/dates agreed
+- [x] Named feature/shared-work/migration/tests/evidence owners recorded from user allocation on26Nov2026; target dates remain planning milestones
+- [ ] Reviewer checks this ownership follow-up before formal approval/merge
 - [ ] Planning PR receives substantive different teammate review and merges into staging; no implementation/review result invented
 
 ## Every feature

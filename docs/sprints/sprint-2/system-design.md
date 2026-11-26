@@ -1,6 +1,6 @@
 # Sprint 2 shared system design
 
-Version 0.1 — 25 November 2026. Proposed technical contract, **NOT REVIEWED / NOT IMPLEMENTED**. Extends [System SDS](../../system-sds.md); policy source [decisions](decisions.md). Refs #40–#43.
+Version 0.2 — 26 November 2026. **Policy CONFIRMED; implementation NOT STARTED / verification NOT RUN.** [THN4's COMMENTED review and named ownership](review-record.md) cover the policy/legacy scope. Technical implementation details and this follow-up still require relevant review/approval. Extends [System SDS](../../system-sds.md); policy source [decisions](decisions.md). Refs #40–#43/#51. Shared schema owner: Thanatip Nitinantakul (THN4), reviewer Kittithat Disthanakornkun (JeffMerry); shared lock owner: Kittithat, reviewer Thanatip.
 
 ## 1. Compatibility and schema ownership
 
@@ -50,7 +50,7 @@ Identifiers use strict UUID validation and pagination follows current page/pageS
 | GET /api/me/teaching-events | Instructor; page/pageSize | 200 paginated current assigned events, startsAt/id ASC; empty success is distinct from error |
 | GET /api/me/teaching-events/:eventId | Assigned Instructor | 200 teaching DTO; missing/unassigned404 |
 
-PATCH omissions preserve stored values; explicit null only allowed for nullable description/deadline. Do not run whole create validation on a partial body before merging with stored fields. Validate resulting full event time/required fields under lock. Supplied capacity uses Lab7-approved integrated range1–60 once available; omitted legacy capacity preserved as decisions.md. owner/IDs/publicationStatus/version directly supplied outside the allowed expectedVersion are422.
+PATCH omissions preserve stored values; explicit null only allowed for nullable description/deadline. Do not run whole create validation on a partial body before merging with stored fields. Validate resulting full event time/required fields under lock. Explicit capacity updates use confirmed F-06 range1–60; omitted legacy capacity is preserved as decisions.md. Lab7 create integration remains separately traceable. owner/IDs/publicationStatus/version directly supplied outside the allowed expectedVersion are422.
 
 Edit deadlines may be past (immediately closed) but cannot be after the proposed startsAt. Existing and proposed starts must be > decision time for editing; otherwise reject with a domain/field error as specified in tests. Null deadline is not an unlimited registration period: effective cutoff=startsAt.
 
@@ -64,6 +64,6 @@ Edit deadlines may be past (immediately closed) but cannot be after the proposed
 
 ## 5. UI / provisioning / unaffected layers
 
-See [UI extension](../../ui-spec.md#sprint-2-extension--draft). Extend frontend identity union/navigation to INSTRUCTOR and show My Teaching only for that role. New backend routes enforce actual role even if client buttons are hidden. Add synthetic Instructor fixtures explicitly for local/test and a reviewed demo provision procedure; never auto-provision at startup or replace existing passwords. No self-registration or account admin scope is added.
+See [UI extension](../../ui-spec.md#sprint-2-extension--confirmed-policy). Extend frontend identity union/navigation to INSTRUCTOR and show My Teaching only for that role. New backend routes enforce actual role even if client buttons are hidden. Add synthetic Instructor fixtures explicitly for local/test and a reviewed demo provision procedure; never auto-provision at startup or replace existing passwords. No self-registration or account admin scope is added.
 
-Build/runtime stack, cookie policy, password hashing, current session expiry and main-only deployment pipeline are unchanged. Migrations and provisioning are separate operator steps. Configuration adds no client secrets or proposed public test-clock controls. Actual commands/output and checked versions belong to feature evidence; none have run for this draft.
+Build/runtime stack, cookie policy, password hashing, current session expiry and main-only deployment pipeline are unchanged. Migrations and provisioning are separate operator steps. Configuration adds no client secrets or proposed public test-clock controls. Actual commands/output and checked versions belong to feature evidence; none have run for Sprint2.

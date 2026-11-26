@@ -1,19 +1,19 @@
 # Sprint 2 branch and release plan
 
-Version 0.1 — 25 November 2026. Refs #40–#45. **Draft / teammate review pending.**
+Version 0.2 — 26 November 2026. Refs #40–#45/#51. **Policy CONFIRMED; follow-up PR approval/merge pending; NOT IMPLEMENTED / NOT RUN.** Actual review and full-name task ownership: [review record and matrix](review-record.md).
 
 ## Branches and owners
 
-Starting main and sprint/02-staging were verified at `3c8b751a2646408f6fdc88209a0fef33d9030f1b`. Working branch for this design is `docs/sprint-2-planning`; its PR targets `sprint/02-staging`. User Kittithat/JeffMerry owns the Sprint 2 workstream; THN4 is the proposed different teammate reviewer, not an approval already received. Individual feature implementation allocation remains for team confirmation.
+Starting main and sprint/02-staging were verified at `3c8b751a2646408f6fdc88209a0fef33d9030f1b`. Working branch for this design is `docs/sprint-2-planning`; its PR targets `sprint/02-staging`. Kittithat Disthanakornkun (JeffMerry) implements F-05/F-06 and owns shared locks/integration; Thanatip Nitinantakul (THN4) implements F-09 and owns shared schema/migration coordination/release evidence. Each reviews the other's work. The full [ownership matrix](review-record.md#ownership-matrix) specifies migration and tests/evidence duties; this user-directed allocation is not work already performed.
 
 | Issue | Work branch | Predecessor / PR target |
 |---|---|---|
 | #40 | docs/sprint-2-planning | Baseline inspection; target sprint/02-staging; contract review before runtime changes |
-| #41 | feature/f-05-cancellation | Reviewed F-05/shared schema protocol; target sprint/02-staging |
-| #42 | feature/f-06-event-management | Reviewed F-06 and joint Lab 7/legacy policy; target sprint/02-staging |
-| #43 | feature/f-09-instructor | Reviewed F-09/shared scheduling design; may proceed independently of F-05 UI; target sprint/02-staging |
+| #41 | feature/f-05-cancellation | Kittithat implement/migration/tests; Thanatip review; reviewed shared prerequisites; target sprint/02-staging |
+| #42 | feature/f-06-event-management | Kittithat implement/migration/tests; Thanatip review; confirmed edit/legacy policy and reviewed shared foundation; target sprint/02-staging |
+| #43 | feature/f-09-instructor | Thanatip implement/migration/tests; Kittithat review; shared schema/lock handoff, independent of F-05 UI; target sprint/02-staging |
 | #44 | feature/f-07-check-in | Reviewed F-07/F-08 contracts and lifecycle decisions; candidate integrates through sprint/02-staging |
-| #45 | docs/deliverable-2 | Collect evidence throughout; release PR uses staging itself as head into main |
+| #45 | docs/deliverable-2 | Thanatip compiles release evidence, Kittithat reviews and supplies integration/main release records; release PR head=staging |
 
 Work branches start from the latest staging with required dependencies present. Preserve meaningful contract → test RED → implementation GREEN commits; use reviewed merges to preserve identities. Never reset/force-push shared work. A feature's staging merge is not its accepted main deployment.
 
@@ -21,9 +21,9 @@ Work branches start from the latest staging with required dependencies present. 
 
 | Target (Asia/Bangkok) | Milestone / gate | Owner / review |
 |---|---|---|
-| 25–26 Nov | #40 contracts, policy/legacy decisions and substantive teammate review | JeffMerry / THN4 proposed |
-| 26–28 Nov | F-05/F-06/F-09 tests/implementation/integration and reviewed Sprint 2 release | Feature allocation TBD; different teammate review |
-| 28–29 Nov | #44 tested Sprint 3 progress, candidate regression/deploy and #45 PDF | Both; allocation confirmed in Issues |
+| 25–26 Nov | #40 policy/legacy confirmed in COMMENTED review; named ownership follow-up and approval/merge remain | Kittithat prepares follow-up / Thanatip reviews |
+| 26–28 Nov | F-05/F-06/F-09 tests/implementation/integration and reviewed Sprint 2 release | Kittithat F-05/F-06/locks/integration; Thanatip F-09/schema/evidence; cross-review |
+| 28–29 Nov | #44 tested Sprint3 progress, candidate regression/deploy and #45 PDF | Kittithat integration; Thanatip evidence compilation; #44 feature allocation separately pending |
 | 29 Nov before23:59 | Inspect final PDF, version and submission evidence | Human submitter TBD |
 | By13 Dec | Remaining F-07/F-08 AC, fixes/final verification/UAT/video/release | Exact remaining AC/owners/dates to be recorded in #44/#45; avoid reserving main workflows for exam end |
 

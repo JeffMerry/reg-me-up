@@ -1,6 +1,6 @@
 # Sprint 2 Software Test Specification
 
-Version0.1 — 25 November2026. Refs #40–#43. **Design only; every case NOT RUN.** Contracts: [F-05](f-05.md), [F-06](f-06.md), [F-09](f-09.md), [shared design](system-design.md). IDs beginning S2- are new planned IDs, not existing executable tests or recorded results.
+Version0.2 — 26 November2026. Refs #40–#43/#51. **Confirmed policy coverage; every acceptance case NOT RUN.** [Ownership/review record](review-record.md): Kittithat owns F-05/F-06 and integration race evidence; Thanatip owns F-09/schema/release evidence; the other teammate reviews. Contracts: [F-05](f-05.md), [F-06](f-06.md), [F-09](f-09.md), [shared design](system-design.md). IDs beginning S2- are new planned IDs, not existing executable tests or recorded results.
 
 ## Setup, time and database safeguards
 
@@ -29,7 +29,7 @@ Every negative API case asserts expected error code/status plus unchanged releva
 | S2-T06-01 / AC01 | Unit/API+DB | O1 reads edit DTO and PATCHes one field then multiple with expectedVersion; omit fields; explicit description/deadline null | 200 and GET/DB values; omissions unchanged; version increments once on real change, no-op stable; invalid null rejected |
 | S2-T06-02 / AC02 | Unit/API+DB | Available E before/exact/after explicit cutoff; null cutoff at start; past deadline update; deadline>start; duplicate with cutoff closed/full | before201; exact/after409 REGISTRATION_CLOSED; invalid deadline422; own ACTIVE duplicate409 ALREADY_REGISTERED, no new row |
 | S2-T06-03 / AC03 | Unit/API+DB | Explicit capacities1,60 with eligible counts;0,61,1.5,"60",null/boolean; active35 then edit35/34 | Approved bounds1/60 accepted; invalid422;35 accepted/full,34 conflict/no writes; GET capacity preserved |
-| S2-T06-04 / AC04 | API+DB migration/legacy | Create controlled legacy E capacity100 in isolated DB under reviewed retained constraint, with ACTIVE0 or>60; PATCH title omitting capacity, then explicit100 or60 | Omitted preserves100; supplied out-of-range422; below ACTIVE409; no truncation; old IDs/reads preserved. Block case until joint policy reviewed |
+| S2-T06-04 / AC04 | API+DB migration/legacy | Create controlled legacy E capacity100 in isolated DB under reviewed retained constraint, with ACTIVE0 or>60; PATCH title omitting capacity, then explicit100 or60 | Omitted preserves100; supplied out-of-range422; below ACTIVE409; no truncation; old IDs/reads preserved. Legacy policy confirmed; actual audit/migration verification still required |
 | S2-T06-05 / AC05 | API+DB matrix | Anonymous/P1/I1/O2; forged owner/publicationStatus/unknown field; stale/missing version; current start reached/proposed past start | 401/403/404/422; stale409 EVENT_CHANGED; started409 EVENT_STARTED; proposed past start422; no partial mutation/leak |
 | S2-T06-06 / AC06 | API+DB synchronized concurrency | Edit capacity vs last-seat register/cancel; deadline update vs register; two writes same expectedVersion; lock crosses cutoff; intentional rollback | Results match locked state/clock; count<=capacity; only one same-version change; sampled time after wait; fields/version atomic |
 | S2-T06-07 / AC07 | API+DB scheduling | E assigned I1; edit into overlap with another I1 event; adjacent interval; race time edit vs assign on other event | Conflict409 or valid adjacency; schedule mutex prevents final overlap; no metadata leaked and rollback preserves both events |
@@ -74,7 +74,7 @@ Integration/browser commands require the existing README guarded isolated DB/ser
 | S2-T06-01–08 | TBD | TBD | NOT RUN; counts unknown | TBD |
 | S2-T09-01–08 | TBD | TBD | NOT RUN; counts unknown | TBD |
 | Existing regression | Existing suites, actual selection TBD | TBD | NOT RUN for Sprint2 | TBD |
-| Migration/legacy/restart checks | TBD | TBD | NOT RUN; joint policy/review pending | TBD |
+| Migration/legacy/restart checks | TBD | TBD | NOT RUN; data audit/migration verification pending | TBD |
 
 ## Post-deployment checks under #45
 

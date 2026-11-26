@@ -1,8 +1,8 @@
 # Sprint 2 planning and evidence
 
-Version 0.1 — 25 November 2026 (Asia/Bangkok). Refs #40.
+Version 0.2 — 26 November 2026 (Asia/Bangkok). Refs #40/#51.
 
-Status: **DRAFT FOR TEAMMATE REVIEW — NOT IMPLEMENTED / NOT RUN**. The user selected the Q-04–Q-08 policy set below for drafting in chat on 25 November; this is not teammate approval or executed verification. Additional API/data choices are proposed technical design for the same review.
+Status: **POLICY CONFIRMED — implementation NOT STARTED / verification NOT RUN**. THN4 confirmed Q-04–Q-08, related FR/BR and legacy policy in the [26Nov review](review-record.md). Review state is COMMENTED, not APPROVED; follow-up approval/merge is pending. Exact technical choices remain subject to implementation PR review. The [ownership matrix](review-record.md#ownership-matrix) assigns F-05/F-06 to Kittithat, F-09/shared schema/release evidence to Thanatip, and shared lock/integration to Kittithat with cross-review.
 
 ## Source and version identity
 
@@ -15,10 +15,11 @@ Status: **DRAFT FOR TEAMMATE REVIEW — NOT IMPLEMENTED / NOT RUN**. The user se
 | Lab 6 exercise retest | Independent UAT-03/UAT-05 evidence not established by this planning work; do not close that gap using CI |
 | Sprint 2 submitted release | TBD; no implementation/release claimed |
 
-Historical test evidence lives in feature evidence files and GitHub runs; old planning text in central documents is not a current release status. This draft has no new runtime results.
+Historical test evidence lives in feature evidence files and GitHub runs; old planning text in central documents is not a current release status. This documentation revision has no new runtime results.
 
 ## Documents
 
+- [Policy confirmation, actual review and ownership matrix](review-record.md)
 - [Policy decisions and Lab 7 boundary](decisions.md)
 - [F-05 cancellation contract](f-05.md)
 - [F-06 event management contract](f-06.md)
@@ -33,8 +34,8 @@ Historical test evidence lives in feature evidence files and GitHub runs; old pl
 | ID / source | Requirements | Decision / release / retest status |
 |---|---|---|
 | #46 / Lab 6 controlled exercise | BR-02; AC-05 | Corrected main `3c8b751…` deployed; independent retest remains unverified here. GitHub CLOSED alone is not closure evidence |
-| Lab 7 / user-supplied spec-sheet announcement | BR-01 / F-02; F-06 dependency | Keep proposed capacity 1–60. Announcement waives Instructor/TA approval. Team contract review and RED/GREEN remain required; no Lab 7 implementation/merge asserted |
-| Q-04–Q-08 / Sprint 2 | FR-06/07/10/11 and related BR/NFR | User selected draft policy; peer review pending. See decisions.md |
+| Lab 7 / user-supplied spec-sheet announcement | BR-01 / F-02; F-06 dependency | Lab7 create remains a separate workstream; F-06 edit range1–60 is CONFIRMED. Announcement waives Instructor/TA approval. Team contract review and RED/GREEN remain required; no Lab 7 implementation/merge asserted |
+| Q-04–Q-08 / Sprint 2 | FR-06/07/10/11 and related BR/NFR | CONFIRMED in THN4 review; named ownership recorded; formal PR approval/merge pending. See decisions.md and review-record.md |
 
 The announcement is supplied text in the chat, with no independently verified announcement URL/date. Attach the original notice in the submission; do not invent an approval or announcement date.
 
