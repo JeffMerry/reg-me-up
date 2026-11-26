@@ -91,6 +91,38 @@ describe('F-02 event APIs', () => {
     expect(dto).toMatchObject({ title: 'Event fixture', location: 'Building A', description: null, startsAt: '2026-12-01T02:00:00.000Z', remainingSeats: 3, activeRegistrationCount: 0 });
     expect(await prisma.event.findUnique({ where: { id: dto.id }, select: { organizerId: true, publicationStatus: true } })).toEqual({ organizerId: owner, publicationStatus: 'PUBLISHED' });
   });
+  it('publishes capacities 1, 30 and 60 and retrieves each stored value', async () => {
+    const organizer = await login(owner);
+    for (const capacity of [1, 30, 60]) {
+      const response = await request('/api/events', { method: 'POST', cookie: organizer.cookie, token: organizer.token, body: { ...valid, capacity } });
+      expect(response.status).toBe(201);
+      const event = (await response.json()).data;
+      expect(event.capacity).toBe(capacity);
+      const stored = await prisma.event.findUniqueOrThrow({ where: { id: event.id }, select: { capacity: true } });
+      expect(stored.capacity).toBe(capacity);
+      const retrieved = await request(`/api/events/${event.id}`);
+      expect(retrieved.status).toBe(200);
+      expect((await retrieved.json()).data.capacity).toBe(capacity);
+    }
+  });
+  it('rejects invalid publication capacities with a field error and no new event row', async () => {
+    const organizer = await login(owner);
+    const before = await prisma.event.count({ where: { organizerId: owner } });
+    const invalidCapacities: Array<{ label: string; body: Record<string, unknown> }> = [];
+    const missing = { ...valid } as Record<string, unknown>; delete missing.capacity;
+    invalidCapacities.push({ label: 'missing', body: missing });
+    for (const capacity of [null, 0, -1, 1.5, '3', 61, 2147483647, 2147483648, Number.MAX_SAFE_INTEGER, true, [], {}]) {
+      invalidCapacities.push({ label: String(capacity), body: { ...valid, capacity } });
+    }
+    for (const { label, body } of invalidCapacities) {
+      const response = await request('/api/events', { method: 'POST', cookie: organizer.cookie, token: organizer.token, body });
+      expect(response.status, `capacity case ${label}`).toBe(422);
+      const result = await response.json();
+      expect(result.error.code, `capacity case ${label}`).toBe('VALIDATION_ERROR');
+      expect(result.error.fieldErrors.capacity, `capacity case ${label}`).toBeTruthy();
+    }
+    expect(await prisma.event.count({ where: { organizerId: owner } })).toBe(before);
+  });
   it('does not insert events for invalid required fields, dates or boundary values', async () => {
     const organizer = await login(owner); const before = await prisma.event.count({ where: { organizerId: owner } });
     const invalidInputs: Record<string, unknown>[] = [];
@@ -99,7 +131,7 @@ describe('F-02 event APIs', () => {
       { ...valid, title: '   ' }, { ...valid, location: '   ' }, { ...valid, title: 'x'.repeat(201) }, { ...valid, location: 'x'.repeat(301) },
       { ...valid, description: 'x'.repeat(10001) }, { ...valid, description: 1 }, { ...valid, startsAt: '2026-02-30T09:00:00+07:00' },
       { ...valid, startsAt: '2026-12-01T09:00:00' }, { ...valid, endsAt: valid.startsAt },
-      { ...valid, capacity: -1 }, { ...valid, capacity: 1.5 }, { ...valid, capacity: '3' }, { ...valid, capacity: 2147483648 },
+      { ...valid, capacity: -1 }, { ...valid, capacity: 1.5 }, { ...valid, capacity: '3' }, { ...valid, capacity: 61 }, { ...valid, capacity: 2147483647 }, { ...valid, capacity: 2147483648 },
     );
     for (const body of invalidInputs) {
       const response = await request('/api/events', { method: 'POST', cookie: organizer.cookie, token: organizer.token, body });
@@ -115,7 +147,7 @@ describe('F-02 event APIs', () => {
       expect(response.status).toBe(201); const result = (await response.json()).data;
       expect(result.description).toBeNull(); expect((await prisma.event.findUniqueOrThrow({ where: { id: result.id } })).description).toBeNull();
     }
-    const body = { ...valid, title: '😀'.repeat(200), location: 'x'.repeat(300), description: 'x'.repeat(10000), startsAt: '2020-12-31T23:30:00+07:00', endsAt: '2021-01-01T01:00:00+07:00', capacity: 2147483647 };
+    const body = { ...valid, title: '😀'.repeat(200), location: 'x'.repeat(300), description: 'x'.repeat(10000), startsAt: '2020-12-31T23:30:00+07:00', endsAt: '2021-01-01T01:00:00+07:00', capacity: 60 };
     const response = await request('/api/events', { method: 'POST', cookie: organizer.cookie, token: organizer.token, body });
     expect(response.status).toBe(201); const event = (await response.json()).data;
     expect(event.startsAt).toBe('2020-12-31T16:30:00.000Z'); expect(event.endsAt).toBe('2020-12-31T18:00:00.000Z');
