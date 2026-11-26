@@ -109,6 +109,8 @@ npm run test:unit
 
 Compose creates two separate databases on the same server endpoint: `DATABASE_URL` for the application and `TEST_DATABASE_URL` for testing. The guard reads the effective database and server identity from both connections rather than comparing URL strings alone. It rejects different endpoints or cases where it cannot verify that the databases are separate.
 
+Integration files run sequentially because they share one guarded test database and some assert public catalog totals. Controlled concurrent requests/transactions inside race tests still run concurrently; this setting only prevents unrelated test files from changing each other's fixtures/totals.
+
 On a fresh Compose volume the test database exists but needs migrations, synthetic fixtures, and a test-only marker. The marker must be installed **after** the initial migration because Prisma rejects migration into a nonempty schema. In a **new PowerShell terminal**, verify that the target URL names `regmeup_test`, then run the following example from the repository root (adjust the port if changed):
 
 ```powershell

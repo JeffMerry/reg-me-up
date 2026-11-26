@@ -32,6 +32,10 @@ New executable checks: [`event-version.test.ts`](../../../../server/tests/integr
 
 Initial CI run45834020724 passed migrations/unit55/integration61/typecheck/build, then browser42 passed/1 failed: F-05 pending test read the request counter before the CSRF bootstrap had dispatched its POST (expected1, received0). The test now observes the intercepted POST before checking the gated pending state and keeps its duplicate-submit assertions; no production behavior changes. This timing failure is not version-migration RED. Updated CI/browser/Docker results are tracked in the prerequisite PR. Human acceptance, cloud migration/restart and deployment are pending. The local PostgreSQL cluster is stopped after verification with its data retained.
 
+Second CI run45834515286 exposed cross-file fixture interference: integration59 passed/2 failed in existing catalog count/pagination assertions while other files added events to the shared test DB (totals38/39 and19/20). `test:integration` now uses `--no-file-parallelism` so unrelated suites cannot mutate the same public catalog between snapshots. Assertions are retained. Explicit concurrent requests/transactions and lock observers inside each race test remain concurrent. This is test isolation, not a change to production locking or a reduced race-test scope. The prerequisite PR records the final CI head/result after these corrections.
+
+After those corrections, local sequential integration passed61/61 (7 files, start21:03:12, duration27.94s). The corrected pending browser test passed3/3 using `npx playwright test e2e/f-05.spec.ts -g "holds pending confirmation" --repeat-each=3`; this targeted repeat checks the synchronization that failed on CI. Full browser/Docker results still require the final remote run.
+
 ## Handoff to F-06 and F-09
 
 1. Obtain substantive THN4 review and merge this prerequisite into `sprint/02-staging`; both feature branches take that reviewed staging commit.
