@@ -1,8 +1,8 @@
 # RegMeUp — Requirements and verification traceability
 
-Version 0.5 — 2026-11-26. Sprint2 policy/legacy CONFIRMED in THN4 COMMENTED review; formal follow-up approval pending. Sources: [SRS](srs.md), [features](features.md), [System SDS](system-sds.md), [UI baseline](ui-spec.md), [Sprint 1 STS](sprints/sprint-1/sts.md).
+Version 0.7 — 2026-11-27. Integrates Lab7 release #62 with Sprint2 staging after #57/#59. Sources: [SRS](srs.md), [features](features.md), [System SDS](system-sds.md), [UI baseline](ui-spec.md), [Sprint 1 STS](sprints/sprint-1/sts.md).
 
-**F-05 now has local executed evidence; see the [26 November F-05 execution update](#f-05-execution-update--26-november-2026).** Older Sprint 1/Sprint 2 rows below retain historical planning status; they do not supersede feature evidence files/GitHub runs or establish candidate verification. No baseline requirement is removed and no planned row establishes a pass. Integrated Sprint 2 acceptance/release remains pending.
+Historical design matrices and revision rows below preserve their original checkpoints. Lab7 local unit63/integration44/F-02 browser15 results are in [capacity evidence](evidence/lab7/RED-publish-capacity.md), with each run's source disclosure. F-05 results are in the [execution update](#f-05-execution-update--26-november-2026), and shared version results in [foundation evidence](sprints/sprint-2/event-version-evidence.md). These separate runs do not establish a pass for the combined source; the synchronization PR records fresh verification. Integrated Sprint2 acceptance/release remains pending. No baseline requirement is removed.
 
 ## 1. Functional requirements
 
@@ -87,8 +87,9 @@ Known remaining work: implement and run all S1 tests; install/lock/verify [selec
 | Mapping clarification | R omitted NFR-01 coverage in F-02/03/09; original security rule already applies | Features/traceability/SDS/contracts | Documented, pending teammate review |
 | AC/TEST-11–15 | Close R discovery/hash/setup/UI/own-event verification gaps under user-adopted proposal | Contracts/STS/DoD/traceability | Designed; NOT RUN |
 | Prisma ORM replaces earlier no-ORM choice | User selected Prisma ORM on 2026-11-10; DEC-08 remains historical and DEC-14 supersedes it | SRS DEC-14, SDS, F-03, SYS-01, versions | Design updated; exact Prisma versions, teammate review and execution pending |
+| Lab 7 BR-01 capacity change | User-selected bound makes new publication explicit at integer 1–60; existing capacity, IDs, registrations and ownership remain intact; existing events continue to use stored capacity under F-03 | SRS BR-01/DEC-05/DEC-15; F-02/03; SDS; UI-06; AC-03/11; TEST-03/05/11/15/14.E/F; Issue #52; F-06 coordination #42 | PR #56 contract and PR #60 implementation reviewed/merged; local unit/API/browser results and local test inventory recorded in Lab7 evidence. Candidate CI, main release, deployment, live inventory and post-deploy checks pending; see release-handoff.md. |
 
-No instructor-approved scope changes or teammate approvals have been recorded; this table is not a fabricated approval log. Later changes need reason/affected requirement IDs/version/actual decision source and must retain baseline unfinished work.
+The Lab 7 announcement removes the TA approval gate for this change; teammate contract review was recorded in PR #56 before implementation. This table links evidence rather than replacing review records. PR #60 review left a CI-trigger follow-up, now prepared under Issue #54. Later changes need reason/affected requirement IDs/version/actual decision source and must retain baseline unfinished work.
 
 ## Revision history
 
@@ -98,7 +99,10 @@ No instructor-approved scope changes or teammate approvals have been recorded; t
 | 0.2 | 2026-11-06 | Linked foundation-specific SYS-AC/SYS-TEST design and selected versions without claiming execution | Pending teammate review; all tests NOT RUN |
 | 0.3 | 2026-11-10 | Traced DEC-14 Prisma decision and affected design artifacts | Pending teammate review; all tests NOT RUN |
 | 0.4 | 2026-11-11 | Added explicit FR-05 to TEST-08 example and SYS-01 foundation test link | Pending teammate review; all tests NOT RUN |
-| 0.5 | 2026-11-26 | Linked confirmed Sprint2 policy/legacy and named ownership to planned AC/STS; no executed results changed | THN4 COMMENTED review; formal approval pending |
+| 0.5 (Sprint2 branch) | 2026-11-26 | Linked confirmed Sprint2 policy/legacy and named ownership to planned AC/STS; no executed results changed | THN4 COMMENTED review; formal approval pending |
+| 0.5 (Lab7 branch) | 2026-11-26 | Traced Lab 7 BR-01 1–60 contract and legacy registration compatibility to F-02/F-03 and planned tests | Pending teammate review; implementation/tests NOT RUN |
+| 0.6 | 2026-11-26 | Linked actual Lab7 contract/implementation reviews and local results; clarified that historical NOT RUN design entries are not current execution status | Release documentation pending teammate review; candidate CI/deployment pending |
+| 0.7 | 2026-11-27 | Combined Lab7/Sprint2 evidence and retained both branch revision histories | Synchronization PR review/combined verification pending |
 
 ## Sprint 2 extension — 25 November 2026
 

@@ -5,6 +5,7 @@ import { verifyTestDatabase } from '../server/src/test-db-safety.js';
 
 const password = process.env.SEED_PASSWORD;
 const title = `E2E event ${randomUUID()}`;
+const publicationTitles = new Set([title]);
 const organizerId = '20000000-0000-4000-8000-000000000001';
 let verified = false;
 test.beforeAll(async () => {
@@ -15,16 +16,66 @@ test.beforeAll(async () => {
 test.afterAll(async () => {
   if (!verified || !process.env.TEST_DATABASE_URL) return;
   const target = new pg.Client({ connectionString: process.env.TEST_DATABASE_URL });
-  try { await target.connect(); await target.query('DELETE FROM events WHERE title = $1 AND organizer_id = $2', [title, organizerId]); } finally { await target.end(); }
+  try { await target.connect(); await target.query('DELETE FROM events WHERE title = ANY($1::text[]) AND organizer_id = $2', [[...publicationTitles], organizerId]); } finally { await target.end(); }
 });
 async function openForm(page: Page) {
   await page.goto('/login'); await page.getByLabel('Email').fill('o1@example.test'); await page.getByLabel('Password').fill(password!); await page.getByRole('button', { name: 'Log in', exact: true }).click();
   await expect(page).toHaveURL(/\/organizer\/events$/); await page.getByRole('link', { name: 'Create event' }).click();
   await expect(page.getByRole('heading', { name: 'Create event' })).toBeVisible();
 }
-async function fillForm(page: Page) {
-  await page.getByLabel('Event name').fill(title); await page.getByLabel('Start date and time').fill('2026-12-01T09:00'); await page.getByLabel('End date and time').fill('2026-12-01T11:00'); await page.getByLabel('Location').fill('Building A'); await page.getByLabel('Capacity').fill('3');
+async function fillForm(page: Page, eventTitle = title) {
+  await page.getByLabel('Event name').fill(eventTitle); await page.getByLabel('Start date and time').fill('2026-12-01T09:00'); await page.getByLabel('End date and time').fill('2026-12-01T11:00'); await page.getByLabel('Location').fill('Building A'); await page.getByLabel('Capacity').fill('3');
 }
+
+for (const capacity of [1, 30, 60]) {
+  test(`Lab7 publishes capacity ${capacity} and preserves it after reload`, async ({ page, browser }, testInfo) => {
+    const eventTitle = `${title} capacity ${capacity}`;
+    publicationTitles.add(eventTitle);
+    await openForm(page); await fillForm(page, eventTitle);
+    await page.getByLabel('Capacity').fill(String(capacity));
+    const publication = page.waitForResponse(response => response.request().method() === 'POST' && new URL(response.url()).pathname === '/api/events');
+    await page.getByRole('button', { name: 'Publish event' }).click();
+    const response = await publication;
+    expect(response.status()).toBe(201);
+    const eventId = (await response.json()).data.id as string;
+    await expect(page).toHaveURL(new RegExp(`/events/${eventId}$`));
+    await expect(page.getByText('Event published successfully.')).toBeVisible();
+    await page.reload();
+    await expect(page.getByRole('heading', { name: eventTitle, exact: true })).toBeVisible();
+    await expect(page.getByText(`${capacity} of ${capacity} seats remaining`, { exact: true })).toBeVisible();
+    const anonymous = await browser.newContext();
+    try {
+      const guest = await anonymous.newPage(); await guest.goto(page.url());
+      await expect(guest.getByRole('heading', { name: eventTitle, exact: true })).toBeVisible();
+      await expect(guest.getByText(`${capacity} of ${capacity} seats remaining`, { exact: true })).toBeVisible();
+      await testInfo.attach(`capacity-${capacity}`, { body: await guest.screenshot({ fullPage: true }), contentType: 'image/png' });
+    } finally { await anonymous.close(); }
+  });
+}
+
+test('Lab7 rejects capacity 61 in the form without sending a publication request', async ({ page }, testInfo) => {
+  const eventTitle = `${title} invalid capacity`;
+  publicationTitles.add(eventTitle);
+  await openForm(page); await fillForm(page, eventTitle);
+  await page.getByLabel('Capacity').fill('61');
+  let publicationRequests = 0;
+  page.on('request', request => { if (request.method() === 'POST' && new URL(request.url()).pathname === '/api/events') publicationRequests++; });
+  await page.getByRole('button', { name: 'Publish event' }).click();
+  await expect(page.getByText('Enter a whole number from 1 to 60.', { exact: true })).toBeVisible();
+  await expect(page.getByLabel('Capacity')).toBeFocused();
+  await expect(page.getByLabel('Capacity')).toHaveValue('61');
+  await expect(page.getByLabel('Event name')).toHaveValue(eventTitle);
+  await expect(page.getByLabel('Location')).toHaveValue('Building A');
+  await expect(page).toHaveURL(/\/organizer\/events\/new$/);
+  expect(publicationRequests).toBe(0);
+  const target = new pg.Client({ connectionString: process.env.TEST_DATABASE_URL });
+  try {
+    await target.connect();
+    const rows = await target.query('SELECT count(*)::int AS total FROM events WHERE title = $1 AND organizer_id = $2', [eventTitle, organizerId]);
+    expect(rows.rows[0].total).toBe(0);
+  } finally { await target.end(); }
+  await testInfo.attach('capacity-61-validation', { body: await page.screenshot({ fullPage: true }), contentType: 'image/png' });
+});
 test('Organizer validates and publishes an event that is publicly retrievable', async ({ page, browser }) => {
   await openForm(page); await page.getByRole('button', { name: 'Publish event' }).click();
   await expect(page.getByLabel('Event name')).toBeFocused(); await expect(page.getByText('Enter an event name up to 200 characters.')).toBeVisible();
@@ -33,7 +84,7 @@ test('Organizer validates and publishes an event that is publicly retrievable', 
   await expect(page.getByText('Building A')).toBeVisible(); await expect(page.getByRole('heading', { name: 'Description' })).toHaveCount(0);
   const url = page.url(); const anonymous = await browser.newContext(); const guest = await anonymous.newPage();
   try { await guest.goto(url); await expect(guest.getByRole('heading', { name: title })).toBeVisible(); await expect(guest.getByRole('link', { name: 'Log in to register' })).toBeVisible(); } finally { await anonymous.close(); }
-  await page.goto('/organizer/events'); await expect(page.getByRole('link', { name: title })).toBeVisible();
+  await page.goto('/organizer/events'); await expect(page.getByRole('link', { name: title, exact: true })).toBeVisible();
 });
 test('unknown publication outcome preserves form and requires checking My Events', async ({ page }) => {
   await openForm(page); await fillForm(page);
@@ -75,7 +126,7 @@ test('invalid time and capacity are described, preserve values and focus the fir
   await page.getByRole('button', { name: 'Publish event' }).click();
   await expect(page.getByLabel('End date and time')).toBeFocused();
   await expect(page.getByText('End time must be after start time.')).toBeVisible();
-  await expect(page.getByText('Capacity must be a positive whole number.')).toBeVisible();
+  await expect(page.getByText('Enter a whole number from 1 to 60.')).toBeVisible();
   await expect(page.getByLabel('Event name')).toHaveValue(title);
 });
 test('pending publication prevents repeat submission and preserves data on validation error', async ({ page }) => {
