@@ -22,6 +22,7 @@ Historical test evidence lives in feature evidence files and GitHub runs; old pl
 - [Policy confirmation, actual review and ownership matrix](review-record.md)
 - [Shared lock prerequisite and actual RED/GREEN evidence](shared-lock-evidence.md)
 - [Shared version prerequisite, reassigned ownership and migration evidence](event-version-evidence.md)
+- [Lab7 synchronization plan, conflict resolution and combined verification](lab7-sync-evidence.md)
 - [Policy decisions and Lab 7 boundary](decisions.md)
 - [F-05 cancellation contract](f-05.md)
 - [F-05 actual RED/GREEN, verification and integration limits](f-05-evidence.md)
