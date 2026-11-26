@@ -11,6 +11,7 @@ import { withEventWrite } from '../../src/event-write.js';
 // Tests hold it on an independent connection and observe actual pg_locks waits.
 const namespace = 334, scheduleKey = 2;
 const owner = randomUUID(), eventA = randomUUID(), eventB = randomUUID(), hidden = randomUUID();
+const writerApplication = `event-write-${owner}`;
 let prisma: PrismaClient, blocker: pg.Client, observer: pg.Client;
 let safe = false;
 let blockerPid: number;
@@ -31,12 +32,12 @@ async function findWriterPid(eventId: string, callbackEntered?: () => boolean) {
   const deadline = Date.now() + 1500;
   while (Date.now() < deadline) {
     if (callbackEntered) expect(callbackEntered()).toBe(false);
-    // Each test has only one competing application transaction; identify it by
-    // wait state, not by a timing assumption or Promise.all scheduling.
+    // Scope to this suite's pool so concurrently running regression suites
+    // cannot supply a false-positive lock waiter.
     const result = await observer.query<{ pid: number }>(
       `SELECT pid FROM pg_stat_activity WHERE datname=current_database()
-       AND pid<>pg_backend_pid() AND pid<>$1 AND wait_event_type='Lock'
-       AND (query ILIKE '%FOR UPDATE%' OR query ILIKE '%pg_advisory_xact_lock%')`, [blockerPid],
+       AND pid<>pg_backend_pid() AND pid<>$1 AND application_name=$2 AND wait_event_type='Lock'
+       AND (query ILIKE '%FOR UPDATE%' OR query ILIKE '%pg_advisory_xact_lock%')`, [blockerPid, writerApplication],
     );
     if (result.rows.length === 1) return result.rows[0].pid;
     await delay(10);
@@ -51,7 +52,7 @@ beforeAll(async () => {
   try {
     await app.connect(); await test.connect(); await verifyTestDatabase(app, test); safe = true;
   } finally { await Promise.allSettled([app.end(), test.end()]); }
-  prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.TEST_DATABASE_URL }) });
+  prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.TEST_DATABASE_URL, application_name: writerApplication }) });
   blocker = new pg.Client({ connectionString: process.env.TEST_DATABASE_URL });
   observer = new pg.Client({ connectionString: process.env.TEST_DATABASE_URL });
   await Promise.all([blocker.connect(), observer.connect()]);

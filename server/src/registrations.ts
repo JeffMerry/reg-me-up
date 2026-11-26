@@ -2,6 +2,7 @@ import type { RequestHandler, Response } from 'express';
 import type { PrismaClient } from '../generated/prisma/client.js';
 import type { Identity } from './auth.js';
 import { hasEmptyRegistrationBody, validateOwnRegistrationQuery, validateRegistrationId } from './registrations-validation.js';
+import { withEventWrite } from './event-write.js';
 
 const eventSelection = {
   id: true, title: true, startsAt: true, endsAt: true, location: true, capacity: true, description: true,
@@ -56,11 +57,7 @@ export function registrationHandlers(prisma: PrismaClient) {
       const eventId = validateRegistrationId(req.params.eventId);
       if (!eventId || Object.keys(req.query).length || !hasEmptyRegistrationBody(req.body)) { invalid(res); return; }
       const participant = res.locals.identity as Identity;
-      const outcome = await prisma.$transaction(async tx => {
-        await tx.$queryRaw`SELECT set_config('lock_timeout', '2s', true)`;
-        await tx.$queryRaw`SELECT set_config('statement_timeout', '5s', true)`;
-        const locked = await tx.$queryRaw<Array<{ id: string }>>`SELECT id FROM events WHERE id = ${eventId}::uuid AND publication_status = 'PUBLISHED' FOR UPDATE`;
-        if (!locked.length) return { kind: 'NOT_FOUND' as const };
+      const write = await withEventWrite(prisma, { eventId, publishedOnly: true }, async tx => {
         const existing = await tx.registration.findFirst({ where: { eventId, participantId: participant.id, status: 'ACTIVE' }, select: { id: true } });
         if (existing) return { kind: 'ALREADY_REGISTERED' as const, registrationId: existing.id };
         const event = await tx.event.findUniqueOrThrow({ where: { id: eventId }, select: { capacity: true, _count: { select: { registrations: { where: { status: 'ACTIVE' } } } } } });
@@ -68,8 +65,9 @@ export function registrationHandlers(prisma: PrismaClient) {
         const registration = await tx.registration.create({ data: { eventId, participantId: participant.id, status: 'ACTIVE' }, select: ownSelection });
         insertedBeforeConnectionLoss = true;
         return { kind: 'CREATED' as const, registration };
-      }, { isolationLevel: 'ReadCommitted', maxWait: 5000, timeout: 10000 });
-      if (outcome.kind === 'NOT_FOUND') { notFound(res); return; }
+      });
+      if (!write.found) { notFound(res); return; }
+      const outcome = write.value;
       if (outcome.kind === 'ALREADY_REGISTERED') { res.status(409).json({ error: { code: outcome.kind, message: 'Already registered.', registrationId: outcome.registrationId } }); return; }
       if (outcome.kind === 'EVENT_FULL') { res.status(409).json({ error: { code: outcome.kind, message: 'This event is full.' } }); return; }
       res.status(201).json({ data: ownDto(outcome.registration) });
