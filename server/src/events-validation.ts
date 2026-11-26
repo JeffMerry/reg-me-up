@@ -25,7 +25,7 @@ export function validateEvent(value: unknown): { data?: EventInput; errors: Reco
   if (!startsAt) errors.startsAt = 'Enter a valid start date and time with timezone.';
   if (!endsAt || (startsAt && endsAt <= startsAt)) errors.endsAt = 'End time must be after start time.';
   const capacity = body.capacity;
-  if (typeof capacity !== 'number' || !Number.isInteger(capacity) || capacity < 1 || capacity > 2147483647) errors.capacity = 'Capacity must be a positive whole number.';
+  if (typeof capacity !== 'number' || !Number.isInteger(capacity) || capacity < 1 || capacity > 60) errors.capacity = 'Enter a whole number from 1 to 60.';
   if (body.description !== undefined && body.description !== null && (typeof body.description !== 'string' || [...body.description].length > 10000)) errors.description = 'Description must be at most 10,000 characters.';
   if (Object.keys(errors).length || !startsAt || !endsAt || typeof capacity !== 'number') return { errors };
   const description = typeof body.description === 'string' && body.description.trim() ? body.description : null;
