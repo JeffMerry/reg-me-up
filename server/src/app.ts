@@ -34,6 +34,9 @@ export function createApp(checkDatabase: () => Promise<void>, auth?: { config: S
     app.post('/api/events/:eventId/registrations', h.requireUser, h.requireRole('PARTICIPANT'), h.csrf, h.jsonBody, registrations.create);
     app.get('/api/me/registrations', h.requireUser, h.requireRole('PARTICIPANT'), registrations.ownList);
     app.get('/api/me/registrations/:registrationId', h.requireUser, h.requireRole('PARTICIPANT'), registrations.ownDetail);
+    // Test-first cancellation scaffold: return the persisted own state; mutation
+    // is added only after the intended-behavior test has demonstrated RED.
+    app.post('/api/me/registrations/:registrationId/cancel', h.requireUser, h.requireRole('PARTICIPANT'), h.csrf, h.jsonBody, registrations.ownDetail);
     app.use(h.errorHandler);
   }
   if (frontendDirectory) {
