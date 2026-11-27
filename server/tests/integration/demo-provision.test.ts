@@ -9,6 +9,7 @@ import { verifyTestDatabase } from '../../src/test-db-safety.js';
 
 const firstPassword = 'synthetic-participant-password';
 const secondPassword = 'synthetic-organizer-password';
+const thirdPassword = 'synthetic-instructor-password';
 
 describe('demo account provisioning', () => {
   beforeAll(async () => {
@@ -20,38 +21,43 @@ describe('demo account provisioning', () => {
   });
 
   it('validates explicit consent and separate passwords without exposing values', () => {
-    const env = { ALLOW_DEMO_PROVISION: '1', DATABASE_URL: 'postgresql://example/test', DEMO_EXPECTED_DATABASE: 'test', DEMO_PARTICIPANT_PASSWORD: firstPassword, DEMO_ORGANIZER_PASSWORD: secondPassword };
-    expect(demoSettings(env).accounts).toHaveLength(2);
-    for (const override of [{ ALLOW_DEMO_PROVISION: '' }, { DEMO_EXPECTED_DATABASE: '' }, { DEMO_PARTICIPANT_PASSWORD: 'short' }, { DEMO_ORGANIZER_PASSWORD: firstPassword }]) {
+    const env = { ALLOW_DEMO_PROVISION: '1', DATABASE_URL: 'postgresql://example/test', DEMO_EXPECTED_DATABASE: 'test', DEMO_PARTICIPANT_PASSWORD: firstPassword, DEMO_ORGANIZER_PASSWORD: secondPassword, DEMO_INSTRUCTOR_PASSWORD: thirdPassword };
+    expect(demoSettings(env).accounts).toHaveLength(3);
+    for (const override of [{ ALLOW_DEMO_PROVISION: '' }, { DEMO_EXPECTED_DATABASE: '' }, { DEMO_PARTICIPANT_PASSWORD: 'short' }, { DEMO_ORGANIZER_PASSWORD: firstPassword }, { DEMO_INSTRUCTOR_PASSWORD: secondPassword }]) {
       try { demoSettings({ ...env, ...override }); throw new Error('Expected rejection'); }
-      catch (error) { expect(String(error)).toContain('Invalid demo provisioning configuration'); expect(String(error)).not.toContain(firstPassword); }
+      catch (error) { expect(String(error)).toContain('Invalid demo provisioning configuration'); expect(String(error)).not.toContain(firstPassword); expect(String(error)).not.toContain(thirdPassword); }
     }
   });
 
   it('creates separate hashes, preserves existing accounts, and rolls back conflicts', async () => {
     const client = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.TEST_DATABASE_URL! }) });
-    const ids = [randomUUID(), randomUUID(), randomUUID()];
+    const ids = [randomUUID(), randomUUID(), randomUUID(), randomUUID()];
     const accounts = [
       { id: ids[0], email: `${ids[0]}@demo.test`, displayName: 'Demo participant', role: 'PARTICIPANT' as const, password: firstPassword },
       { id: ids[1], email: `${ids[1]}@demo.test`, displayName: 'Demo organizer', role: 'ORGANIZER' as const, password: secondPassword },
+      { id: ids[2], email: `${ids[2]}@demo.test`, displayName: 'Demo Instructor', role: 'INSTRUCTOR' as const, password: thirdPassword },
     ];
     const name = (await client.$queryRaw<Array<{ name: string }>>`SELECT current_database() AS name`)[0].name;
     try {
       await expect(provisionDemoAccounts(client, `${name}-wrong`, accounts)).rejects.toThrow('Demo database confirmation failed');
       expect(await client.user.count({ where: { id: { in: ids } } })).toBe(0);
-      expect(await provisionDemoAccounts(client, name, accounts)).toEqual([{ role: 'PARTICIPANT', status: 'created' }, { role: 'ORGANIZER', status: 'created' }]);
+      expect(await provisionDemoAccounts(client, name, accounts)).toEqual([{ role: 'PARTICIPANT', status: 'created' }, { role: 'ORGANIZER', status: 'created' }, { role: 'INSTRUCTOR', status: 'created' }]);
       const participant = await client.user.findUniqueOrThrow({ where: { id: ids[0] } });
       const organizer = await client.user.findUniqueOrThrow({ where: { id: ids[1] } });
+      const instructor = await client.user.findUniqueOrThrow({ where: { id: ids[2] } });
       expect(participant.role).toBe('PARTICIPANT'); expect(organizer.role).toBe('ORGANIZER');
-      expect(participant.passwordHash).not.toBe(organizer.passwordHash);
+      expect(instructor.role).toBe('INSTRUCTOR');
+      expect(new Set([participant.passwordHash, organizer.passwordHash, instructor.passwordHash]).size).toBe(3);
       expect(await argon2.verify(participant.passwordHash, firstPassword)).toBe(true);
       expect(await argon2.verify(organizer.passwordHash, secondPassword)).toBe(true);
+      expect(await argon2.verify(instructor.passwordHash, thirdPassword)).toBe(true);
       const changedPasswords = accounts.map(account => ({ ...account, password: 'different-test-password' }));
-      expect(await provisionDemoAccounts(client, name, changedPasswords)).toEqual([{ role: 'PARTICIPANT', status: 'existing' }, { role: 'ORGANIZER', status: 'existing' }]);
+      expect(await provisionDemoAccounts(client, name, changedPasswords)).toEqual([{ role: 'PARTICIPANT', status: 'existing' }, { role: 'ORGANIZER', status: 'existing' }, { role: 'INSTRUCTOR', status: 'existing' }]);
       expect((await client.user.findUniqueOrThrow({ where: { id: ids[0] } })).passwordHash).toBe(participant.passwordHash);
-      const conflict = [{ ...accounts[0], id: ids[2], email: `${ids[2]}@demo.test` }, { ...accounts[1], role: 'PARTICIPANT' as const }];
+      expect((await client.user.findUniqueOrThrow({ where: { id: ids[2] } })).passwordHash).toBe(instructor.passwordHash);
+      const conflict = [{ ...accounts[0], id: ids[3], email: `${ids[3]}@demo.test` }, { ...accounts[1], role: 'PARTICIPANT' as const }];
       await expect(provisionDemoAccounts(client, name, conflict)).rejects.toThrow('Demo account identity conflict');
-      expect(await client.user.findUnique({ where: { id: ids[2] } })).toBeNull();
+      expect(await client.user.findUnique({ where: { id: ids[3] } })).toBeNull();
     } finally {
       await client.user.deleteMany({ where: { id: { in: ids } } });
       await client.$disconnect();

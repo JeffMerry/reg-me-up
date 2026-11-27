@@ -1,5 +1,7 @@
 # RegMeUp — Requirements and verification traceability
 
+Latest F-09 implementation update27Nov2026: F-09 uncommitted code candidate is in the working tree on `feature/f-09-instructor`; pure interval rule RED/GREEN and typecheck/build evidence are recorded in [F-09 evidence](sprints/sprint-2/f-09-evidence.md). Guarded PostgreSQL, API/DB migration/race and browser tests are NOT RUN because local DB/loopback access returned EACCES. No F-09 acceptance is inferred as passed.
+
 Latest F-06 execution update27Nov2026: owner edit API/UI/deadline candidate `4cce15d` now has24 pure-rule,17 API/DB and10 browser cases passing locally (complete regression87 unit/81 integration/57 browser, typecheck/build). [F-06 mapping and actual RED/GREEN](sprints/sprint-2/f-06-evidence.md) supersedes F-06 NOT RUN entries below only for executed scope: AC01–06 and UI/persistence portion of AC07. Instructor overlap/role/assign-vs-edit integration and accepted release remain pending; no historical result is relabeled as a current pass.
 
 Version 0.7 — 2026-11-27. Integrates Lab7 release #62 with Sprint2 staging after #57/#59. Sources: [SRS](srs.md), [features](features.md), [System SDS](system-sds.md), [UI baseline](ui-spec.md), [Sprint 1 STS](sprints/sprint-1/sts.md).
