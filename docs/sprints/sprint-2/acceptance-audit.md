@@ -24,6 +24,8 @@ Existing evidence: [F-05](f-05-evidence.md), [F-06](f-06-evidence.md), [F-09](f-
 
 ## Closure queue
 
+Implementation branch for S2-G01–04: `test/sprint-2-acceptance`, starting at reviewed staging `13ea49f` after #67. It is tracked under #45 and opens a PR back to staging. **Execution update:** selected G01–04 checks now pass locally at `5036b1d`:13 new API/DB +11 new browser, full107 integration/93 unit, typecheck/build. [Actual mapping, RED/GREEN and limits](acceptance-evidence.md) supersede the inspection-only NOT RUN statements above for these exact selections. Equal-start teaching tie is explicitly not applicable to valid non-overlapping assignments, not a passed test. PR CI/peer review pending; G05–06 remain pending. F07 remains separate on `feature/f-07-check-in` under #44.
+
 These are **verification gaps**, not assertions that the implementation is broken. Preserve the existing positive/negative assertions; do not satisfy gaps by renaming unrelated passing tests.
 
 | ID | Owner / action | Expected result / evidence | Gate |
@@ -38,6 +40,8 @@ These are **verification gaps**, not assertions that the implementation is broke
 THN4 reviews bounded changes and final evidence. Do not reopen historical merged work or claim old Issue closure is acceptance; #45 and its linked gap register track remaining release obligations. No local/production account reset or automatic seed is required by this audit.
 
 ## Next work order
+
+PR #68 CI45982996285 passes93 unit/107 integration/73 browser plus build/Docker at head `56f5b79`, tested merge `b0af4e6`; [execution record](acceptance-evidence.md#pr-ci). This supersedes the PR-CI-pending checkpoint above for that exact version. Peer review, G05–06 and final release remain pending.
 
 1. Review Sprint3 contracts and confirmed Q09 counting/window policy in [Sprint3 plan](../sprint-3/README.md); preserve the design revision before check-in implementation.
 2. Close S2-G01–04 on a small branch from current staging, with meaningful added checks; resolve actual failures if found. This work is independent of Q09 implementation.

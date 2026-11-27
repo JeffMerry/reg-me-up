@@ -47,4 +47,6 @@ Use Refs #40 on the planning PR; do not close it before its actual acceptance co
 
 ## Current allocation and next work — 27 November 2026
 
+Concrete next branches: #45 `test/sprint-2-acceptance` (S2-G01–04 tests/bounded fixes) → #44 `feature/f-07-check-in` → #45 `docs/deliverable-2` (candidate/release/report evidence). All PR into sprint/02-staging; release PR uses staging→main. This clarification records the previously unnamed gap branch before creation; F08 implementation remains a later separately recorded scope.
+
 Historical planning above is superseded for remaining ownership: JeffMerry now owns Sprint2 gap closure, F07/F08 implementation/migrations/tests, schema coordination, integration and release evidence/PDF; THN4 reviews. Existing F09 work/author credit remains historical. See [updated ownership](review-record.md#current-responsibilities--27-november-2026), [Sprint2 gap audit](acceptance-audit.md), [Sprint3 contracts](../sprint-3/README.md) and [delivery plan](../deliverable-2/plan.md). Lab7 #64 and F09 #66 are merged into staging; do not repeat main synchronization for the same source. No remaining review/deployment gate is satisfied merely by the new allocation.

@@ -4,6 +4,8 @@
 
 ## Gates and proposed targets
 
+Branch allocation clarified27Nov2026 before gap work: `test/sprint-2-acceptance` under #45 contains S2-G01–04 tests and bounded fixes/evidence; `feature/f-07-check-in` under #44 implements reviewed Check-in; `docs/deliverable-2` under #45 compiles candidate/release/report evidence. Each starts from current staging and PRs back there. Release PR uses staging→main; no extra release/F08 branch is required for the current checkpoint. Issue44 remains open for actual F07 implementation after its contract-only PR67 merged.
+
 | Order / target | Owner work and concrete artifact | Exit / review evidence |
 |---|---|---|
 | 27Nov | Sprint2 [acceptance audit](../sprint-2/acceptance-audit.md), confirmed Q09 and full F07/F08 contract/AC/STS, updated ownership | THN4 reviews docs PR; user confirmation is recorded separately from peer approval |
