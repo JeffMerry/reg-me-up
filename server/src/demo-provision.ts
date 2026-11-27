@@ -1,10 +1,11 @@
 import argon2 from 'argon2';
 import type { PrismaClient } from '../generated/prisma/client.js';
 
-type DemoAccount = { id: string; email: string; displayName: string; role: 'PARTICIPANT' | 'ORGANIZER'; password: string };
+type DemoAccount = { id: string; email: string; displayName: string; role: 'PARTICIPANT' | 'ORGANIZER' | 'INSTRUCTOR'; password: string };
 export const DEMO_IDENTITIES = [
   { id: 'd1000000-0000-4000-8000-000000000001', email: 'participant@example.test', displayName: 'Demo Participant', role: 'PARTICIPANT' },
   { id: 'd2000000-0000-4000-8000-000000000002', email: 'organizer@example.test', displayName: 'Demo Organizer', role: 'ORGANIZER' },
+  { id: 'd3000000-0000-4000-8000-000000000003', email: 'instructor@example.test', displayName: 'Demo Instructor', role: 'INSTRUCTOR' },
 ] as const;
 
 export function demoSettings(env: NodeJS.ProcessEnv) {
@@ -12,13 +13,16 @@ export function demoSettings(env: NodeJS.ProcessEnv) {
   const expectedDatabase = env.DEMO_EXPECTED_DATABASE ?? '';
   const participantPassword = env.DEMO_PARTICIPANT_PASSWORD ?? '';
   const organizerPassword = env.DEMO_ORGANIZER_PASSWORD ?? '';
+  const instructorPassword = env.DEMO_INSTRUCTOR_PASSWORD ?? '';
   const validPassword = (value: string) => Buffer.byteLength(value, 'utf8') >= 16 && Buffer.byteLength(value, 'utf8') <= 1024;
-  if (env.ALLOW_DEMO_PROVISION !== '1' || !databaseUrl || !expectedDatabase || !validPassword(participantPassword) || !validPassword(organizerPassword) || participantPassword === organizerPassword) {
+  const passwords = [participantPassword, organizerPassword, instructorPassword];
+  if (env.ALLOW_DEMO_PROVISION !== '1' || !databaseUrl || !expectedDatabase || passwords.some(password => !validPassword(password)) || new Set(passwords).size !== passwords.length) {
     throw new Error('Invalid demo provisioning configuration');
   }
   return { databaseUrl, expectedDatabase, accounts: [
     { ...DEMO_IDENTITIES[0], password: participantPassword },
     { ...DEMO_IDENTITIES[1], password: organizerPassword },
+    { ...DEMO_IDENTITIES[2], password: instructorPassword },
   ] };
 }
 

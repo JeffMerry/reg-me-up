@@ -15,6 +15,8 @@ async function seed() {
       ['10000000-0000-4000-8000-000000000003', 'p3@example.test', 'Participant Three', 'PARTICIPANT'],
       ['20000000-0000-4000-8000-000000000001', 'o1@example.test', 'Organizer One', 'ORGANIZER'],
       ['20000000-0000-4000-8000-000000000002', 'o2@example.test', 'Organizer Two', 'ORGANIZER'],
+      ['20000000-0000-4000-8000-000000000003', 'i1@example.test', 'Instructor One', 'INSTRUCTOR'],
+      ['20000000-0000-4000-8000-000000000004', 'i2@example.test', 'Instructor Two', 'INSTRUCTOR'],
     ];
     await prisma.$transaction(async (tx) => {
       for (const [id, email, displayName, role] of people) {
