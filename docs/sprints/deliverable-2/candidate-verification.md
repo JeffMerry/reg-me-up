@@ -41,11 +41,17 @@ The user-run PASS resolves the immediate unit-check blocker for this source cont
 
 ### User-run integration attempt — 27 November 2026
 
-The user supplied output from `npm run test:integration`. **All 13 suites failed during setup; all 128 tests were skipped and zero test assertions ran.** Most suites reported missing `DATABASE_URL` / `TEST_DATABASE_URL` or missing separate guarded app/test databases. `attendance-migration.test.ts` also reported `SASL: SCRAM-SERVER-FIRST-MESSAGE: client password must be a string`. Treat this as an unconfigured database environment, not a domain assertion failure and not a pass. Retry only after preparing the two separate local databases, migrations, synthetic fixtures, and the test-only guard as documented in [README Integration tests](../../../../README.md#integration-tests). Do not include connection strings or passwords in evidence.
+The user supplied output from `npm run test:integration`. **All 13 suites failed during setup; all 128 tests were skipped and zero test assertions ran.** Most suites reported missing `DATABASE_URL` / `TEST_DATABASE_URL` or missing separate guarded app/test databases. `attendance-migration.test.ts` also reported `SASL: SCRAM-SERVER-FIRST-MESSAGE: client password must be a string`. Treat this as an unconfigured database environment, not a domain assertion failure and not a pass. Retry only after preparing the two separate local databases, migrations, synthetic fixtures, and the test-only guard as documented in [README Integration tests](../../../README.md#integration-tests). Do not include connection strings or passwords in evidence.
 
 ### User-reported rerun after seed fix — 27 November 2026
 
 The user reports the rerun through `scripts/test-integration-local.ps1` passed all integration tests after the synthetic seeder was changed to refresh passwords for its fixed fixture IDs. Record this as **128/128 passed, 13/13 suites**, user-reported; raw final Vitest output and exit code were not included in the message. The prior 126/128 run remains documented above as the observed failure before the fix. Re-run the suite on the reviewed commit/CI to retain independently verifiable output.
+
+## PR70 browser startup follow-up
+
+PR70 head `4d1c4e7`, run [46020963099](https://github.com/JeffMerry/reg-me-up/actions/runs/46020963099), passed93 unit and128 integration tests, then Playwright reported `Process from config.webServer exited early` immediately after the API listening message. No browser case summary was produced; this is startup failure, not a failing browser domain assertion. The log does not establish the underlying exit cause. Playwright now launches the API directly with `node --import tsx server/src/index.ts`, removing the intermediary npm/tsx CLI lifecycle. Latest PR checks must verify the revised source; retain this failed attempt separately from PR69's passing evidence. The port and seed-documentation review fixes were already present in4d1c4e7 and are preserved.
+
+Local verification of the direct Node launcher:14/14 F07 browser cases passed using the pinned Node22 toolchain, guarded native test database and installed Chrome; no seed/reset was performed. Full PR browser regression remains a CI gate.
 
 ## Independent historical CI
 
