@@ -162,6 +162,8 @@ Latest F-09 implementation update27Nov2026: F-09 uncommitted code candidate is i
 
 ## Sprint 3 contract mapping — 27 November 2026
 
+Sprint2 acceptance selection update: [gap evidence](sprints/sprint-2/acceptance-evidence.md) at `5036b1d` maps F05 AC04, F06 cutoff/assigned adjacency and F09 restart/assignment race/removal/rollback/access/UI assertions to13 new API/DB and11 new browser cases. Full integration107/unit93, typecheck/build pass locally. These exact selections supersede historical pending statements above; they do not imply whole-AC coverage, accepted release, cloud persistence or F07 execution. Equal-start teaching tie has an explicit validity disposition, not a fabricated pass. Candidate G05 and deployment/human G06 remain pending.
+
 Confirmed Q09 and technical reviewable contracts supplement baseline IDs without deleting them. [Sprint2 audit](sprints/sprint-2/acceptance-audit.md) supersedes old Instructor-pending statements only for specifically executed overlap/role/race scope; remaining AC and release are explicit. User-confirmed ownership: JeffMerry implements/tests/integrates and compiles release evidence; THN4 reviews. No Sprint3 test has run.
 
 | Requirement | Feature / responsibility | AC | Planned STS | Actual file/result/version |

@@ -81,6 +81,8 @@ Integration/browser commands require the existing README guarded isolated DB/ser
 
 ## Post-deployment checks under #45
 
+Execution update27Nov2026: selected S2-G01–04 at `5036b1d` pass13 added API/DB cases and11 added browser cases; full integration107/unit93, typecheck/build PASS. [Acceptance evidence](acceptance-evidence.md) maps exact assertions, RED/GREEN versions and equal-start tie disposition. This supersedes older pending statements only for the selected compound deadline, assignment restart/race/rollback/access and Instructor UI cases. Full browser CI/peer review and G05–06 remain separate gates; no cloud or F07 result is claimed.
+
 Record immutable main SHA→CI/deploy run→image digest→Cloud Run revision and time. Execute selected real create/register/cancel/re-register/owner totals, deadline/capacity rejection and Instructor assignment/denial journeys using authorized synthetic fixtures. Retrieve saved data after restart/redeploy without seed. Capture actual API status/body and authorized reads, not just UI or a green workflow icon. Coordinate public version with Lab7 testers. Generic pipeline health/home smoke alone does not prove these domain paths. Cleanup only specifically authorized synthetic records; do not erase evidence/history silently.
 
 ## Historical F-09 execution notes (superseded)
