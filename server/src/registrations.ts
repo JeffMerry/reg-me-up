@@ -4,15 +4,7 @@ import type { Identity } from './auth.js';
 import { hasEmptyRegistrationBody, validateOwnRegistrationQuery, validateRegistrationId } from './registrations-validation.js';
 import { withEventWrite } from './event-write.js';
 
-const eventSelection = {
-  id: true, title: true, startsAt: true, endsAt: true, location: true, capacity: true, description: true,
-  organizer: { select: { displayName: true } },
-  _count: { select: { registrations: { where: { status: 'ACTIVE' } } } },
-} as const;
-const publicEvent = (event: { id: string; title: string; startsAt: Date; endsAt: Date; location: string; capacity: number; description: string | null; organizer: { displayName: string }; _count: { registrations: number } }) => ({
-  id: event.id, title: event.title, startsAt: event.startsAt.toISOString(), endsAt: event.endsAt.toISOString(), location: event.location, capacity: event.capacity,
-  remainingSeats: event.capacity - event._count.registrations, description: event.description, organizer: event.organizer,
-});
+import { publicEventSelection as eventSelection, publicEventDto as publicEvent, effectiveCutoff } from './event-dto.js';
 const invalid = (res: Response) => res.status(422).json({ error: { code: 'VALIDATION_ERROR', message: 'Invalid input.' } });
 const notFound = (res: Response) => res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Not found.' } });
 const ownSelection = {
@@ -21,7 +13,7 @@ const ownSelection = {
 const ownDto = (row: { id: string; status: string; registeredAt: Date; cancelledAt: Date | null; participant: { displayName: string }; event: Parameters<typeof publicEvent>[0] }) => ({
   id: row.id, status: row.status, registeredAt: row.registeredAt.toISOString(), cancelledAt: row.cancelledAt?.toISOString() ?? null, participant: row.participant, event: publicEvent(row.event),
 });
-function isKnownContention(error: unknown): boolean {
+export function isKnownContention(error: unknown): boolean {
   const pending: unknown[] = [error]; const seen = new Set<object>();
   while (pending.length) {
     const value = pending.pop();
@@ -35,7 +27,7 @@ function isKnownContention(error: unknown): boolean {
   }
   return false;
 }
-function isConnectionLoss(error: unknown): boolean {
+export function isConnectionLoss(error: unknown): boolean {
   const pending: unknown[] = [error]; const seen = new Set<object>();
   while (pending.length) {
     const value = pending.pop();
@@ -60,10 +52,8 @@ export function registrationHandlers(prisma: PrismaClient, now: () => number = D
       const write = await withEventWrite(prisma, { eventId, publishedOnly: true }, async tx => {
         const existing = await tx.registration.findFirst({ where: { eventId, participantId: participant.id, status: 'ACTIVE' }, select: { id: true } });
         if (existing) return { kind: 'ALREADY_REGISTERED' as const, registrationId: existing.id };
-        const event = await tx.event.findUniqueOrThrow({ where: { id: eventId }, select: { startsAt: true, capacity: true, _count: { select: { registrations: { where: { status: 'ACTIVE' } } } } } });
-        // F-06 will extend this start cutoff with its optional deadline. Do not
-        // add the peer-owned schema here; existing own duplicates still win.
-        if (now() >= event.startsAt.getTime()) return { kind: 'REGISTRATION_CLOSED' as const };
+        const event = await tx.event.findUniqueOrThrow({ where: { id: eventId }, select: { startsAt: true, registrationDeadline: true, capacity: true, _count: { select: { registrations: { where: { status: 'ACTIVE' } } } } } });
+        if (now() >= effectiveCutoff(event).getTime()) return { kind: 'REGISTRATION_CLOSED' as const };
         if (event._count.registrations >= event.capacity) return { kind: 'EVENT_FULL' as const };
         const registration = await tx.registration.create({ data: { eventId, participantId: participant.id, status: 'ACTIVE' }, select: ownSelection });
         insertedBeforeConnectionLoss = true;
