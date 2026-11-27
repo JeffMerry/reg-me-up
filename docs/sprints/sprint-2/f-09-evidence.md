@@ -1,5 +1,7 @@
 # F-09 implementation and verification evidence
 
+Latest CI follow-up: run `45964497962` on `1b0a2f1` passed all 93 unit and 94 integration tests plus typecheck/build. Browser execution stopped before running cases with `Timed out waiting 60000ms from config.webServer`; Docker image build was skipped. The working-tree startup fix uses non-watch backend execution, explicit IPv4 addresses for browser/server/proxy/origin, and piped server output. Playwright discovery still lists 62 cases; CI browser/Docker confirmation remains pending after pushing this fix.
+
 CI update (27 November 2026, run 45961985966 at commit 2d57965): full unit PASS 93/93; integration 87 passed / 7 failed. This observed CI result supersedes the earlier developer-reported integration PASS. The seven failures were traced to outdated seed user counts, repeated response-body reads, schedule fixtures leaking between cases, and a race fixture missing an existing assignment. Fixes are in the working tree; typecheck passes. Focused integration rerun is blocked by runner EACCES before database connection, so CI confirmation after pushing the fix is pending. No tests were skipped or disabled by this fix.
 
 ## Latest status — 27 November 2026

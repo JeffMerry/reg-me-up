@@ -25,6 +25,8 @@ The Playwright configuration starts dedicated server and Vite processes on ports
 
 ## Test artifacts
 
+The E2E application origin is `http://127.0.0.1:43171`. Both web servers and the API proxy use explicit IPv4 addresses. The backend runs once with `npm --workspace server run start:e2e` rather than watch mode; readiness checks `/api/ready`, and server stdout/stderr are included in Playwright output for startup diagnostics.
+
 Every E2E case automatically saves a screenshot under `docs/evidence/e2e/.playwright-artifacts/`. Failed cases also retain a Playwright trace and video in that folder. The HTML report is generated at `docs/evidence/e2e/.playwright-report/index.html`; open it with `npx playwright show-report docs/evidence/e2e/.playwright-report`. These generated-artifact folders are separate from the numbered evidence screenshots at the root of `docs/evidence/e2e`.
 
 The F-01 suite exercises identity. Run `npx playwright test e2e/f-02.spec.ts` with the same isolated test setup to exercise selected F-02 publication/discovery flows. Registration remains F-03. The UI expiry cases simulate a 401 response; the actual eight-hour boundary is separately tested with the backend clock. Browser checks do not replace the full STS or teammate review.
