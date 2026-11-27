@@ -1,5 +1,13 @@
 # F-09 implementation and verification evidence
 
+## Latest status — 27 November 2026
+
+This status supersedes the historical attempts below: F-09 E2E PASS 5/5 (Playwright artifacts), focused Instructor unit PASS 6/6, typecheck PASS, client/server build PASS. Integration PASS is reported by the developer in this conversation; successful-run output/counts have not been supplied. Full unit suite PASS: 93/93 tests across 10/10 files, confirmed by the developer-provided Vitest screenshot (duration 4.34 seconds). This successful local run supersedes the earlier runner EACCES attempts. Peer review and deployment acceptance are not inferred from these results.
+
+Implementation commits: `affac31` (server), `22f88f8` (client), `0ebff2a` (tests/evidence).
+
+## Historical attempts and implementation record
+
 Run date: 27 November 2026. Working tree on `feature/f-09-instructor`, based on shared staging SHA `b8ad3e2` before implementation. Issue: #43. This is uncommitted candidate evidence only; no reviewer approval or staging acceptance is implied.
 
 ## Test-first evidence

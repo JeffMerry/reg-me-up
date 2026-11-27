@@ -1,5 +1,7 @@
 # Sprint 2 Software Test Specification
 
+Latest F-09 verification (27 November 2026): E2E PASS 5/5; focused unit PASS 6/6; typecheck/build PASS; integration PASS reported by the developer (successful log/counts not supplied). This supersedes earlier F-09 DB/browser NOT RUN entries for that scope. Full unit regression PASS 93/93 tests in 10/10 files, confirmed by the developer-provided Vitest screenshot; release acceptance remains separate. See docs/sprints/sprint-2/f-09-evidence.md.
+
 Version0.5 — 27 November2026. Refs #40–#43/#51. **F-05 and F-06 candidate verification recorded below; F-09 implementation candidate and partial local evidence recorded, DB/browser acceptance and integrated release remain pending.** [Ownership/review record](review-record.md): Kittithat owns F-05/F-06 and integration race evidence; Thanatip owns F-09/schema/release evidence; the other teammate reviews. Contracts: [F-05](f-05.md), [F-06](f-06.md), [F-09](f-09.md), [shared design](system-design.md). IDs beginning S2- are planned case IDs; only explicit executed mappings establish results.
 
 ## Setup, time and database safeguards

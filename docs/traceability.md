@@ -1,5 +1,7 @@
 # RegMeUp — Requirements and verification traceability
 
+Latest F-09 verification (27 November 2026): E2E PASS 5/5; focused unit PASS 6/6; typecheck/build PASS; integration PASS reported by the developer (successful log/counts not supplied). This supersedes earlier F-09 DB/browser NOT RUN entries for that scope. Full unit regression PASS 93/93 tests in 10/10 files, confirmed by the developer-provided Vitest screenshot; release acceptance remains separate. See docs/sprints/sprint-2/f-09-evidence.md.
+
 Latest F-09 implementation update27Nov2026: F-09 uncommitted code candidate is in the working tree on `feature/f-09-instructor`; pure interval rule RED/GREEN and typecheck/build evidence are recorded in [F-09 evidence](sprints/sprint-2/f-09-evidence.md). Guarded PostgreSQL, API/DB migration/race and browser tests are NOT RUN because local DB/loopback access returned EACCES. No F-09 acceptance is inferred as passed.
 
 Latest F-06 execution update27Nov2026: owner edit API/UI/deadline candidate `4cce15d` now has24 pure-rule,17 API/DB and10 browser cases passing locally (complete regression87 unit/81 integration/57 browser, typecheck/build). [F-06 mapping and actual RED/GREEN](sprints/sprint-2/f-06-evidence.md) supersedes F-06 NOT RUN entries below only for executed scope: AC01–06 and UI/persistence portion of AC07. Instructor overlap/role/assign-vs-edit integration and accepted release remain pending; no historical result is relabeled as a current pass.
