@@ -91,6 +91,38 @@ describe('F-02 event APIs', () => {
     expect(dto).toMatchObject({ title: 'Event fixture', location: 'Building A', description: null, startsAt: '2026-12-01T02:00:00.000Z', remainingSeats: 3, activeRegistrationCount: 0 });
     expect(await prisma.event.findUnique({ where: { id: dto.id }, select: { organizerId: true, publicationStatus: true } })).toEqual({ organizerId: owner, publicationStatus: 'PUBLISHED' });
   });
+  it('publishes capacities 1, 30 and 60 and retrieves each stored value', async () => {
+    const organizer = await login(owner);
+    for (const capacity of [1, 30, 60]) {
+      const response = await request('/api/events', { method: 'POST', cookie: organizer.cookie, token: organizer.token, body: { ...valid, capacity } });
+      expect(response.status).toBe(201);
+      const event = (await response.json()).data;
+      expect(event.capacity).toBe(capacity);
+      const stored = await prisma.event.findUniqueOrThrow({ where: { id: event.id }, select: { capacity: true } });
+      expect(stored.capacity).toBe(capacity);
+      const retrieved = await request(`/api/events/${event.id}`);
+      expect(retrieved.status).toBe(200);
+      expect((await retrieved.json()).data.capacity).toBe(capacity);
+    }
+  });
+  it('rejects invalid publication capacities with a field error and no new event row', async () => {
+    const organizer = await login(owner);
+    const before = await prisma.event.count({ where: { organizerId: owner } });
+    const invalidCapacities: Array<{ label: string; body: Record<string, unknown> }> = [];
+    const missing = { ...valid } as Record<string, unknown>; delete missing.capacity;
+    invalidCapacities.push({ label: 'missing', body: missing });
+    for (const capacity of [null, 0, -1, 1.5, '3', 61, 2147483647, 2147483648, Number.MAX_SAFE_INTEGER, true, [], {}]) {
+      invalidCapacities.push({ label: String(capacity), body: { ...valid, capacity } });
+    }
+    for (const { label, body } of invalidCapacities) {
+      const response = await request('/api/events', { method: 'POST', cookie: organizer.cookie, token: organizer.token, body });
+      expect(response.status, `capacity case ${label}`).toBe(422);
+      const result = await response.json();
+      expect(result.error.code, `capacity case ${label}`).toBe('VALIDATION_ERROR');
+      expect(result.error.fieldErrors.capacity, `capacity case ${label}`).toBeTruthy();
+    }
+    expect(await prisma.event.count({ where: { organizerId: owner } })).toBe(before);
+  });
   it('does not insert events for invalid required fields, dates or boundary values', async () => {
     const organizer = await login(owner); const before = await prisma.event.count({ where: { organizerId: owner } });
     const invalidInputs: Record<string, unknown>[] = [];
@@ -99,7 +131,7 @@ describe('F-02 event APIs', () => {
       { ...valid, title: '   ' }, { ...valid, location: '   ' }, { ...valid, title: 'x'.repeat(201) }, { ...valid, location: 'x'.repeat(301) },
       { ...valid, description: 'x'.repeat(10001) }, { ...valid, description: 1 }, { ...valid, startsAt: '2026-02-30T09:00:00+07:00' },
       { ...valid, startsAt: '2026-12-01T09:00:00' }, { ...valid, endsAt: valid.startsAt },
-      { ...valid, capacity: -1 }, { ...valid, capacity: 1.5 }, { ...valid, capacity: '3' }, { ...valid, capacity: 2147483648 },
+      { ...valid, capacity: -1 }, { ...valid, capacity: 1.5 }, { ...valid, capacity: '3' }, { ...valid, capacity: 61 }, { ...valid, capacity: 2147483647 }, { ...valid, capacity: 2147483648 },
     );
     for (const body of invalidInputs) {
       const response = await request('/api/events', { method: 'POST', cookie: organizer.cookie, token: organizer.token, body });
@@ -115,7 +147,7 @@ describe('F-02 event APIs', () => {
       expect(response.status).toBe(201); const result = (await response.json()).data;
       expect(result.description).toBeNull(); expect((await prisma.event.findUniqueOrThrow({ where: { id: result.id } })).description).toBeNull();
     }
-    const body = { ...valid, title: '😀'.repeat(200), location: 'x'.repeat(300), description: 'x'.repeat(10000), startsAt: '2020-12-31T23:30:00+07:00', endsAt: '2021-01-01T01:00:00+07:00', capacity: 2147483647 };
+    const body = { ...valid, title: '😀'.repeat(200), location: 'x'.repeat(300), description: 'x'.repeat(10000), startsAt: '2020-12-31T23:30:00+07:00', endsAt: '2021-01-01T01:00:00+07:00', capacity: 60 };
     const response = await request('/api/events', { method: 'POST', cookie: organizer.cookie, token: organizer.token, body });
     expect(response.status).toBe(201); const event = (await response.json()).data;
     expect(event.startsAt).toBe('2020-12-31T16:30:00.000Z'); expect(event.endsAt).toBe('2020-12-31T18:00:00.000Z');
@@ -185,6 +217,54 @@ describe('F-02 event APIs', () => {
 });
 
 describe('F-03 registration APIs', () => {
+  it('preserves legacy capacity 61 and existing registrations while admitting the last seat', async () => {
+    // Direct DB setup models a pre-change row; new publication still uses the HTTP validator.
+    const legacyEvent = randomUUID();
+    const legacyParticipants = Array.from({ length: 60 }, () => randomUUID());
+    const legacyRegistrations = Array.from({ length: 60 }, () => randomUUID());
+    const fixtureHash = (await prisma.user.findUniqueOrThrow({ where: { id: owner } })).passwordHash;
+    try {
+      await prisma.user.createMany({ data: legacyParticipants.map(id => ({ id, email: `${id}@legacy.events.test`, passwordHash: fixtureHash, displayName: `Legacy ${id}`, role: 'PARTICIPANT' })) });
+      await prisma.event.create({ data: { id: legacyEvent, organizerId: owner, title: 'Legacy capacity 61', startsAt: new Date('2026-12-01T02:00:00Z'), endsAt: new Date('2026-12-01T04:00:00Z'), location: 'A', capacity: 61, publicationStatus: 'PUBLISHED' } });
+      await prisma.registration.createMany({ data: legacyParticipants.map((id, index) => ({ id: legacyRegistrations[index], eventId: legacyEvent, participantId: id, status: 'ACTIVE' })) });
+      const beforeEvent = await prisma.event.findUniqueOrThrow({ where: { id: legacyEvent } });
+      const beforeRegistrations = await prisma.registration.findMany({ where: { eventId: legacyEvent }, orderBy: { id: 'asc' } });
+      expect(beforeRegistrations).toHaveLength(60);
+      const publicDetail = await request(`/api/events/${legacyEvent}`);
+      expect(publicDetail.status).toBe(200);
+      expect((await publicDetail.json()).data).toMatchObject({ id: legacyEvent, capacity: 61, remainingSeats: 1 });
+      const publicList = await request('/api/events?pageSize=100');
+      expect(publicList.status).toBe(200);
+      expect((await publicList.json()).data).toEqual(expect.arrayContaining([expect.objectContaining({ id: legacyEvent, capacity: 61, remainingSeats: 1 })]));
+      const o = await login(owner);
+      const owned = await request('/api/me/events?pageSize=100', { cookie: o.cookie });
+      expect(owned.status).toBe(200);
+      expect((await owned.json()).data).toEqual(expect.arrayContaining([expect.objectContaining({ id: legacyEvent, capacity: 61, activeRegistrationCount: 60, remainingSeats: 1 })]));
+      const p = await login(participant);
+      const registered = await request(`/api/events/${legacyEvent}/registrations`, { method: 'POST', cookie: p.cookie, token: p.token, body: {} });
+      expect(registered.status).toBe(201);
+      const created = (await registered.json()).data;
+      expect(created).toMatchObject({ status: 'ACTIVE', event: { id: legacyEvent, remainingSeats: 0 } });
+      expect(await prisma.registration.findUniqueOrThrow({ where: { id: created.id } })).toMatchObject({ eventId: legacyEvent, participantId: participant, status: 'ACTIVE' });
+      expect(await prisma.registration.count({ where: { eventId: legacyEvent, status: 'ACTIVE' } })).toBe(61);
+      const p2 = await login(participant2);
+      const full = await request(`/api/events/${legacyEvent}/registrations`, { method: 'POST', cookie: p2.cookie, token: p2.token, body: {} });
+      expect(full.status).toBe(409);
+      expect((await full.json()).error.code).toBe('EVENT_FULL');
+      expect(await prisma.registration.count({ where: { eventId: legacyEvent } })).toBe(61);
+      expect(await prisma.registration.count({ where: { eventId: legacyEvent, participantId: participant2 } })).toBe(0);
+      const fullDetail = await request(`/api/events/${legacyEvent}`);
+      expect(fullDetail.status).toBe(200);
+      expect((await fullDetail.json()).data).toMatchObject({ id: legacyEvent, capacity: 61, remainingSeats: 0 });
+      expect(await prisma.event.findUniqueOrThrow({ where: { id: legacyEvent } })).toEqual(beforeEvent);
+      expect(await prisma.registration.findMany({ where: { id: { in: legacyRegistrations } }, orderBy: { id: 'asc' } })).toEqual(beforeRegistrations);
+    } finally {
+      await prisma.registration.deleteMany({ where: { eventId: legacyEvent } });
+      await prisma.event.deleteMany({ where: { id: legacyEvent } });
+      await prisma.user.deleteMany({ where: { id: { in: legacyParticipants } } });
+    }
+  });
+
   it('rejects the next Participant registration when a capacity-one event is full', async () => {
     const fullEvent = randomUUID();
     await prisma.event.create({ data: { id: fullEvent, organizerId: owner, title: 'Capacity-one controlled exercise', startsAt: new Date('2026-12-01T02:00:00Z'), endsAt: new Date('2026-12-01T04:00:00Z'), location: 'A', capacity: 1, publicationStatus: 'PUBLISHED' } });
