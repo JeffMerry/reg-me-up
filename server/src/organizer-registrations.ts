@@ -1,6 +1,7 @@
 import type { RequestHandler, Response } from 'express';
 import type { PrismaClient } from '../generated/prisma/client.js';
 import type { Identity } from './auth.js';
+import { effectiveCutoff } from './event-dto.js';
 import { validatePagination } from './events-validation.js';
 
 const invalid = (res: Response) => res.status(422).json({ error: { code: 'VALIDATION_ERROR', message: 'Invalid input.' } });
@@ -18,7 +19,7 @@ export function organizerRegistrationHandlers(prisma: PrismaClient) {
         const event = await tx.event.findFirst({
           where: { id: req.params.eventId as string, organizerId: organizer.id },
           select: {
-            id: true, title: true, startsAt: true, endsAt: true, location: true, capacity: true, description: true,
+            id: true, title: true, startsAt: true, endsAt: true, location: true, capacity: true, description: true, registrationDeadline: true,
             organizer: { select: { displayName: true } },
           },
         });
@@ -49,6 +50,8 @@ export function organizerRegistrationHandlers(prisma: PrismaClient) {
             capacity: result.event.capacity,
             remainingSeats: result.event.capacity - activeRegistrations,
             description: result.event.description,
+            registrationDeadline: result.event.registrationDeadline?.toISOString() ?? null,
+            effectiveRegistrationCutoff: effectiveCutoff(result.event).toISOString(),
             organizer: result.event.organizer,
           },
           summary: { capacity: result.event.capacity, activeRegistrations, remainingSeats: result.event.capacity - activeRegistrations },

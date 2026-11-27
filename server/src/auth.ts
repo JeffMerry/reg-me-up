@@ -11,7 +11,8 @@ declare module 'express-session' {
   interface SessionData { csrfToken?: string; userId?: string; authenticatedAt?: number }
 }
 
-export type Identity = { id: string; displayName: string; role: 'PARTICIPANT' | 'ORGANIZER' };
+export type Role = 'PARTICIPANT' | 'ORGANIZER' | 'INSTRUCTOR';
+export type Identity = { id: string; displayName: string; role: Role };
 const lifetime = 8 * 60 * 60 * 1000;
 const token = () => randomBytes(32).toString('base64url');
 const fail = (res: Response, status: number, code: string, message: string, fieldErrors?: Record<string, string>) =>
@@ -43,7 +44,7 @@ export function authHandlers(prisma: PrismaClient, config: ServerConfig, now: ()
       const { userId, authenticatedAt } = req.session;
       if (!userId || typeof authenticatedAt !== 'number' || now() >= authenticatedAt + lifetime) { fail(res, 401, 'UNAUTHENTICATED', 'Authentication required.'); return; }
       const user = await prisma.user.findUnique({ where: { id: userId }, select: { id: true, displayName: true, role: true } });
-      if (!user || (user.role !== 'PARTICIPANT' && user.role !== 'ORGANIZER')) { fail(res, 401, 'UNAUTHENTICATED', 'Authentication required.'); return; }
+      if (!user || (user.role !== 'PARTICIPANT' && user.role !== 'ORGANIZER' && user.role !== 'INSTRUCTOR')) { fail(res, 401, 'UNAUTHENTICATED', 'Authentication required.'); return; }
       res.locals.identity = user as Identity; next();
     } catch (err) { next(err); }
   };
@@ -70,7 +71,7 @@ export function authHandlers(prisma: PrismaClient, config: ServerConfig, now: ()
       if (Object.keys(input).some(key => !['email', 'password'].includes(key))) errors.form = 'Unexpected field.';
       if (Object.keys(errors).length) { fail(res, 422, 'VALIDATION_ERROR', 'Invalid input.', errors); return; }
       const user = await prisma.user.findUnique({ where: { email } });
-      if (!user || !await argon2.verify(user.passwordHash, password) || (user.role !== 'PARTICIPANT' && user.role !== 'ORGANIZER')) {
+      if (!user || !await argon2.verify(user.passwordHash, password) || (user.role !== 'PARTICIPANT' && user.role !== 'ORGANIZER' && user.role !== 'INSTRUCTOR')) {
         fail(res, 401, 'INVALID_CREDENTIALS', 'Incorrect email or password.'); return;
       }
       await regenerate(req);

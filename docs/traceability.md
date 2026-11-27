@@ -1,8 +1,16 @@
 # RegMeUp — Requirements and verification traceability
 
-Version 0.6 — 2026-11-26. Lab 7 contract review recorded in PR #56 and implementation review in PR #60; release follow-up documentation pending review. Sources: [SRS](srs.md), [features](features.md), [System SDS](system-sds.md), [UI baseline](ui-spec.md), [Sprint 1 STS](sprints/sprint-1/sts.md).
+Current reconciliation, version0.8 /27Nov2026: the [complete current FR/BR/NFR matrix](sprints/deliverable-2/current-traceability.md) maps all11 FR,13 BR and7 NFR to responsibility/sprint/AC/planned test/actual selection/result/version, including uncovered F08 and remaining human/cloud checks. [Feature completion](sprints/deliverable-2/feature-completion.md) records each Sprint2 AC and Sprint3 progress; [actual CI logs](sprints/deliverable-2/ci-excerpt.md) verify the historical combined93/128/87 PASS. [Current candidate attempts](sprints/deliverable-2/candidate-verification.md) separately retain agent environment failures, user memory failure and user serialized93/93 PASS. Older matrices below preserve design/run history; they are not the current result register. Main release/G05–06 remain open.
 
-**The matrices below retain the original Sprint 1 test-design baseline; historical NOT RUN entries are not a current execution summary.** Lab 7 actual results are recorded separately in [capacity evidence](evidence/lab7/RED-publish-capacity.md): unit63/63, integration44/44 including legacy compatibility, and F-02 browser15/15 passed in the documented local runs. See each run's SHA/working-tree disclosure; none establishes deployment or passing candidate CI. No baseline requirement removed.
+CI run [45966205796](https://github.com/JeffMerry/reg-me-up/actions/runs/45966205796) on tested commit `0dd48000cd0b5146ce16aedf5e0f00520ca36de3` completed successfully on 27 November 2026. Unit **93/93**, PostgreSQL integration **94/94**, and browser **62/62** passed, including all five F-09 browser cases; typecheck, client/server build, migrations/seed, and Docker image build passed. These are automated CI results for this SHA; peer merge approval and post-deployment acceptance under #45 remain separate.
+
+For F-09, this verified execution supersedes historical NOT RUN design entries for the automated scope in [STS](sprints/sprint-2/sts.md). FR-10/11, BR-11/12/13 and applicable NFR checks are exercised by the Instructor API, migration, overlap and browser suites. This does not mark unexecuted manual/redeploy checks complete. [Current evidence](sprints/sprint-2/f-09-evidence.md).
+
+Latest F-06 execution update27Nov2026: owner edit API/UI/deadline candidate `4cce15d` now has24 pure-rule,17 API/DB and10 browser cases passing locally (complete regression87 unit/81 integration/57 browser, typecheck/build). [F-06 mapping and actual RED/GREEN](sprints/sprint-2/f-06-evidence.md) supersedes F-06 NOT RUN entries below only for executed scope: AC01–06 and UI/persistence portion of AC07. Instructor overlap/role/assign-vs-edit integration and accepted release remain pending; no historical result is relabeled as a current pass.
+
+Version 0.7 — 2026-11-27. Integrates Lab7 release #62 with Sprint2 staging after #57/#59. Sources: [SRS](srs.md), [features](features.md), [System SDS](system-sds.md), [UI baseline](ui-spec.md), [Sprint 1 STS](sprints/sprint-1/sts.md).
+
+Historical design matrices and revision rows below preserve their original checkpoints. Lab7 local unit63/integration44/F-02 browser15 results are in [capacity evidence](evidence/lab7/RED-publish-capacity.md), with each run's source disclosure. F-05 results are in the [execution update](#f-05-execution-update--26-november-2026), and shared version results in [foundation evidence](sprints/sprint-2/event-version-evidence.md). These separate runs do not establish a pass for the combined source; the synchronization PR records fresh verification. Integrated Sprint2 acceptance/release remains pending. No baseline requirement is removed.
 
 ## 1. Functional requirements
 
@@ -13,30 +21,30 @@ Version 0.6 — 2026-11-26. Lab 7 contract review recorded in PR #56 and impleme
 | FR-03 | F-02 | 1 | UI-02/03; public DTO/query | AC-11 → TEST-11; AC-09 → TEST-09; AC-14 → TEST-14.A | Discovery gap addressed by design; NOT RUN |
 | FR-04 | F-03 | 1 | UI-03/04/04-D; registration service | AC-04 → TEST-04; AC-09/10 → TEST-09/10 | Designed; NOT RUN |
 | FR-05 | F-04 | 1 | UI-05/07; owner read model | AC-08/09 → TEST-08/09; AC-14 → TEST-14.J/L | Designed; NOT RUN |
-| FR-06 | F-05 | 2 | Later cancellation state/API/UI | Contract/AC/STS pending Q-05; verify owner cancel/state/seat return/re-registration policy | Allocated; NOT RUN |
-| FR-07 | F-06 | 2 | Event update/deadline/lock protocol | Contract/AC/STS pending Q-04/06; deadline boundary/capacity below active rejection | Allocated; NOT RUN |
+| FR-06 | F-05 | 2 | [Cancellation contract](sprints/sprint-2/f-05.md) | S2-F05-AC01–06 → S2-T05-01–07 | Policy CONFIRMED; NOT RUN |
+| FR-07 | F-06 | 2 | [Edit/deadline contract](sprints/sprint-2/f-06.md) | S2-F06-AC01–07 → S2-T06-01–08 | Policy/legacy CONFIRMED; NOT RUN |
 | FR-08 | F-07 | 3 | Attendance conceptual model | Contract/AC/STS pending Q-09; owner check-in/eligibility/duplicate | Allocated; NOT RUN |
 | FR-09 | F-08 | 3 | Summary query/count semantics | Contract/AC/STS pending Q-09; compare persisted rows/formulas incl cancelled state | Allocated; NOT RUN |
-| FR-10 | F-09 | 2 | Assignment conceptual model | Contract/AC/STS pending Q-07/08; owner assign, account/role checks, retrieval | Allocated; NOT RUN |
-| FR-11 | F-09 | 2 | Assigned Instructor reads | Contract/AC/STS pending Q-07/08; assigned-only details/empty/denial | Allocated; NOT RUN |
+| FR-10 | F-09 | 2 | [Assignment contract](sprints/sprint-2/f-09.md) | S2-F09-AC01–03/05–07 → S2-T09-01–04/06–08 | Policy CONFIRMED; NOT RUN |
+| FR-11 | F-09 | 2 | [Own teaching reads](sprints/sprint-2/f-09.md) | S2-F09-AC04–07 → S2-T09-05–08 | Policy CONFIRMED; NOT RUN |
 
 ## 2. Business rules
 
 | Requirement | Feature | Sprint | UI / design | AC → planned verification | Gap/status |
 |---|---|---|---|---|---|
 | BR-01 | F-02 | 1 | UI-06; DB capacity check | AC-03 → TEST-03 | Designed; NOT RUN |
-| BR-02 | F-03; F-05/06 extend | 1–2 | Event-lock protocol; UI-03 availability | AC-05/07 → TEST-05/07; later seat-return/capacity-change regression | S1 designed; S2 contract pending; NOT RUN |
+| BR-02 | F-03; F-05/06 extend | 1–2 | Event-lock protocol; UI-03 availability | AC-05/07 → TEST-05/07; later seat-return/capacity-change regression | S1 historical; S2 policy CONFIRMED, S2-T05-06/S2-T06-06; NOT RUN |
 | BR-03 | F-03 | 1 | Partial unique active pair + transaction | AC-06 → TEST-06 (sequential/concurrent/full duplicate) | Designed; NOT RUN |
 | BR-04 | F-01/03; F-05 extends | 1–2 | Role guards; own reads/cancel | AC-09 → TEST-09; later own-cancel contract | S1 designed; NOT RUN |
 | BR-05 | F-01/02/04/06/07/08/09 | 1–3 | Owner-filtered events/private queries | AC-08/09/15 → TEST-08/09/15; later owner checks on every added operation | Mapping expanded; NOT RUN |
-| BR-06 | F-06 | 2 | Deadline semantics | Contract/AC/STS pending Q-04; before/exact/after boundary | Allocated; NOT RUN |
-| BR-07 | F-05 | 2 | Registration lifecycle/event lock | Contract/AC/STS pending Q-05; persisted state/seat return/history | Allocated; NOT RUN |
-| BR-08 | F-06 | 2 | Capacity update/event lock | Contract/AC/STS pending Q-06; concurrent lower capacity vs registrations | Allocated; NOT RUN |
+| BR-06 | F-06 | 2 | Deadline semantics | Confirmed Q-04; S2-F06-AC02 → S2-T06-02 before/exact/after boundary | CONFIRMED policy; NOT RUN |
+| BR-07 | F-05 | 2 | Registration lifecycle/event lock | Confirmed Q-05; S2-F05-AC01–04 → S2-T05-01–04 state/seat/history | CONFIRMED policy; NOT RUN |
+| BR-08 | F-06 | 2 | Capacity update/event lock | Confirmed Q-06/legacy; S2-F06-AC03/04/06 → S2-T06-03/04/06 | CONFIRMED policy; NOT RUN |
 | BR-09 | F-07 | 3 | Eligible registration/attendance uniqueness | Contract/AC/STS pending Q-09 | Allocated; NOT RUN |
 | BR-10 | F-08 | 3 | Persisted data/count definitions | Contract/AC/STS pending Q-09; known dataset expected totals | Allocated; NOT RUN |
-| BR-11 | F-09 | 2 | Owner assignment permissions | Contract/AC/STS pending; two Organizer negative tests | Allocated; NOT RUN |
-| BR-12 | F-09 | 2 | Instructor FK/role/cardinality | Contract/AC/STS pending Q-07; absent/wrong-role account | Allocated; NOT RUN |
-| BR-13 | F-09 | 2 | Instructor assigned-only reads | Contract/AC/STS pending Q-08; unassigned/forbidden mutation/private-data denial | Allocated; NOT RUN |
+| BR-11 | F-09 | 2 | Owner assignment permissions | Confirmed policy; S2-F09-AC05 → S2-T09-06 two Organizer negative tests | CONFIRMED policy; NOT RUN |
+| BR-12 | F-09 | 2 | Instructor FK/role/cardinality | Confirmed Q-07; S2-F09-AC01–03 → S2-T09-01–04 absent/wrong-role/overlap | CONFIRMED policy; NOT RUN |
+| BR-13 | F-09 | 2 | Instructor assigned-only reads | Confirmed Q-08; S2-F09-AC04/05 → S2-T09-05/06 assigned-only/access denial | CONFIRMED policy; NOT RUN |
 
 ## 3. Non-functional requirements
 
@@ -99,5 +107,87 @@ The Lab 7 announcement removes the TA approval gate for this change; teammate co
 | 0.2 | 2026-11-06 | Linked foundation-specific SYS-AC/SYS-TEST design and selected versions without claiming execution | Pending teammate review; all tests NOT RUN |
 | 0.3 | 2026-11-10 | Traced DEC-14 Prisma decision and affected design artifacts | Pending teammate review; all tests NOT RUN |
 | 0.4 | 2026-11-11 | Added explicit FR-05 to TEST-08 example and SYS-01 foundation test link | Pending teammate review; all tests NOT RUN |
-| 0.5 | 2026-11-26 | Traced Lab 7 BR-01 1–60 contract and legacy registration compatibility to F-02/F-03 and planned tests | Pending teammate review; implementation/tests NOT RUN |
+| 0.5 (Sprint2 branch) | 2026-11-26 | Linked confirmed Sprint2 policy/legacy and named ownership to planned AC/STS; no executed results changed | THN4 COMMENTED review; formal approval pending |
+| 0.5 (Lab7 branch) | 2026-11-26 | Traced Lab 7 BR-01 1–60 contract and legacy registration compatibility to F-02/F-03 and planned tests | Pending teammate review; implementation/tests NOT RUN |
 | 0.6 | 2026-11-26 | Linked actual Lab7 contract/implementation reviews and local results; clarified that historical NOT RUN design entries are not current execution status | Release documentation pending teammate review; candidate CI/deployment pending |
+| 0.7 | 2026-11-27 | Combined Lab7/Sprint2 evidence and retained both branch revision histories | Synchronization PR review/combined verification pending |
+
+## Sprint 2 extension — 25 November 2026
+
+Revision26Nov2026: this matrix supplements historical baseline rows above for the confirmed Sprint2 policy. [STS](sprints/sprint-2/sts.md) defines every planned ID. Actual file/name/measurement, tested commit/run and result are **TBD / NOT RUN** for every row; no measured coverage percentage or formal PR APPROVED is claimed. Policy confirmation and named owners are recorded in [review-record.md](sprints/sprint-2/review-record.md); Kittithat owns F-05/F-06/locks/integration, Thanatip owns F-09/schema/release evidence, with cross-review. Baseline IDs retained. The full candidate matrix must later reconcile actual Sprint1 results and remaining Sprint3 checks under #45.
+
+| Requirement | Feature / sprint | AC | Planned tests | Actual file/test/measurement | Result / tested version |
+|---|---|---|---|---|---|
+| FR-06; BR-07 | F-05 /2 | S2-F05-AC01–04 | S2-T05-01–04 | TBD | NOT RUN / TBD |
+| BR-02/03 | F-03/05/06 /1–2 | S2-F05-AC03/04/06; S2-F06-AC03/06 | S2-T05-03/04/06; S2-T06-03/06 + TEST-05/06/07 | TBD | NOT RUN / TBD |
+| BR-04 | F-05 /2 | S2-F05-AC05 | S2-T05-05 | TBD | NOT RUN / TBD |
+| FR-07; BR-06 | F-06 /2 | S2-F06-AC01/02/05–07 | S2-T06-01/02/05–08 | TBD | NOT RUN / TBD |
+| BR-01 dependency; BR-08 | F-06 /2 + peer Lab7 | S2-F06-AC03/04/06 | S2-T06-03/04/06; Lab7 create test references pending | TBD | NOT RUN; legacy policy CONFIRMED; audit pending |
+| BR-05 | F-05/06/09 /2 | S2-F05-AC05; S2-F06-AC05; S2-F09-AC05 | S2-T05-05; S2-T06-05; S2-T09-06 | TBD | NOT RUN / TBD |
+| FR-10; BR-11/12 | F-09 /2 | S2-F09-AC01–03/05 | S2-T09-01–04/06 | TBD | NOT RUN / TBD |
+| FR-11; BR-13 | F-09 /2 | S2-F09-AC04/05/07 | S2-T09-05/06/08 | TBD | NOT RUN / TBD |
+| NFR-01 | Shared auth/new APIs /2 | Access AC in all3 contracts | S2-T05-05; S2-T06-05; S2-T09-06 + TEST-09 | TBD | NOT RUN / TBD |
+| NFR-02 | F-05/06 /2 | S2-F05-AC06; S2-F06-AC07 | S2-T05-07; S2-T06-08; post-deploy retrieval | TBD | NOT RUN / TBD |
+| NFR-03 | F-03/05/06 /2 | S2-F05-AC06; S2-F06-AC06 | S2-T05-06; S2-T06-06 + TEST-06/07 | TBD | NOT RUN / TBD |
+| NFR-04 | F-01/09 role extension /1–2 | S2-F09-AC04/06 | S2-T09-05/07 + TEST-02/12 | TBD | NOT RUN / TBD |
+| NFR-05 | SYS-01 /2 | Reproducibility/DoD | S2-T09-07; migration/repeat setup; TEST-13 | TBD | NOT RUN / TBD |
+| NFR-06 | F-05/06/09 /2 | S2-F05-AC06; S2-F06-AC07; S2-F09-AC07 | S2-T05-07; S2-T06-08; S2-T09-08 | TBD | NOT RUN / TBD |
+| NFR-07 | F-09 /2 | S2-F09-AC04–06 | S2-T09-05–07 | TBD | NOT RUN / TBD |
+
+Q-04–Q-08/related FR/BR and legacy policy are CONFIRMED in THN4 review6068033006 (COMMENTED) on26Nov2026; formal follow-up approval/merge remains pending. TA change-request approval for Lab7 is waived by the supplied announcement; link its original record when available. F-07/F-08 remain planned under #44; no Sprint3 completion implied by this mapping.
+
+## F-05 execution update — 26 November 2026
+
+This update supersedes only F-05 NOT RUN entries above. Planning approval/merge later completed in #51; shared locks merged in #55. F-05 runtime/test GREEN is `60423732af75b4155aff13553ff3f57fe5e262ac`, preceded by real domain RED `4688652`. [Executed evidence](sprints/sprint-2/f-05-evidence.md) contains exact tests, counts, setup limitations and remaining integration. Feature peer review, accepted release and post-deployment verification are pending.
+
+| Requirement → AC → STS | Actual checks | Result / remaining scope |
+|---|---|---|
+| FR-06; BR-07 → S2-F05-AC01–04 → S2-T05-01–04 | Cancellation API/DB tests: state, returned seat, start boundaries, repeat/concurrent idempotence, history/new-ID re-registration | Passed locally for startsAt; explicit deadline integration waits for F-06 |
+| BR-04/05; NFR-01 → S2-F05-AC05 → S2-T05-05 | Auth/ownership/validation/CSRF matrix and DTO allowlists | Passed for existing roles; Instructor coverage waits for F-09 |
+| BR-02/03; NFR-03 → S2-F05-AC06 → S2-T05-06 | Observed lock waits, last-seat orderings, shared-helper capacity writer, rollback | Passed locally; real F-06 endpoint/expectedVersion and integrated contention remain pending |
+| NFR-02/06 → S2-F05-AC06 → S2-T05-07 | New app subprocess, persisted browser history, responsive/focus/expiry/pending/unknown-outcome flows | Passed locally; human UAT/cloud retrieval after restart remains under #45 |
+
+Measured selection: 13 cancellation API/DB cases and 10 F-05 browser cases; complete regression 55 unit, 58 integration and 43 browser passed, plus typecheck/build. No coverage percentage is claimed. F-06/F-09/Lab7 requirements, policy and baseline text are not changed by this execution update.
+
+## Historical F-09 status notes (superseded)
+
+<details>
+<summary>Earlier traceability checkpoint</summary>
+
+CI update (27 November 2026, run 45961985966 at commit 2d57965): full unit PASS 93/93; integration 87 passed / 7 failed. This observed CI result supersedes the earlier developer-reported integration PASS. The seven failures were traced to outdated seed user counts, repeated response-body reads, schedule fixtures leaking between cases, and a race fixture missing an existing assignment. Fixes are in the working tree; typecheck passes. Focused integration rerun is blocked by runner EACCES before database connection, so CI confirmation after pushing the fix is pending. No tests were skipped or disabled by this fix.
+
+Latest F-09 verification (27 November 2026): E2E PASS 5/5; focused unit PASS 6/6; typecheck/build PASS; integration PASS reported by the developer (successful log/counts not supplied). This supersedes earlier F-09 DB/browser NOT RUN entries for that scope. Full unit regression PASS 93/93 tests in 10/10 files, confirmed by the developer-provided Vitest screenshot; release acceptance remains separate. See docs/sprints/sprint-2/f-09-evidence.md.
+
+Latest F-09 implementation update27Nov2026: F-09 uncommitted code candidate is in the working tree on `feature/f-09-instructor`; pure interval rule RED/GREEN and typecheck/build evidence are recorded in [F-09 evidence](sprints/sprint-2/f-09-evidence.md). Guarded PostgreSQL, API/DB migration/race and browser tests are NOT RUN because local DB/loopback access returned EACCES. No F-09 acceptance is inferred as passed.
+
+</details>
+
+## Sprint 3 contract mapping — 27 November 2026
+
+Sprint2 acceptance selection update: [gap evidence](sprints/sprint-2/acceptance-evidence.md) at `5036b1d` maps F05 AC04, F06 cutoff/assigned adjacency and F09 restart/assignment race/removal/rollback/access/UI assertions to13 new API/DB and11 new browser cases. Full integration107/unit93, typecheck/build pass locally. These exact selections supersede historical pending statements above; they do not imply whole-AC coverage, accepted release, cloud persistence or F07 execution. Equal-start teaching tie has an explicit validity disposition, not a fabricated pass. Candidate G05 and deployment/human G06 remain pending.
+
+Confirmed Q09 and technical reviewable contracts supplement baseline IDs without deleting them. [Sprint2 audit](sprints/sprint-2/acceptance-audit.md) supersedes old Instructor-pending statements only for specifically executed overlap/role/race scope; remaining AC and release are explicit. User-confirmed ownership: JeffMerry implements/tests/integrates and compiles release evidence; THN4 reviews. No Sprint3 test has run.
+
+| Requirement | Feature / responsibility | AC | Planned STS | Actual file/result/version |
+|---|---|---|---|---|
+| FR08; BR09 | F07 owner check-in | S3-F07-AC01–04/06 | S3-T07-01–04/06 | NOT IMPLEMENTED / NOT RUN |
+| BR05; NFR01 | F07/F08 owner-only private access | S3-F07-AC05; S3-F08-AC04 | S3-T07-05; S3-T08-04 | NOT RUN |
+| FR09; BR10 | F08 unique-person/current-state report counts | S3-F08-AC01–03/05 | S3-T08-01–03/05 | NOT IMPLEMENTED / NOT RUN |
+| NFR02 | F07 attendance/F08 saved count retrieval after restart | S3-F07-AC07; S3-F08-AC06 | S3-T07-07; S3-T08-06 | NOT RUN; no deployment/reseed evidence inferred |
+| NFR06 | Check-in/report state/keyboard/responsive UI | S3-F07-AC08; S3-F08-AC06 | S3-T07-08; S3-T08-06 | NOT RUN |
+
+Full [F07](sprints/sprint-3/f-07.md)/[F08](sprints/sprint-3/f-08.md), [STS](sprints/sprint-3/sts.md), [DoD](sprints/sprint-3/dod.md) and [delivery plan](sprints/deliverable-2/plan.md) define remaining work and targets. Intended tests do not establish measured coverage or acceptance.
+
+## F07 execution update — 27 November 2026
+
+The preceding NOT RUN contract checkpoint is superseded only for [these actual F07 selections](sprints/sprint-3/f-07-evidence.md), RED643dac5/GREEN0faf42a. F08 remains unimplemented. No coverage percentage, main release or human acceptance is claimed.
+
+| Requirement → AC/STS | Actual executable selection | Result/version |
+|---|---|---|
+| FR08/BR09 → S3-F07-AC01–04 / T07-01–04 | `server/tests/integration/check-ins.test.ts`: persisted actor/time/readback,6 boundaries,2 observed wait/time crossings, same-ID contention/repeat, cancelled/new-ID/invalid/wrong-event | Selected assertions PASS;20 total API cases at0faf42a |
+| BR05/NFR01 → AC05 / T07-05 | Direct anonymous/Participant/assigned Instructor/non-owner/expiry/CSRF/Origin matrix, exact safe roster DTOs and unchanged state | PASS; no UI-only authorization claim |
+| NFR03 → AC06 / T07-06 | Observed cancel/edit/check-in lock waits and start crossing; deferred commit rollback; real bounded contention503 |6 API cases PASS |
+| NFR02 → AC07 / T07-07 | New app process retrieves same saved attendance without seed;21 tied registration rows; `attendance-migration.test.ts` preservation/constraints | PASS locally; cloud redeploy NOT RUN |
+| NFR06 → AC08 / T07-08 | `e2e/f-07.spec.ts` confirmation/pending/unknown/read-error/empty/stale-window/expiry/private clearing/navigation/layout |14 browser PASS locally; human keyboard/screen-reader UAT pending |
+
+Full local regression93 unit/128 integration, typecheck/build PASS. Full browser/Docker/complete committed head are PR-CI gates; peer acceptance, G05–06 and report/submission remain separate.

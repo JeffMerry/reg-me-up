@@ -2,10 +2,14 @@
 
 | Item | Value |
 |---|---|
-| Version / date | 0.5 / 2026-11-11 (Asia/Bangkok) |
+| Version / date | 0.8 / 2026-11-27 (Asia/Bangkok); status reconciliation only, baseline requirement IDs preserved |
 | Product | กิจกรรมอบรมและเวิร์กช็อปภายในมหาวิทยาลัย — CPE334 Topic 3 |
 | Baseline authority | บริบทที่ผู้ใช้ยืนยันและคำสั่งให้นำข้อเสนอทางเทคนิคลงเอกสาร |
-| Review / implementation | Pending teammate review / not implemented |
+| Review / implementation | Planning #51 and Sprint2 features #57/#65/#66 approved/merged; acceptance #68 and meaningful F07 #69 approved/merged through7c85dcc. F08 contract-only; accepted main release/deployment pending. [Current evidence/status](sprints/deliverable-2/evidence-index.md) |
+
+Current status27Nov2026: [complete requirement-result matrix](sprints/deliverable-2/current-traceability.md) and [per-AC completion](sprints/deliverable-2/feature-completion.md) reconcile actual combined CI and current candidate attempts. The next paragraph records the earlier policy/ownership checkpoint; later approvals and the user-directed remaining-work allocation in [review record](sprints/sprint-2/review-record.md#current-responsibilities--27-november-2026) supersede its pending-review/old allocation text. No baseline requirement or approved Lab7 policy changes in this documentation reconciliation.
+
+Sprint 2 Q-04–Q-08 and associated FR/BR, preserved BR-02–BR-04 and legacy capacity policy are CONFIRMED in [THN4 review6068033006](sprints/sprint-2/review-record.md) on26November2026 at10:10:04 Asia/Bangkok. The review state is COMMENTED, not APPROVED. Exact technical implementation still requires verification and this follow-up needs review before merge. See [decisions](sprints/sprint-2/decisions.md), [contracts](sprints/sprint-2/README.md), [shared design](sprints/sprint-2/system-design.md) and [named ownership matrix](sprints/sprint-2/review-record.md#ownership-matrix). Kittithat owns F-05/F-06/locks/integration; Thanatip owns F-09/schema/release evidence, with cross-review. This revision does not change peer-owned Lab7 BR-01/DEC-05. The supplied announcement waives Instructor/TA approval, not test/release evidence.
 
 ## 1. Context and actors
 
@@ -48,8 +52,8 @@ Sprint 1 ไม่รวม editing/deleting/draft controls, Instructor pages, c
 
 | ID | Observable requirement | Sprint / feature |
 |---|---|---|
-| FR-06 | Participant ยกเลิกทะเบียนตนตาม cancellation policy | 2 / F-05 |
-| FR-07 | Organizer เปลี่ยนรายละเอียด/capacity และกำหนด deadline ของ event ตนตามกฎ | 2 / F-06 |
+| FR-06 | CONFIRMED: Participant ยกเลิก ACTIVE registration ของตนก่อน event start; คงประวัติและอ่านผลที่บันทึกได้; repeated cancel ไม่คืนที่นั่งซ้ำ ตาม Q-05 | 2 / F-05 |
+| FR-07 | CONFIRMED: Organizer แก้ fields ที่อนุญาต/capacity/deadline ของ event ตนก่อนเริ่ม พร้อม version conflict protection และตรวจ Instructor overlap เมื่อแก้เวลา ตาม Q-04/06 | 2 / F-06 |
 | FR-10 | Organizer มอบหมายบัญชี Instructor ที่มีอยู่ให้ event ตนและอ่าน assignment ที่ persist แล้วได้ | 2 / F-09 |
 | FR-11 | Instructor อ่านเฉพาะ assigned teaching events พร้อมชื่อ วันเวลา สถานที่ และ teaching details | 2 / F-09 |
 
@@ -76,11 +80,11 @@ Sprint 1 ไม่รวม editing/deleting/draft controls, Instructor pages, c
 
 | ID | Rule | Sprint |
 |---|---|---|
-| BR-06 | Registration หลัง deadline ถูกปฏิเสธ; boundary/timezone policy รอ Q-04 | 2 |
-| BR-07 | Cancellation เปลี่ยนสถานะและคืน seat อย่างสอดคล้อง; timing/re-registration/history รอ Q-05 | 2 |
-| BR-08 | ลด capacity แล้วต้องไม่ต่ำกว่า active registration count | 2 |
+| BR-06 | CONFIRMED: effective registration cutoff คือ deadline เมื่อกำหนด มิฉะนั้น startsAt; ใช้ UTC instants/Asia-Bangkok UI; now >= cutoff ปฏิเสธคำขอใหม่; deadline <= startsAt | 2 |
+| BR-07 | CONFIRMED: cancel ACTIVE ได้เมื่อ now < startsAt; commit แล้วคืน seat โดยสถานะ CANCELLED; repeated own cancel เป็น no-op; ลงใหม่ก่อน registration cutoff ด้วย ID ใหม่และคงประวัติ | 2 |
+| BR-08 | CONFIRMED: explicit capacity update ต้องเป็น integer 1–60 และ >= ACTIVE count ภายใต้ event lock; PATCH ที่ไม่ส่ง capacity คงค่าเดิมรวม legacy >60; ไม่ลดข้อมูลอัตโนมัติหรือเพิ่ม incompatible global constraint; ไม่เปลี่ยน BR-01 create ใน revision นี้ | 2 |
 | BR-11 | เฉพาะ owner Organizer มอบหมาย Instructor ให้ event นั้น | 2 |
-| BR-12 | Assignee ต้องเป็นบัญชี Instructor ที่มีอยู่จริง; cardinality/change/history รอ Q-07 | 2 |
+| BR-12 | CONFIRMED: Assignee ต้องเป็นบัญชี Instructor ที่มีอยู่จริง; current Instructor ได้หนึ่งคน/event เปลี่ยน/ถอนได้ก่อนเริ่มและคง assignment history | 2 |
 | BR-13 | Instructor อ่านเฉพาะ assigned work; ไม่แก้ event/capacity/assignment หรืออ่าน private Participant registrations | 2 |
 
 ### Sprint 3
@@ -142,12 +146,12 @@ Text limits ใน SDS เป็น technical design limits จาก proposal �
 | Q-01 | Required event fields/optional description | CLOSED — DEC-05 |
 | Q-02 | Anonymous discovery | CLOSED — DEC-06 |
 | Q-03 | Organizer registers as Participant? | CLOSED — DEC-07: ไม่ได้ใน Sprint 1 |
-| Q-04 | Deadline timezone และ exactly-at-deadline boundary | OPEN — F-06 contract, Sprint 2 |
-| Q-05 | Cancellation window, seat return, re-registration และ history | OPEN — F-05 contract, Sprint 2 |
-| Q-06 | Editable fields และ capacity change policy หลังมี registrants | OPEN — F-06 contract, Sprint 2 |
-| Q-07 | Instructor count, changes/removal และ assignment history | OPEN — F-09 contract, Sprint 2 |
-| Q-08 | Instructor multi-role และ overlapping teaching events | OPEN — F-09 contract, Sprint 2 |
-| Q-09 | Check-in window/corrections และ report counting | OPEN — F-07/08 contracts, Sprint 3 |
+| Q-04 | Deadline timezone และ exactly-at-deadline boundary | CONFIRMED — UTC/Bangkok UI; exact cutoff closed; null uses start; [review evidence](sprints/sprint-2/review-record.md) |
+| Q-05 | Cancellation window, seat return, re-registration และ history | CONFIRMED — before start, idempotent cancel/history/new-ID re-register; no runtime result implied |
+| Q-06 | Editable fields และ capacity change policy หลังมี registrants | CONFIRMED — before-start partial edits/version/ACTIVE guard; explicit1–60 and preserved omitted legacy capacity |
+| Q-07 | Instructor count, changes/removal และ assignment history | CONFIRMED — one current Instructor, pre-start changes, retained history |
+| Q-08 | Instructor multi-role และ overlapping teaching events | CONFIRMED — single role, reject overlap, adjacent allowed |
+| Q-09 | Check-in window/corrections และ report counting | CONFIRMED by user27Nov2026: ACTIVE only; start≤now<end; repeat no-op/original time; no undo; reports count unique people by current status. [Definitions/example](sprints/sprint-3/README.md); technical contract review pending |
 | ENG-01 | Exact compatible runtime/package versions และ local PostgreSQL provisioning | PARTIAL — existing targets selected, Prisma exact versions/compatibility remain open; see [versions](dependency-versions.md); install/lockfile/provisioning/build validation pending SYS-01 |
 | ENG-02 | Feature authors/reviewers, GitHub board/Issues, branch settings และ actual review findings | PARTIAL — Issues #1, #3–#6 assigned per user direction; teammate agreement, actual feature PR review approvals, board and protection remain pending |
 | ENG-03 | GCP components/resource access/cost/configuration จาก Lab 5 guidance | OPEN — Lab 5; architecture must support durable DB now |
@@ -176,3 +180,6 @@ No source baseline requirement removed. No implementation/approval/test evidence
 | 0.3 | 2026-11-10 | Recorded user-selected Prisma ORM in DEC-14, superseding DEC-08; reopened exact Prisma version selection | Pending teammate review; NOT RUN |
 | 0.4 | 2026-11-11 | Grouped FR/BR by Sprint and NFR by first Sprint with regression rounds; retained all requirement IDs | Pending teammate review; NOT RUN |
 | 0.5 | 2026-11-11 | Recorded actual GitHub Issue assignees; teammate agreement and feature reviews remain pending | NOT RUN |
+| 0.6 | 2026-11-25 | Added user-selected Sprint2 drafting policies and linked full contracts; Lab7 create BR-01/DEC-05 untouched | Teammate review pending; S2 NOT IMPLEMENTED/NOT RUN |
+| 0.7 | 2026-11-26 | Recorded THN4 policy/legacy confirmation and user-directed named ownership; preserve runtime status | COMMENTED review6068033006; follow-up approval/merge pending; S2 NOT STARTED/NOT RUN |
+| 0.8 | 2026-11-27 | FR08/BR05/BR09 F07 candidate implements owner-only ACTIVE check-in, start-inclusive/end-exclusive server time, original persisted repeat and no undo; requirement IDs retained. [Execution mapping](sprints/sprint-3/f-07-evidence.md) records actual selections | Contract approved #67; candidate0faf42a locally tested, implementation review/release pending. FR09/BR10 report remains contract-only |

@@ -15,11 +15,15 @@ async function seed() {
       ['10000000-0000-4000-8000-000000000003', 'p3@example.test', 'Participant Three', 'PARTICIPANT'],
       ['20000000-0000-4000-8000-000000000001', 'o1@example.test', 'Organizer One', 'ORGANIZER'],
       ['20000000-0000-4000-8000-000000000002', 'o2@example.test', 'Organizer Two', 'ORGANIZER'],
+      ['20000000-0000-4000-8000-000000000003', 'i1@example.test', 'Instructor One', 'INSTRUCTOR'],
+      ['20000000-0000-4000-8000-000000000004', 'i2@example.test', 'Instructor Two', 'INSTRUCTOR'],
     ];
     await prisma.$transaction(async (tx) => {
       for (const [id, email, displayName, role] of people) {
         const passwordHash = await argon2.hash(process.env.SEED_PASSWORD!, { type: argon2.argon2id, memoryCost: 19456, timeCost: 2, parallelism: 1 });
-        await tx.user.upsert({ where: { id }, update: {}, create: { id, email, displayName, role, passwordHash } });
+        // Keep the documented synthetic credential usable when reseeding an existing
+        // local/test fixture. This code is guarded above from production execution.
+        await tx.user.upsert({ where: { id }, update: { passwordHash }, create: { id, email, displayName, role, passwordHash } });
       }
       const events = [
         ['30000000-0000-4000-8000-000000000001', 'Empty workshop', 3, 'PUBLISHED'],

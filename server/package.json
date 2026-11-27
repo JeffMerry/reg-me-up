@@ -5,11 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
+    "start:e2e": "tsx src/index.ts",
     "start": "node dist/src/index.js",
     "build": "prisma generate --config prisma.config.ts && tsc -p tsconfig.build.json",
     "typecheck": "prisma generate --config prisma.config.ts && tsc --noEmit",
     "test:unit": "vitest run tests/unit",
-    "test:integration": "vitest run tests/integration",
+    "test:integration": "vitest run tests/integration --no-file-parallelism",
     "db:generate": "prisma generate --config prisma.config.ts",
     "db:migrate": "tsx scripts/check-migration-history.ts && prisma migrate deploy --config prisma.config.ts",
     "db:seed": "tsx prisma/seed.ts",

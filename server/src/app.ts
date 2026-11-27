@@ -6,6 +6,9 @@ import { authHandlers, authMiddleware } from './auth.js';
 import { eventHandlers } from './events.js';
 import { registrationHandlers } from './registrations.js';
 import { organizerRegistrationHandlers } from './organizer-registrations.js';
+import { eventManagementHandlers } from './event-management.js';
+import { instructorHandlers } from './instructors.js';
+import { checkInHandlers } from './check-ins.js';
 
 export function createApp(checkDatabase: () => Promise<void>, auth?: { config: ServerConfig; pool: pg.Pool; prisma: PrismaClient; now?: () => number }, frontendDirectory?: string) {
   const app = express();
@@ -24,16 +27,29 @@ export function createApp(checkDatabase: () => Promise<void>, auth?: { config: S
     app.get('/api/auth/me', h.requireUser, h.me);
     app.post('/api/auth/logout', h.requireUser, h.csrf, h.jsonBody, h.logout);
     const events = eventHandlers(auth.prisma);
-    const registrations = registrationHandlers(auth.prisma);
+    const registrations = registrationHandlers(auth.prisma, auth.now);
     const organizerRegistrations = organizerRegistrationHandlers(auth.prisma);
+    const management = eventManagementHandlers(auth.prisma, auth.now);
+    const instructors = instructorHandlers(auth.prisma, auth.now);
+    const checkIns = checkInHandlers(auth.prisma, auth.now);
+    app.get('/api/organizer/events/:eventId/check-ins', h.requireUser, h.requireRole('ORGANIZER'), checkIns.list);
+    app.post('/api/organizer/events/:eventId/registrations/:registrationId/check-in', h.requireUser, h.requireRole('ORGANIZER'), h.csrf, h.jsonBody, checkIns.create);
     app.get('/api/events', events.publicList);
     app.get('/api/events/:eventId', events.detail);
     app.post('/api/events', h.requireUser, h.requireRole('ORGANIZER'), h.csrf, h.jsonBody, events.publish);
     app.get('/api/me/events', h.requireUser, h.requireRole('ORGANIZER'), events.ownList);
+    app.get('/api/organizer/events/:eventId', h.requireUser, h.requireRole('ORGANIZER'), management.detail);
+    app.patch('/api/organizer/events/:eventId', h.requireUser, h.requireRole('ORGANIZER'), h.csrf, h.jsonBody, management.edit);
+    app.get('/api/organizer/instructors', h.requireUser, h.requireRole('ORGANIZER'), instructors.directory);
+    app.put('/api/organizer/events/:eventId/instructor', h.requireUser, h.requireRole('ORGANIZER'), h.csrf, h.jsonBody, instructors.assign);
+    app.delete('/api/organizer/events/:eventId/instructor', h.requireUser, h.requireRole('ORGANIZER'), h.csrf, h.jsonBody, instructors.remove);
+    app.get('/api/me/teaching-events', h.requireUser, h.requireRole('INSTRUCTOR'), instructors.teachingList);
+    app.get('/api/me/teaching-events/:eventId', h.requireUser, h.requireRole('INSTRUCTOR'), instructors.teachingDetail);
     app.get('/api/organizer/events/:eventId/registrations', h.requireUser, h.requireRole('ORGANIZER'), organizerRegistrations.list);
     app.post('/api/events/:eventId/registrations', h.requireUser, h.requireRole('PARTICIPANT'), h.csrf, h.jsonBody, registrations.create);
     app.get('/api/me/registrations', h.requireUser, h.requireRole('PARTICIPANT'), registrations.ownList);
     app.get('/api/me/registrations/:registrationId', h.requireUser, h.requireRole('PARTICIPANT'), registrations.ownDetail);
+    app.post('/api/me/registrations/:registrationId/cancel', h.requireUser, h.requireRole('PARTICIPANT'), h.csrf, h.jsonBody, registrations.cancel);
     app.use(h.errorHandler);
   }
   if (frontendDirectory) {

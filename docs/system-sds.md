@@ -1,6 +1,6 @@
 # RegMeUp — System-Level Software Design Specification
 
-Version 0.7 — 2026-11-26 (Asia/Bangkok). Selected design direction adopted by user; **pending teammate review**. This is a pre-implementation design, not an implemented architecture or tested result. [SRS](srs.md) defines requirements/decisions; feature contracts refine endpoint behavior.
+Version0.8 — 2026-11-27 (Asia/Bangkok). Design and implementation checkpoint: baseline architecture plus reviewed Sprint2 F05/F06/F09 and F07 check-in are integrated through7c85dcc; F08 report remains a contract/design only. Existing architecture/endpoint/data definitions and later feature extensions below are retained. [Per-AC evidence](sprints/deliverable-2/feature-completion.md), [actual result matrix](sprints/deliverable-2/current-traceability.md) and [release readiness](sprints/deliverable-2/readiness.md) define executed scope and open verification. [SRS](srs.md) remains the requirement authority; no main deployment or full final architecture acceptance is claimed by this status update.
 
 ## 1. Architecture and stack
 
@@ -178,3 +178,31 @@ No code/package/schema/test/migration/container deployed or executed by this doc
 | 0.5 | 2026-11-11 | Updated Issue-assignment status while retaining pending team agreement and review | Pending teammate review; NOT RUN |
 | 0.6 | 2026-11-11 | Recorded observed Prisma warning discrepancy and designed guarded migration preflight | Implementation review pending |
 | 0.7 | 2026-11-26 | Defined new-publication capacity 1–60 while retaining PostgreSQL storage range and legacy-row compatibility | Pending teammate review; no schema applied or tests run |
+
+## 9. Sprint 2 extension — confirmed policy, revised 26 November 2026
+
+The sections above preserve Sprint1 design/history; statements about unimplemented setup are historical, not a fresh inspection of main. Sprint2 starts from main `3c8b751a2646408f6fdc88209a0fef33d9030f1b`. Revision26Nov2026: policy/legacy **CONFIRMED** in [actual COMMENTED review](sprints/sprint-2/review-record.md), formal follow-up approval/merge pending; implementation NOT STARTED / acceptance NOT RUN. Shared schema owner Thanatip Nitinantakul (THN4), reviewer Kittithat Disthanakornkun (JeffMerry); shared lock/integration owner Kittithat, reviewer Thanatip; release evidence owner Thanatip, reviewer Kittithat.
+
+The complete [Sprint2 shared system design](sprints/sprint-2/system-design.md) specifies additive deadline/version/cancellation/assignment schema, endpoint and DTO contracts, access matrix, server-clock boundaries and migration/provisioning safeguards. [Policies](sprints/sprint-2/decisions.md) record confirmed rules/legacy policy separately from technical implementation choices requiring code/migration verification. The linked sections are part of this versioned design; include their full assessed content in the D2 PDF, not just links.
+
+Key extensions: all ACTIVE-count/capacity writers retain event row locking; owner edits/assignment changes serialize cross-event scheduling with a proposed transaction advisory mutex before event lock; expectedVersion prevents lost edits; single-role Instructor has current-assignment-only private reads; historical cancellations/assignments persist. Public cutoff fields change explicitly while private fields remain excluded. UI/backend role/returnTo handling must extend together. No applied migration rewrite or automatic live seed is allowed.
+
+Lab7 create capacity rules from main are now included in this document: new publication accepts integer1–60 and legacy stored capacities are preserved. F-06 requires confirmed1–60 only for explicitly supplied capacity edits, under the confirmed legacy policy; omitted legacy capacity is not silently reduced. Do not implement a global DB<=60 constraint from this draft.
+
+Review scope: [F-05](sprints/sprint-2/f-05.md), [F-06](sprints/sprint-2/f-06.md), [F-09](sprints/sprint-2/f-09.md), [STS](sprints/sprint-2/sts.md). No runtime API/schema/config changes are made by this planning extension.
+
+## 10. Integration checkpoint — 27 November 2026
+
+Lab7 release #62 at main `d490632` is being synchronized with Sprint2 staging `882818d`, containing shared locks #55, F-05 #57 and shared events.version #59. Earlier pending/NOT STARTED statements above describe their original design checkpoint. The user reassigned only events.version to Kittithat; Thanatip retains Instructor schema/combined migration coordination. [Updated ownership](sprints/sprint-2/review-record.md) and [version handoff](sprints/sprint-2/event-version-evidence.md) govern current work. F-06 validation remains on its separate work branch; edit API/UI and F-09 acceptance are not established here. Fresh combined-source results belong to the synchronization PR; an automatic Git merge is not verification of those paths.
+
+## 11. Sprint 3 contract extension — 27 November 2026
+
+User-confirmed Q09 specifies owner-only ACTIVE check-in at start≤serverNow<end, repeated check-in preserving its original record/time, no attendance correction/undo, and reports counting distinct people by current state. [F07](sprints/sprint-3/f-07.md), [F08](sprints/sprint-3/f-08.md) and [STS](sprints/sprint-3/sts.md) provide full proposed technical design/AC/error/DTO details for review before implementation; code/tests remain NOT RUN.
+
+Proposed Attendance references a unique registration and actual Organizer actor with timestamp, preserving all existing history. Check-in uses event-row locking shared with cancellation/event editing; no inverse advisory-lock order. Reports are owner-only consistent REPEATABLE READ snapshots: ACTIVE distinct people are registered; cancelled-history people without ACTIVE are cancelled; saved attendance distinct people are attended. A re-registered person is not also currently cancelled. Reports are read-only; no export/QR/undo interface is introduced. This design supplements existing Sprint1/2 source rules and does not claim an applied migration.
+
+Remaining Sprint2 validation and release evidence are assigned to JeffMerry by the later user allocation, with THN4 peer review; see [acceptance audit](sprints/sprint-2/acceptance-audit.md) and [delivery plan](sprints/deliverable-2/plan.md).
+
+## 12. F07 implementation checkpoint — 27 November 2026
+
+At feature candidate `0faf42a`, Attendance is implemented with UNIQUE registration FK, required checked-in timestamp and recorder FK. Owner-authorized roster reads use REPEATABLE READ and safe pagination; check-in uses the shared event row lock with trusted decision time and preserves management version/seat/history. Current eligibility is read after waiting; valid repeats return the original record before testing the new-creation window. Check-in UI is linked from My Events, reconciles uncertain outcomes through explicit GET, and ignores disposed callbacks. [Contract/API/data](sprints/sprint-3/f-07.md) and [actual tests/limits](sprints/sprint-3/f-07-evidence.md) supersede section11's F07 proposed/NOT RUN status for this candidate. F08 report design remains unimplemented. Feature review/main release/deployment are separate pending gates.
