@@ -17,6 +17,7 @@ model User {
   events       Event[]
   registrations Registration[]
   teachingAssignments InstructorAssignment[] @relation("AssignedInstructor")
+  recordedAttendance Attendance[]
   @@map("users")
 }
 
@@ -62,9 +63,20 @@ model Registration {
   cancelledAt   DateTime? @map("cancelled_at") @db.Timestamptz(6)
   event         Event    @relation(fields: [eventId], references: [id], onDelete: Restrict)
   participant   User     @relation(fields: [participantId], references: [id], onDelete: Restrict)
+  attendance    Attendance?
   @@index([eventId, status, registeredAt, id])
   @@index([participantId, registeredAt, id])
   @@map("registrations")
+}
+
+model Attendance {
+  id             String       @id @default(uuid()) @db.Uuid
+  registrationId String       @unique @map("registration_id") @db.Uuid
+  checkedInAt    DateTime     @map("checked_in_at") @db.Timestamptz(6)
+  checkedInBy    String       @map("checked_in_by") @db.Uuid
+  registration   Registration @relation(fields: [registrationId], references: [id], onDelete: Restrict)
+  recorder       User         @relation(fields: [checkedInBy], references: [id], onDelete: Restrict)
+  @@map("attendance")
 }
 
 model Session {

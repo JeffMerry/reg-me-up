@@ -1,6 +1,6 @@
 # Sprint 3 software test specification
 
-Version0.1,27Nov2026. Owner JeffMerry; reviewer THN4. Refs #44/#45. **All cases planned/NOT RUN; files/test counts below are not invented execution results.** Contracts [F07](f-07.md)/[F08](f-08.md); [confirmed Q09](README.md).
+Version0.2,27Nov2026. Owner JeffMerry; reviewer THN4. Refs #44/#45. Tables below retain planned cases; the execution register and [actual F07 evidence](f-07-evidence.md) distinguish performed selections. F08 remains NOT RUN. Contracts [F07](f-07.md)/[F08](f-08.md); [confirmed Q09](README.md).
 
 ## Setup and safeguards
 
@@ -38,8 +38,8 @@ Before mutation implementation, preserve executable test and domain RED (eligibl
 
 | Scope | Actual executable file/name | Source/test commit | Command | Result |
 |---|---|---|---|---|
-| S3-T07-01–08 | TBD after implementation | TBD | TBD | NOT RUN |
+| S3-T07-01–08 selected automated assertions | `check-ins.test.ts`20; `attendance-migration.test.ts`1; `e2e/f-07.spec.ts`14 | RED `643dac5`; GREEN `0faf42a` | Focused integration; full integration; unit/typecheck/build; selected Playwright |20 API/1 migration/14 browser PASS locally; full128 integration/93 unit. Exact per-AC scope and remaining human/cloud checks in [evidence](f-07-evidence.md); feature CI/review pending |
 | S3-T08-01–06 | TBD after implementation | TBD | TBD | NOT RUN |
-| Existing F01–F09 regression | Existing suites at selected candidate | TBD | Repository unit/integration/typecheck/build/Playwright commands | NOT RUN on a Sprint3 candidate |
+| Existing F01–F09 regression | Existing suites plus new attendance selection | `0faf42a` runtime | Unit/integration/typecheck/build; full Playwright deferred to PR CI | Local93 unit/128 integration; typecheck/build PASS;14 selected new browser PASS. Exact complete committed-head regression awaits CI |
 
 Candidate checks must include publish1/60/61 and legacy>60; register/cancel/deadline/capacity; Instructor assignment/access/scheduling; check-in lifecycle. The baseline CI93/94/62 belongs to F09's tested head, not to new attendance code. [DoD](dod.md) and #45 require exact release identity and post-deploy verification separately.

@@ -36,3 +36,4 @@ Current Sprint2 allocation is recorded in the linked named ownership matrix from
 | 0.4 | 2026-11-12 | Added a post-baseline cross-feature UI refinement workstream (F-10) | Planning only; issue and teammate review pending |
 | 0.5 | 2026-11-25 | Linked Sprint2 draft contracts and shared lifecycle/schedule dependencies; retained Lab7 ownership | Pending teammate review; S2 NOT IMPLEMENTED/NOT RUN |
 | 0.6 | 2026-11-26 | Recorded confirmed policy/legacy and named ownership | COMMENTED review; formal follow-up approval pending; NOT STARTED/NOT RUN |
+| 0.7 | 2026-11-27 | F07 candidate0faf42a adds owner roster/attendance workflow for FR08, BR05/09, NFR01/02/03/06; F08 remains contract-only | [F07 actual automated scope](sprints/sprint-3/f-07-evidence.md); feature CI/THN4 review/staging acceptance and release pending |

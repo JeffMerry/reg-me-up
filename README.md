@@ -133,3 +133,5 @@ Integration tests refuse to run if a URL is missing or the database identity or 
 ## Verification scope
 
 The [SYS-01 contract](docs/sprints/sprint-1/sys-01.md) defines the foundation criteria. [F-01 verification](docs/sprints/sprint-1/f-01-evidence.md) records identity checks and remaining gaps. These checks do not establish completion of F-02–F-04 or full-product TEST-13.
+
+F07 candidate adds Organizer-owned Check-in from My Events. Run the existing `npm run db:migrate` procedure to add Attendance; startup does not seed or reset existing data. Eligible ACTIVE registrations may be checked in from event start until before event end; repeat requests preserve the saved attendance/time. Use **Check status** after an uncertain result. [F07 API/setup/test evidence](docs/sprints/sprint-3/f-07-evidence.md) records local execution and remaining review/release/human gates; F08 reports remain contract-only.

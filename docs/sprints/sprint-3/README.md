@@ -1,6 +1,6 @@
 # Sprint 3 contracts and Deliverable 2 checkpoint
 
-27 November 2026 (Asia/Bangkok). Refs #44/#45. Owner of remaining implementation/migrations/tests/integration/release evidence: Kittithat Disthanakornkun (JeffMerry). Peer reviewer: Thanatip Nitinantakul (THN4). **Contracts prepared for review; F07/F08 implementation and tests NOT RUN.** Historical F09 work remains credited to THN4.
+27 November 2026 (Asia/Bangkok). Refs #44/#45. Owner of remaining implementation/migrations/tests/integration/release evidence: Kittithat Disthanakornkun (JeffMerry). Peer reviewer: Thanatip Nitinantakul (THN4). **Contracts approved/merged in #67. F07 is implemented and locally tested at `0faf42a`, pending feature CI/peer review/merge; F08 implementation remains NOT STARTED.** [F07 actual evidence](f-07-evidence.md) supersedes earlier planned statements for its exact automated selections. Historical F09 work remains credited to THN4.
 
 ## User-confirmed Q09 policy
 

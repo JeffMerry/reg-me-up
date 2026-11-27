@@ -175,3 +175,17 @@ Confirmed Q09 and technical reviewable contracts supplement baseline IDs without
 | NFR06 | Check-in/report state/keyboard/responsive UI | S3-F07-AC08; S3-F08-AC06 | S3-T07-08; S3-T08-06 | NOT RUN |
 
 Full [F07](sprints/sprint-3/f-07.md)/[F08](sprints/sprint-3/f-08.md), [STS](sprints/sprint-3/sts.md), [DoD](sprints/sprint-3/dod.md) and [delivery plan](sprints/deliverable-2/plan.md) define remaining work and targets. Intended tests do not establish measured coverage or acceptance.
+
+## F07 execution update — 27 November 2026
+
+The preceding NOT RUN contract checkpoint is superseded only for [these actual F07 selections](sprints/sprint-3/f-07-evidence.md), RED643dac5/GREEN0faf42a. F08 remains unimplemented. No coverage percentage, main release or human acceptance is claimed.
+
+| Requirement → AC/STS | Actual executable selection | Result/version |
+|---|---|---|
+| FR08/BR09 → S3-F07-AC01–04 / T07-01–04 | `server/tests/integration/check-ins.test.ts`: persisted actor/time/readback,6 boundaries,2 observed wait/time crossings, same-ID contention/repeat, cancelled/new-ID/invalid/wrong-event | Selected assertions PASS;20 total API cases at0faf42a |
+| BR05/NFR01 → AC05 / T07-05 | Direct anonymous/Participant/assigned Instructor/non-owner/expiry/CSRF/Origin matrix, exact safe roster DTOs and unchanged state | PASS; no UI-only authorization claim |
+| NFR03 → AC06 / T07-06 | Observed cancel/edit/check-in lock waits and start crossing; deferred commit rollback; real bounded contention503 |6 API cases PASS |
+| NFR02 → AC07 / T07-07 | New app process retrieves same saved attendance without seed;21 tied registration rows; `attendance-migration.test.ts` preservation/constraints | PASS locally; cloud redeploy NOT RUN |
+| NFR06 → AC08 / T07-08 | `e2e/f-07.spec.ts` confirmation/pending/unknown/read-error/empty/stale-window/expiry/private clearing/navigation/layout |14 browser PASS locally; human keyboard/screen-reader UAT pending |
+
+Full local regression93 unit/128 integration, typecheck/build PASS. Full browser/Docker/complete committed head are PR-CI gates; peer acceptance, G05–06 and report/submission remain separate.
