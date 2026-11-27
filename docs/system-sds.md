@@ -1,6 +1,6 @@
 # RegMeUp — System-Level Software Design Specification
 
-Version 0.7 — 2026-11-26 (Asia/Bangkok). Selected design direction adopted by user; **pending teammate review**. This is a pre-implementation design, not an implemented architecture or tested result. [SRS](srs.md) defines requirements/decisions; feature contracts refine endpoint behavior.
+Version0.8 — 2026-11-27 (Asia/Bangkok). Design and implementation checkpoint: baseline architecture plus reviewed Sprint2 F05/F06/F09 and F07 check-in are integrated through7c85dcc; F08 report remains a contract/design only. Existing architecture/endpoint/data definitions and later feature extensions below are retained. [Per-AC evidence](sprints/deliverable-2/feature-completion.md), [actual result matrix](sprints/deliverable-2/current-traceability.md) and [release readiness](sprints/deliverable-2/readiness.md) define executed scope and open verification. [SRS](srs.md) remains the requirement authority; no main deployment or full final architecture acceptance is claimed by this status update.
 
 ## 1. Architecture and stack
 

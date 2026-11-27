@@ -1,0 +1,87 @@
+{
+  "repository": "JeffMerry/reg-me-up",
+  "recorded_date": "2026-11-27",
+  "timezone": "Asia/Bangkok",
+  "scope": "Read-only source excerpts for Deliverable 2 compilation; not release/submission approval.",
+  "documentation_base_sha": "7c85dcc3e762c7f2be62a2285264af8aa4f9a972",
+  "github_sources": [
+    {
+      "number": 57,
+      "url": "https://github.com/JeffMerry/reg-me-up/pull/57",
+      "branch": "feature/f-05-cancellation",
+      "base": "sprint/02-staging",
+      "author": "JeffMerry",
+      "head_sha": "28bee49bbf9cd47477cd3e7e48cf32ed2b9be048",
+      "merged": true,
+      "merge_sha": "bd8bf1a97a53e30eaa60a5a0a689b13af0e0f149",
+      "merged_at_utc": "2026-11-26T13:31:01Z",
+      "reviews": [
+        {
+          "id": 6074898983,
+          "state": "APPROVED",
+          "commit": "28bee49bbf9cd47477cd3e7e48cf32ed2b9be048",
+          "reviewer": "THN4",
+          "url": "https://github.com/JeffMerry/reg-me-up/pull/57#pullrequestreview-6074898983",
+          "time": "2026-11-26T13:24:37Z",
+          "body": "ตรวจ PR #57 สำหรับ Issue #41 ที่ commit 28bee49bbf9cd47477cd3e7e48cf32ed2b9be048\n\nApprove — ไม่พบ blocker สำหรับขอบเขต PR นี้\n\nตรวจแล้วพบว่าการยกเลิกตรวจ session/role/ownership/CSRF และ cutoff หลังได้ event lock ถูกต้อง เก็บประวัติ CANCELLED พร้อมเวลา ยกเลิกซ้ำไม่คืนที่นั่งเพิ่ม และลงทะเบียนใหม่ด้วย ID ใหม่โดยรักษาประวัติเดิม รวมถึงมี additive migration และ regression tests รองรับ\n\nCI [run 45825030762](https://github.com/JeffMerry/reg-me-up/actions/runs/45825030762) ผ่านบน merge commit f61e4300442ebfe6d8b2bd0a391a3f81dbdc54cd: unit 55, integration 58, browser 43 รวม migration, typecheck/build และ Docker build\n\nข้อเสนอไม่บล็อก merge: ปรับสถานะส่วนต้นของ DoD และ shared system design ให้ชัดว่าเป็น planning snapshot หรือเชื่อมไปยังสถานะ implementation/evidence ปัจจุบัน\n\nก่อนปิด Issue #41: ติดตามการทดสอบร่วมกับ F-06 deadline/capacity endpoint, กรณีผู้ลงทะเบียนใหม่แข่งขันสองคน, Instructor denial หลัง F-09 และ release/UAT/post-deploy evidence ตามแผน\n\nการตรวจนี้อิง diff, issue, contract/AC/STS/DoD, evidence และ CI logs ไม่ได้รันทดสอบซ้ำในเครื่องหรือยืนยัน human acceptance"
+        }
+      ]
+    },
+    {
+      "number": 65,
+      "url": "https://github.com/JeffMerry/reg-me-up/pull/65",
+      "branch": "feature/f-06-event-management",
+      "base": "sprint/02-staging",
+      "author": "JeffMerry",
+      "head_sha": "81df0a40ad98afd087230a0ac0e84ac94d3e14d4",
+      "merged": true,
+      "merge_sha": "b8ad3e2cca223edb841f6ed56f64c4be690b9317",
+      "merged_at_utc": "2026-11-27T04:53:49Z",
+      "reviews": [
+        {
+          "id": 6083618119,
+          "state": "APPROVED",
+          "commit": "81df0a40ad98afd087230a0ac0e84ac94d3e14d4",
+          "reviewer": "THN4",
+          "url": "https://github.com/JeffMerry/reg-me-up/pull/65#pullrequestreview-6083618119",
+          "time": "2026-11-27T04:49:35Z",
+          "body": "ตรวจ PR #65 สำหรับ Issue #42 ที่ head commit 81df0a40ad98afd087230a0ac0e84ac94d3e14d4 จาก feature/f-06-event-management → sprint/02-staging\n\nApprove — ไม่พบ blocker สำหรับขอบเขต PR นี้\n\nตรวจแล้วการแก้กิจกรรมของเจ้าของมี session/role/ownership/CSRF checks ใช้ schedule mutex → event row lock และตรวจ expectedVersion เพื่อป้องกันบันทึกทับ โดยเปลี่ยนจริงเพิ่ม version ครั้งเดียว ส่วน no-op คงเดิม\n\nCapacity/deadline ตรงตาม contract: explicit capacity 1–60 และไม่ต่ำกว่า ACTIVE count, omitted legacy capacity >60 คงเดิม, ตรง cutoff ปฏิเสธการลงทะเบียน และ ACTIVE duplicate ยังมีลำดับก่อน closed/full กฎ publish ของ Lab 7 ยังคง 1–60 พร้อม additive migration และ UI สำหรับ validation/conflict/unknown outcome/session expiry\n\nCI [run 45939679623](https://github.com/JeffMerry/reg-me-up/actions/runs/45939679623) ผ่านบน test merge 2b7b19a1fc07b76bb3a345d017671d2509efe0e6: unit 87, integration 81, browser 57 รวม migration, typecheck/build และ Docker build\n\nก่อนปิด Issue #42: ติดตาม actual Instructor reads/overlap guard, Instructor denial และ cross-event assign-vs-edit tests หลังรวม F-09 รวมถึง release/UAT ตาม DoD งานเหล่านี้ระบุเป็นขั้นถัดไปชัดเจนและไม่บล็อก PR นี้\n\nการตรวจอิง diff, contract/AC/evidence และ CI logs ไม่ได้รันทดสอบซ้ำในเครื่องหรือยืนยัน deployment acceptance ครับ"
+        }
+      ]
+    }
+  ],
+  "ci": {
+    "run_id": 45990942080,
+    "job_id": 140478323371,
+    "url": "https://github.com/JeffMerry/reg-me-up/actions/runs/45990942080",
+    "head_sha": "cc55b4a3761d58c04402ac34793a3a44ddfb4204",
+    "tested_merge_sha": "4d4e2740e1ddcf47d1b4dd784c77c70610d99d8a",
+    "check": "test-and-docker",
+    "conclusion": "success",
+    "source": "actual decoded workflow job logs",
+    "counts": {
+      "unit_passed": 93,
+      "integration_passed": 128,
+      "browser_passed": 87
+    },
+    "release_image_digest": null,
+    "cloud_run_revision": null
+  },
+  "operator_unit": {
+    "source": "user-supplied terminal output in this conversation",
+    "node": "24.14.0",
+    "command": "npm exec --workspace server -- vitest run tests/unit --maxWorkers=1 --no-file-parallelism",
+    "start_local": "2026-11-27T20:57:50+07:00",
+    "files_passed": 10,
+    "tests_passed": 93,
+    "duration_seconds": 9.73,
+    "explicit_sha_capture_supplied": false
+  },
+  "release": {
+    "accepted_main_sha": null,
+    "submitted_tag": null,
+    "deploy_run": null,
+    "pdf_hash": null,
+    "submission_receipt": null
+  }
+}

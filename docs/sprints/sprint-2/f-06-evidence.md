@@ -1,5 +1,7 @@
 # F-06 owned event editing — executed evidence
 
+Current feature chain reconciliation: PR [#65](https://github.com/JeffMerry/reg-me-up/pull/65) was approved by THN4 and merged27Nov2026 into staging as `b8ad3e2cca223edb841f6ed56f64c4be690b9317`. Subsequent #66/#68/#69 integrate actual Instructor overlap, assignment and selected race/access/UI coverage; combined C69 CI reports management17/17 plus acceptance13/13 and Instructor11/11 within integration128/128. This supersedes historical review/staging-pending paragraphs below for those sources; main release/deployed verification remain open. See [per-AC record](../deliverable-2/feature-completion.md).
+
 27 November 2026 (Asia/Bangkok). Owner: Kittithat (JeffMerry); reviewer: Thanatip (THN4). Refs #42/#45. **API/UI/deadline candidate locally verified; peer review/staging merge, Instructor integration and release acceptance pending.**
 
 ## Source and actual RED/GREEN
@@ -36,7 +38,7 @@ An earlier full integration attempt had80 pass/1 failure because the new app-pro
 
 ## AC → actual tests → remaining scope
 
-API file: [`event-management.test.ts`](../../../../server/tests/integration/event-management.test.ts). UI file: [`f-06.spec.ts`](../../../../e2e/f-06.spec.ts). Pure rules: [`event-edit-validation.test.ts`](../../../../server/tests/unit/event-edit-validation.test.ts).
+API file: [`event-management.test.ts`](../../../server/tests/integration/event-management.test.ts). UI file: [`f-06.spec.ts`](../../../e2e/f-06.spec.ts). Pure rules: [`event-edit-validation.test.ts`](../../../server/tests/unit/event-edit-validation.test.ts).
 
 | AC / planned cases | Actual executed checks | Limits |
 |---|---|---|

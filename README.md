@@ -109,6 +109,8 @@ npm run test:unit
 
 ## Integration tests
 
+On Windows with Docker Desktop running, use `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test-integration-local.ps1` from the repository root to start the local Compose PostgreSQL service, generate Prisma, migrate/seed `regmeup_test`, install its guard and run the integration suite. This helper uses only the local Compose credentials and `REGMEUP_PG_PORT` (default55432), restores the calling environment values, and stops on preparation errors. It preserves the Docker volume. For custom PostgreSQL installations, use the explicit setup below instead.
+
 Compose creates two separate databases on the same server endpoint: `DATABASE_URL` for the application and `TEST_DATABASE_URL` for testing. The guard reads the effective database and server identity from both connections rather than comparing URL strings alone. It rejects different endpoints or cases where it cannot verify that the databases are separate.
 
 Integration files run sequentially because they share one guarded test database and some assert public catalog totals. Controlled concurrent requests/transactions inside race tests still run concurrently; this setting only prevents unrelated test files from changing each other's fixtures/totals.

@@ -1,5 +1,7 @@
 # Sprint 2 acceptance gap evidence — 27 November 2026
 
+Current reconciliation: [THN4 APPROVED review6087075354](https://github.com/JeffMerry/reg-me-up/pull/68#pullrequestreview-6087075354) on27Nov2026 17:55:37 Asia/Bangkok approved head `50d6943f3ce869150f47d201989d64e13005c48f` for staging integration and records CI93 unit/107 integration/73 browser plus migrations/typecheck/build/Docker. PR #68 is integrated at `3a22a71d936f3aa52ad6d6d3e1a30e95467fc9c7`. This supersedes historical pending-review text below; selected G01–04 are integrated, while G05–06 remain pending. The review's non-blocking delayed-logout synchronization follow-up is tracked in the [Deliverable2 evidence index](../deliverable-2/evidence-index.md).
+
 Refs #45. Branch `test/sprint-2-acceptance` → `sprint/02-staging`. Implementer/tester: JeffMerry; peer review: THN4, pending. This closes the selected local verification work S2-G01–04, subject to PR/CI/review. S2-G05–06, accepted release, deployment, human UAT and submission remain pending. F07/F08 implementation is outside this PR.
 
 ## Versions and actual execution

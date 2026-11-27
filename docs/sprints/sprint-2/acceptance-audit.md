@@ -1,5 +1,7 @@
 # Sprint 2 acceptance audit — 27 November 2026
 
+Current reconciliation after #68/#69: [actual integrated acceptance record](acceptance-evidence.md) and [Deliverable2 per-AC completion](../deliverable-2/feature-completion.md) supersede the inspection-only missing-selection rows below where actual tests exist. [Readiness](../deliverable-2/readiness.md) retains remaining concrete selections, including explicit two-new-registrants-after-cancel coverage, human/cloud checks and G05–06. This does not convert the original audit snapshot into an executed acceptance run.
+
 Owner of remaining work: Kittithat (JeffMerry); peer reviewer: Thanatip (THN4). Refs #42/#43/#45. Audited source: staging `40a4db213ece980c2f6313a9e68c3ed8a6300447`, after F-09 #66. **Source/evidence inspection only; no new runtime test or deployment was executed for this audit.**
 
 ## Established evidence

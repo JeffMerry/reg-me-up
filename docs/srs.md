@@ -2,10 +2,12 @@
 
 | Item | Value |
 |---|---|
-| Version / date | 0.7 / 2026-11-26 (Asia/Bangkok) |
+| Version / date | 0.8 / 2026-11-27 (Asia/Bangkok); status reconciliation only, baseline requirement IDs preserved |
 | Product | กิจกรรมอบรมและเวิร์กช็อปภายในมหาวิทยาลัย — CPE334 Topic 3 |
 | Baseline authority | บริบทที่ผู้ใช้ยืนยันและคำสั่งให้นำข้อเสนอทางเทคนิคลงเอกสาร |
-| Review / implementation | Sprint 2 policy CONFIRMED by THN4 COMMENTED review; formal follow-up approval/merge pending; implementation NOT STARTED / verification NOT RUN |
+| Review / implementation | Planning #51 and Sprint2 features #57/#65/#66 approved/merged; acceptance #68 and meaningful F07 #69 approved/merged through7c85dcc. F08 contract-only; accepted main release/deployment pending. [Current evidence/status](sprints/deliverable-2/evidence-index.md) |
+
+Current status27Nov2026: [complete requirement-result matrix](sprints/deliverable-2/current-traceability.md) and [per-AC completion](sprints/deliverable-2/feature-completion.md) reconcile actual combined CI and current candidate attempts. The next paragraph records the earlier policy/ownership checkpoint; later approvals and the user-directed remaining-work allocation in [review record](sprints/sprint-2/review-record.md#current-responsibilities--27-november-2026) supersede its pending-review/old allocation text. No baseline requirement or approved Lab7 policy changes in this documentation reconciliation.
 
 Sprint 2 Q-04–Q-08 and associated FR/BR, preserved BR-02–BR-04 and legacy capacity policy are CONFIRMED in [THN4 review6068033006](sprints/sprint-2/review-record.md) on26November2026 at10:10:04 Asia/Bangkok. The review state is COMMENTED, not APPROVED. Exact technical implementation still requires verification and this follow-up needs review before merge. See [decisions](sprints/sprint-2/decisions.md), [contracts](sprints/sprint-2/README.md), [shared design](sprints/sprint-2/system-design.md) and [named ownership matrix](sprints/sprint-2/review-record.md#ownership-matrix). Kittithat owns F-05/F-06/locks/integration; Thanatip owns F-09/schema/release evidence, with cross-review. This revision does not change peer-owned Lab7 BR-01/DEC-05. The supplied announcement waives Instructor/TA approval, not test/release evidence.
 

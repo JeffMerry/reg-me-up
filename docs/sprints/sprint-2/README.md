@@ -1,5 +1,7 @@
 # Sprint 2 planning and evidence
 
+Current checkpoint27Nov2026: #68 selected acceptance additions and #69 F07 are approved/merged, combined staging `7c85dcc3e762c7f2be62a2285264af8aa4f9a972`. The [Deliverable2 evidence index](../deliverable-2/evidence-index.md) reconciles actual reviews/CI and separates remaining candidate G05, release/deploy G06, PDF and human submission. F08 remains contract-only. Older status paragraphs below are historical checkpoints.
+
 Version 0.3 — 26 November 2026 (Asia/Bangkok). Refs #40/#41/#51.
 
 Current status27Nov2026: **F05 #57/F06 #65/F09 #66 are merged in staging40a4db2**, alongside shared version/locks and Lab7 sync. [Acceptance audit](acceptance-audit.md) records established reviewed CI93/94/62 and specific verification gaps, not full release acceptance. The user now assigns all remaining work through release evidence to JeffMerry, with THN4 peer review; [current ownership](review-record.md#current-responsibilities--27-november-2026). [Sprint3 contracts](../sprint-3/README.md) are prepared with confirmed Q09; code/tests NOT RUN. [Delivery plan](../deliverable-2/plan.md).

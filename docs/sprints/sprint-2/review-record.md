@@ -45,6 +45,8 @@ F-05 merged in #57; [F-05 evidence](f-05-evidence.md) records its local/CI bound
 
 ## Current responsibilities — 27 November 2026
 
+Latest release-evidence reconciliation: #68 and #69 are now THN4-approved and integrated through staging `7c85dcc3e762c7f2be62a2285264af8aa4f9a972`; #69 CI45990942080 succeeded. This does not change the ownership below or mark main release/deployment/submission complete. See [Deliverable2 evidence](../deliverable-2/evidence-index.md).
+
 The user stated in chat: “เปลี่ยนเเล้วครับต่อไปผมทำหมดเลยจนถึง release evidence”. This explicitly assigns remaining implementation and release-evidence work to Kittithat (JeffMerry). Thanatip's F09 historical implementation and actual JeffMerry review are preserved; no completed work is reattributed.
 
 | Remaining work | Accountable / implementation / migration / tests / evidence | Different teammate reviewer |
