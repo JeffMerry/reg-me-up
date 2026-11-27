@@ -6,6 +6,7 @@ import { authHandlers, authMiddleware } from './auth.js';
 import { eventHandlers } from './events.js';
 import { registrationHandlers } from './registrations.js';
 import { organizerRegistrationHandlers } from './organizer-registrations.js';
+import { eventManagementHandlers } from './event-management.js';
 
 export function createApp(checkDatabase: () => Promise<void>, auth?: { config: ServerConfig; pool: pg.Pool; prisma: PrismaClient; now?: () => number }, frontendDirectory?: string) {
   const app = express();
@@ -26,10 +27,13 @@ export function createApp(checkDatabase: () => Promise<void>, auth?: { config: S
     const events = eventHandlers(auth.prisma);
     const registrations = registrationHandlers(auth.prisma, auth.now);
     const organizerRegistrations = organizerRegistrationHandlers(auth.prisma);
+    const management = eventManagementHandlers(auth.prisma, auth.now);
     app.get('/api/events', events.publicList);
     app.get('/api/events/:eventId', events.detail);
     app.post('/api/events', h.requireUser, h.requireRole('ORGANIZER'), h.csrf, h.jsonBody, events.publish);
     app.get('/api/me/events', h.requireUser, h.requireRole('ORGANIZER'), events.ownList);
+    app.get('/api/organizer/events/:eventId', h.requireUser, h.requireRole('ORGANIZER'), management.detail);
+    app.patch('/api/organizer/events/:eventId', h.requireUser, h.requireRole('ORGANIZER'), h.csrf, h.jsonBody, management.edit);
     app.get('/api/organizer/events/:eventId/registrations', h.requireUser, h.requireRole('ORGANIZER'), organizerRegistrations.list);
     app.post('/api/events/:eventId/registrations', h.requireUser, h.requireRole('PARTICIPANT'), h.csrf, h.jsonBody, registrations.create);
     app.get('/api/me/registrations', h.requireUser, h.requireRole('PARTICIPANT'), registrations.ownList);
