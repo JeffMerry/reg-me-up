@@ -194,3 +194,11 @@ Review scope: [F-05](sprints/sprint-2/f-05.md), [F-06](sprints/sprint-2/f-06.md)
 ## 10. Integration checkpoint — 27 November 2026
 
 Lab7 release #62 at main `d490632` is being synchronized with Sprint2 staging `882818d`, containing shared locks #55, F-05 #57 and shared events.version #59. Earlier pending/NOT STARTED statements above describe their original design checkpoint. The user reassigned only events.version to Kittithat; Thanatip retains Instructor schema/combined migration coordination. [Updated ownership](sprints/sprint-2/review-record.md) and [version handoff](sprints/sprint-2/event-version-evidence.md) govern current work. F-06 validation remains on its separate work branch; edit API/UI and F-09 acceptance are not established here. Fresh combined-source results belong to the synchronization PR; an automatic Git merge is not verification of those paths.
+
+## 11. Sprint 3 contract extension — 27 November 2026
+
+User-confirmed Q09 specifies owner-only ACTIVE check-in at start≤serverNow<end, repeated check-in preserving its original record/time, no attendance correction/undo, and reports counting distinct people by current state. [F07](sprints/sprint-3/f-07.md), [F08](sprints/sprint-3/f-08.md) and [STS](sprints/sprint-3/sts.md) provide full proposed technical design/AC/error/DTO details for review before implementation; code/tests remain NOT RUN.
+
+Proposed Attendance references a unique registration and actual Organizer actor with timestamp, preserving all existing history. Check-in uses event-row locking shared with cancellation/event editing; no inverse advisory-lock order. Reports are owner-only consistent REPEATABLE READ snapshots: ACTIVE distinct people are registered; cancelled-history people without ACTIVE are cancelled; saved attendance distinct people are attended. A re-registered person is not also currently cancelled. Reports are read-only; no export/QR/undo interface is introduced. This design supplements existing Sprint1/2 source rules and does not claim an applied migration.
+
+Remaining Sprint2 validation and release evidence are assigned to JeffMerry by the later user allocation, with THN4 peer review; see [acceptance audit](sprints/sprint-2/acceptance-audit.md) and [delivery plan](sprints/deliverable-2/plan.md).

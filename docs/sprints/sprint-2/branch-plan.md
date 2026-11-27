@@ -44,3 +44,7 @@ After F-05/F-06/F-09 are complete, run build/unit/integration/browser and select
 ## Evidence and reporting
 
 Use Refs #40 on the planning PR; do not close it before its actual acceptance conditions. Record reviewers/findings/response dates, tested commits/commands and failed/skipped results. #45 must contain full required documents and selected source excerpts in a self-contained PDF, two meaningful Sprint 2 demos, one Sprint 3 workflow, two actual test excerpts (domain and access), two substantive Issue/PR chains and versioned deployment evidence. Include known defects/debt and safe private account handoff/local seed. Do not send credentials or fabricate review/submission history.
+
+## Current allocation and next work — 27 November 2026
+
+Historical planning above is superseded for remaining ownership: JeffMerry now owns Sprint2 gap closure, F07/F08 implementation/migrations/tests, schema coordination, integration and release evidence/PDF; THN4 reviews. Existing F09 work/author credit remains historical. See [updated ownership](review-record.md#current-responsibilities--27-november-2026), [Sprint2 gap audit](acceptance-audit.md), [Sprint3 contracts](../sprint-3/README.md) and [delivery plan](../deliverable-2/plan.md). Lab7 #64 and F09 #66 are merged into staging; do not repeat main synchronization for the same source. No remaining review/deployment gate is satisfied merely by the new allocation.

@@ -39,3 +39,7 @@ Version0.2 — 26 November2026. Refs #40–#45/#51. **Policy CONFIRMED; implemen
 - [ ] Human submits to LEB2 by29Nov2026 23:59 Asia/Bangkok and actual submission evidence recorded; repository/deployment retained through grading
 
 No check is satisfied by AI review, a closed Issue alone, an unexecuted test plan or an unrelated green run. Record incomplete work as incomplete.
+
+## Current audit checkpoint — 27 November 2026
+
+The planning checklist above preserves original checkpoints rather than asserting current failures. Planning #51 and features #57/#65/#66 have actual approvals/staging merges. Lab7 sync #64 and version #59 are merged. Existing executed source/CI evidence is linked in [acceptance audit](acceptance-audit.md), which identifies the remaining specific cases and release gates. Whole-feature or full STS ranges are not checked from a suite total. JeffMerry owns remaining work/release evidence and THN4 peer review under the updated allocation; F07/F08 contracts are prepared, not implemented. Use the [delivery plan](../deliverable-2/plan.md) for current order/targets.

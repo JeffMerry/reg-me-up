@@ -91,3 +91,7 @@ No fixed hour/day estimates or contribution counts have been agreed. At each int
 | 0.6 | 2026-11-11 | Recorded user-reported LEB2 D1 deadline, preserved earlier handout discrepancy and separated D1/Lab 5 deliverables | LEB2 not independently inspected; teammate review pending |
 | 0.7 | 2026-11-11 | Recorded user-directed feature Issue assignees | Teammate agreement and review pending |
 | 0.8 | 2026-11-12 | Added F-10 final UI refinement after baseline feature integration | Planning only; GitHub issue and teammate review pending |
+
+## Current next-stage allocation — 27 November 2026
+
+Historical Sprint1/2 workflow above remains part of the project record. F05/F06/F09 are now merged in Sprint2 staging; a [specific acceptance audit](sprint-2/acceptance-audit.md) and [delivery plan](deliverable-2/plan.md) govern current remaining work. The user assigned all remaining implementation through release evidence to JeffMerry; THN4 supplies different-teammate review. Q09 is user-confirmed and full [F07/F08 contracts/STS/DoD](sprint-3/README.md) are prepared for technical review before code. No future code, result or release is claimed by this planning update.

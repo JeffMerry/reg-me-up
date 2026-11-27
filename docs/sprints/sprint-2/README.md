@@ -2,7 +2,7 @@
 
 Version 0.3 — 26 November 2026 (Asia/Bangkok). Refs #40/#41/#51.
 
-Current status: **Planning #51, shared locks #55, F-05 #57, version #59 and Lab7 sync #64 merged. F-06 API/UI/deadline candidate locally verified; feature review and F-09 integration pending.** [F-06 evidence](f-06-evidence.md) records runtime GREEN `4cce15d`, full87/81/57 regression and Instructor overlap/current-assignee/role gaps. The [ownership matrix](review-record.md#ownership-matrix) assigns Kittithat F-05/F-06/version/locks/integration and Thanatip F-09/Instructor schema/migration coordination/release evidence, with cross-review. No accepted integrated Sprint2 main release is claimed.
+Current status27Nov2026: **F05 #57/F06 #65/F09 #66 are merged in staging40a4db2**, alongside shared version/locks and Lab7 sync. [Acceptance audit](acceptance-audit.md) records established reviewed CI93/94/62 and specific verification gaps, not full release acceptance. The user now assigns all remaining work through release evidence to JeffMerry, with THN4 peer review; [current ownership](review-record.md#current-responsibilities--27-november-2026). [Sprint3 contracts](../sprint-3/README.md) are prepared with confirmed Q09; code/tests NOT RUN. [Delivery plan](../deliverable-2/plan.md).
 
 ## Source and version identity
 
@@ -31,6 +31,7 @@ Historical test evidence lives in feature evidence files and GitHub runs; old pl
 - [F-09 Instructor contract](f-09.md)
 - [Shared API/data/locking design](system-design.md)
 - [Software test specification](sts.md)
+- [Current acceptance audit and gap queue](acceptance-audit.md)
 - [Definition of Done](dod.md)
 - [Branches, dependencies and review gates](branch-plan.md)
 
@@ -51,7 +52,7 @@ Shared lock plumbing merged in PR #55. F-05 builds on that staging version and h
 | Feature | AC | Implementation | Executed verification | Accepted release |
 |---|---|---|---|---|
 | F-05 | S2-F05-AC01–06 | Merged #57 at `bd8bf1a` | 13 API/DB cases + 10 browser cases; regression passed; [remaining integration](f-05-evidence.md) | TBD |
-| F-06 | S2-F06-AC01–07 | API/UI/deadline candidate `4cce15d`; feature review pending | 24 rules/17 API/DB/10 browser; regression87/81/57 passed; [Instructor integration pending](f-06-evidence.md) | TBD |
-| F-09 | S2-F09-AC01–07 | NOT STARTED | NOT RUN | TBD |
+| F-06 | S2-F06-AC01–07 | Merged #65; F09 guard connected in #66 | Original87/81/57; later F09 cross-feature CI93/94/62; [remaining scope](acceptance-audit.md) | TBD |
+| F-09 | S2-F09-AC01–07 | Merged #66 at40a4db2 | CI93 unit/94 integration/62 browser passed; [specific AC gaps](acceptance-audit.md) | TBD |
 
 Deliverable 2 also requires #44: contracts for all remaining F-07/F-08 work and at least one meaningful tested Sprint 3 workflow. Those contracts and implementation are not supplied by this Sprint 2 planning PR. #45 tracks the complete PDF and integrated deployment; neither checkpoint is complete here.
