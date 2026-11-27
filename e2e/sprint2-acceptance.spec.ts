@@ -179,7 +179,10 @@ test('S2-G04 ignores a delayed expired mutation after logout rather than redirec
     await save(page); await expect.poll(() => count).toBe(1);
     await page.getByRole('button', { name: 'Log out', exact: true }).click(); await expect(page).toHaveURL('/events');
   } finally { release(); }
-  expect((await response).status()).toBe(401); await page.waitForLoadState('networkidle');
+  const expired = await response;
+  expect(expired.status()).toBe(401);
+  // Wait for fetch callbacks and React's resulting render, not Vite's open connections.
+  await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
   await expect(page).toHaveURL('/events'); await expect(page.getByLabel('Choose an Instructor')).toHaveCount(0);
 });
 
