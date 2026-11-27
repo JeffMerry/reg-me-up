@@ -1,5 +1,7 @@
 # F-09 implementation and verification evidence
 
+CI update (27 November 2026, run 45961985966 at commit 2d57965): full unit PASS 93/93; integration 87 passed / 7 failed. This observed CI result supersedes the earlier developer-reported integration PASS. The seven failures were traced to outdated seed user counts, repeated response-body reads, schedule fixtures leaking between cases, and a race fixture missing an existing assignment. Fixes are in the working tree; typecheck passes. Focused integration rerun is blocked by runner EACCES before database connection, so CI confirmation after pushing the fix is pending. No tests were skipped or disabled by this fix.
+
 ## Latest status — 27 November 2026
 
 This status supersedes the historical attempts below: F-09 E2E PASS 5/5 (Playwright artifacts), focused Instructor unit PASS 6/6, typecheck PASS, client/server build PASS. Integration PASS is reported by the developer in this conversation; successful-run output/counts have not been supplied. Full unit suite PASS: 93/93 tests across 10/10 files, confirmed by the developer-provided Vitest screenshot (duration 4.34 seconds). This successful local run supersedes the earlier runner EACCES attempts. Peer review and deployment acceptance are not inferred from these results.

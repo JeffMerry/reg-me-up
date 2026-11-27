@@ -1,5 +1,7 @@
 # RegMeUp — Requirements and verification traceability
 
+CI update (27 November 2026, run 45961985966 at commit 2d57965): full unit PASS 93/93; integration 87 passed / 7 failed. This observed CI result supersedes the earlier developer-reported integration PASS. The seven failures were traced to outdated seed user counts, repeated response-body reads, schedule fixtures leaking between cases, and a race fixture missing an existing assignment. Fixes are in the working tree; typecheck passes. Focused integration rerun is blocked by runner EACCES before database connection, so CI confirmation after pushing the fix is pending. No tests were skipped or disabled by this fix.
+
 Latest F-09 verification (27 November 2026): E2E PASS 5/5; focused unit PASS 6/6; typecheck/build PASS; integration PASS reported by the developer (successful log/counts not supplied). This supersedes earlier F-09 DB/browser NOT RUN entries for that scope. Full unit regression PASS 93/93 tests in 10/10 files, confirmed by the developer-provided Vitest screenshot; release acceptance remains separate. See docs/sprints/sprint-2/f-09-evidence.md.
 
 Latest F-09 implementation update27Nov2026: F-09 uncommitted code candidate is in the working tree on `feature/f-09-instructor`; pure interval rule RED/GREEN and typecheck/build evidence are recorded in [F-09 evidence](sprints/sprint-2/f-09-evidence.md). Guarded PostgreSQL, API/DB migration/race and browser tests are NOT RUN because local DB/loopback access returned EACCES. No F-09 acceptance is inferred as passed.

@@ -55,7 +55,13 @@ beforeAll(async () => {
   base = `http://127.0.0.1:${address.port}`;
 });
 
-beforeEach(() => { now = initialStart - 3_600_000; });
+beforeEach(async () => {
+  now = initialStart - 3_600_000;
+  // Keep each schedule independent while retaining only this suite's users.
+  await prisma.instructorAssignment.deleteMany({ where: { event: { organizerId: { in: [owner, outsider] } } } });
+  await prisma.registration.deleteMany({ where: { event: { organizerId: { in: [owner, outsider] } } } });
+  await prisma.event.deleteMany({ where: { organizerId: { in: [owner, outsider] } } });
+});
 
 afterAll(async () => {
   if (server) await new Promise<void>(resolve => server.close(() => resolve()));
@@ -110,8 +116,9 @@ describe('F-09 Instructor assignment and teaching APIs', () => {
     const event = await fixture(); const organizer = await login(owner), other = await login(outsider), student = await login(participant), instructor = await login(instructor1);
     const directory = await request('/api/organizer/instructors?page=1', organizer);
     expect(directory.status).toBe(200);
-    expect(Object.keys((await directory.json()).data[0]).sort()).toEqual(['displayName', 'id']);
-    expect(JSON.stringify(await directory.json())).not.toContain('@f09.test');
+    const directoryBody = await directory.json();
+    expect(Object.keys(directoryBody.data[0]).sort()).toEqual(['displayName', 'id']);
+    expect(JSON.stringify(directoryBody)).not.toContain('@f09.test');
     expect((await request('/api/organizer/instructors', instructor)).status).toBe(403);
     expect((await request(`/api/organizer/events/${event.id}/instructor`, student, 'PUT', { instructorId: instructor1, expectedVersion: 0 })).status).toBe(403);
     expect((await assign(event.id, other, instructor1)).status).toBe(404);
@@ -122,9 +129,10 @@ describe('F-09 Instructor assignment and teaching APIs', () => {
     const missingAssignee = await request(`/api/organizer/events/${event.id}/instructor`, organizer, 'PUT', { expectedVersion: 0 });
     const malformedAssignee = await request(`/api/organizer/events/${event.id}/instructor`, organizer, 'PUT', { expectedVersion: 0, instructorId: 'not-a-uuid' });
     expect(absent.status).toBe(422); expect(wrongRole.status).toBe(422); expect(missingAssignee.status).toBe(422); expect(malformedAssignee.status).toBe(422);
-    expect((await absent.json()).error).toEqual((await wrongRole.json()).error);
-    expect((await absent.json()).error).toEqual((await missingAssignee.json()).error);
-    expect((await absent.json()).error).toEqual((await malformedAssignee.json()).error);
+    const absentBody = await absent.json();
+    expect(absentBody.error).toEqual((await wrongRole.json()).error);
+    expect(absentBody.error).toEqual((await missingAssignee.json()).error);
+    expect(absentBody.error).toEqual((await malformedAssignee.json()).error);
     expect((await assign(event.id, organizer, instructor1, -1)).status).toBe(422);
     const stale = await assign(event.id, organizer, instructor1, 1);
     expect(stale.status).toBe(409); expect((await stale.json()).error.code).toBe('EVENT_CHANGED');
@@ -151,7 +159,11 @@ describe('F-09 Instructor assignment and teaching APIs', () => {
       expect((await assign(first.id, organizer, scheduledInstructor)).status).toBe(200);
       const response = await assign(second.id, organizer, scheduledInstructor);
       expect(response.status).toBe(overlaps ? 409 : 200);
-      if (overlaps) { expect((await response.json()).error).toMatchObject({ code: 'INSTRUCTOR_UNAVAILABLE' }); expect(JSON.stringify(await response.json())).not.toContain(first.id); }
+      if (overlaps) {
+        const body = await response.json();
+        expect(body.error).toMatchObject({ code: 'INSTRUCTOR_UNAVAILABLE' });
+        expect(JSON.stringify(body)).not.toContain(first.id);
+      }
       expect(await prisma.instructorAssignment.count({ where: { instructorId: scheduledInstructor, endedAt: null } })).toBe(overlaps ? 1 : 2);
     } finally {
       await prisma.instructorAssignment.deleteMany({ where: { instructorId: scheduledInstructor } });
@@ -211,11 +223,12 @@ describe('F-09 Instructor assignment and teaching APIs', () => {
   it('serializes cross-event assign and F-06 edit races on the shared schedule mutex', async () => {
     const first = await fixture(initialStart, initialStart + 3_600_000); const second = await fixture(initialStart + 2 * 3_600_000, initialStart + 3 * 3_600_000);
     const organizer = await login(owner); const blocker = new pg.Client({ connectionString: process.env.TEST_DATABASE_URL }); const observer = new pg.Client({ connectionString: process.env.TEST_DATABASE_URL });
+    expect((await assign(second.id, organizer, instructor1)).status).toBe(200);
     const pending: Promise<Response>[] = [];
     try {
       await blocker.connect(); await observer.connect(); await blocker.query('BEGIN'); await blocker.query('SELECT pg_advisory_xact_lock(334,2)');
       pending.push(assign(first.id, organizer, instructor1));
-      pending.push(patch(second.id, organizer, { expectedVersion: 0, startsAt: new Date(initialStart + 30 * 60_000).toISOString(), endsAt: new Date(initialStart + 90 * 60_000).toISOString() }));
+      pending.push(patch(second.id, organizer, { expectedVersion: 1, startsAt: new Date(initialStart + 30 * 60_000).toISOString(), endsAt: new Date(initialStart + 90 * 60_000).toISOString() }));
       const limit = Date.now() + 2000; let count = 0;
       while (Date.now() < limit && count < 2) {
         count = (await observer.query<{ count: number }>("SELECT count(*)::int AS count FROM pg_stat_activity WHERE application_name=$1 AND wait_event_type='Lock' AND query ILIKE '%pg_advisory_xact_lock%'", [applicationName])).rows[0].count;
@@ -225,9 +238,19 @@ describe('F-09 Instructor assignment and teaching APIs', () => {
       await blocker.query('COMMIT');
       const responses = await Promise.all(pending);
       expect(responses.map(response => response.status).sort()).toEqual([200, 409]);
-      const [assignment] = await prisma.instructorAssignment.findMany({ where: { instructorId: instructor1, endedAt: null }, include: { event: true } });
-      const other = assignment.eventId === first.id ? await prisma.event.findUniqueOrThrow({ where: { id: second.id } }) : await prisma.event.findUniqueOrThrow({ where: { id: first.id } });
-      expect(assignment.event.startsAt < other.endsAt && other.startsAt < assignment.event.endsAt).toBe(false);
+      const assignments = await prisma.instructorAssignment.findMany({ where: { instructorId: instructor1, endedAt: null }, include: { event: true } });
+      expect(assignments.some(assignment => assignment.eventId === second.id)).toBe(true);
+      const [savedFirst, savedSecond] = await Promise.all([first.id, second.id].map(id => prisma.event.findUniqueOrThrow({ where: { id } })));
+      if (responses[0].status === 200) {
+        expect(assignments).toHaveLength(2);
+        expect(savedFirst.version).toBe(1);
+        expect(savedSecond).toMatchObject({ version: 1, startsAt: second.startsAt, endsAt: second.endsAt });
+        expect(savedFirst.startsAt < savedSecond.endsAt && savedSecond.startsAt < savedFirst.endsAt).toBe(false);
+      } else {
+        expect(assignments).toHaveLength(1);
+        expect(savedFirst.version).toBe(0);
+        expect(savedSecond.version).toBe(2);
+      }
     } finally {
       await blocker.query('ROLLBACK').catch(() => undefined); await Promise.allSettled(pending); await Promise.allSettled([blocker.end(), observer.end()]);
     }

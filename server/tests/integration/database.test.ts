@@ -82,7 +82,7 @@ describe('foundation database schema', () => {
     try {
       await client.connect();
       const result = await client.query("SELECT (SELECT count(*)::int FROM users WHERE email LIKE '%@example.test') AS users, (SELECT count(*)::int FROM events WHERE id::text LIKE '30000000-%') AS events, (SELECT count(*)::int FROM registrations WHERE id::text LIKE '40000000-%') AS registrations");
-      expect(result.rows[0]).toEqual({ users: 5, events: 4, registrations: 2 });
+      expect(result.rows[0]).toEqual({ users: 7, events: 4, registrations: 2 });
       const user = await client.query("SELECT password_hash FROM users WHERE email = 'p1@example.test'");
       expect(user.rows[0].password_hash).not.toBe(process.env.SEED_PASSWORD);
       expect(await argon2.verify(user.rows[0].password_hash, process.env.SEED_PASSWORD)).toBe(true);
