@@ -10,7 +10,7 @@ function destination(value: string | null, role: Identity['role']) {
   if (!value || /[%\\#]/.test(value)) return fallback;
   if (value === '/events' || new RegExp(`^/events/${uuid}$`).test(value)) return value;
   if (role === 'PARTICIPANT' && (value === '/my-registrations' || new RegExp(`^/my-registrations\\?registrationId=${uuid}$`).test(value))) return value;
-  if (role === 'ORGANIZER' && (value === '/organizer/events' || value === '/organizer/events/new' || new RegExp(`^/organizer/events/${uuid}/registrations$`).test(value))) return value;
+  if (role === 'ORGANIZER' && (value === '/organizer/events' || value === '/organizer/events/new' || new RegExp(`^/organizer/events/${uuid}/(?:registrations|edit)$`).test(value))) return value;
   return fallback;
 }
 type Result = { data?: any; error?: { code: string; fieldErrors?: Record<string, string> } };

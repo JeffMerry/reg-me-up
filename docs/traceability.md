@@ -1,5 +1,7 @@
 # RegMeUp — Requirements and verification traceability
 
+Latest F-06 execution update27Nov2026: owner edit API/UI/deadline candidate `4cce15d` now has24 pure-rule,17 API/DB and10 browser cases passing locally (complete regression87 unit/81 integration/57 browser, typecheck/build). [F-06 mapping and actual RED/GREEN](sprints/sprint-2/f-06-evidence.md) supersedes F-06 NOT RUN entries below only for executed scope: AC01–06 and UI/persistence portion of AC07. Instructor overlap/role/assign-vs-edit integration and accepted release remain pending; no historical result is relabeled as a current pass.
+
 Version 0.7 — 2026-11-27. Integrates Lab7 release #62 with Sprint2 staging after #57/#59. Sources: [SRS](srs.md), [features](features.md), [System SDS](system-sds.md), [UI baseline](ui-spec.md), [Sprint 1 STS](sprints/sprint-1/sts.md).
 
 Historical design matrices and revision rows below preserve their original checkpoints. Lab7 local unit63/integration44/F-02 browser15 results are in [capacity evidence](evidence/lab7/RED-publish-capacity.md), with each run's source disclosure. F-05 results are in the [execution update](#f-05-execution-update--26-november-2026), and shared version results in [foundation evidence](sprints/sprint-2/event-version-evidence.md). These separate runs do not establish a pass for the combined source; the synchronization PR records fresh verification. Integrated Sprint2 acceptance/release remains pending. No baseline requirement is removed.

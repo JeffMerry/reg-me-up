@@ -3,13 +3,7 @@ import type { PrismaClient } from '../generated/prisma/client.js';
 import { validateEvent, validatePagination } from './events-validation.js';
 import type { Identity } from './auth.js';
 
-const selected = {
-  id: true, title: true, startsAt: true, endsAt: true, location: true, capacity: true, description: true,
-  organizer: { select: { displayName: true } },
-  _count: { select: { registrations: { where: { status: 'ACTIVE' } } } },
-} as const;
-type EventRow = { id: string; title: string; startsAt: Date; endsAt: Date; location: string; capacity: number; description: string | null; organizer: { displayName: string }; _count: { registrations: number } };
-const publicDto = (row: EventRow) => ({ id: row.id, title: row.title, startsAt: row.startsAt.toISOString(), endsAt: row.endsAt.toISOString(), location: row.location, capacity: row.capacity, remainingSeats: row.capacity - row._count.registrations, description: row.description, organizer: row.organizer });
+import { publicEventSelection as selected, publicEventDto as publicDto, type PublicEventRow as EventRow } from './event-dto.js';
 const ownedDto = (row: EventRow) => ({ ...publicDto(row), activeRegistrationCount: row._count.registrations });
 const invalid = (res: Response, fieldErrors?: Record<string, string>) => res.status(422).json({ error: { code: 'VALIDATION_ERROR', message: 'Invalid input.', ...(fieldErrors ? { fieldErrors } : {}) } });
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

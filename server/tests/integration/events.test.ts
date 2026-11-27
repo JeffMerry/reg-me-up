@@ -69,7 +69,8 @@ describe('F-02 event APIs', () => {
   it('allows anonymous discovery of published data with database-derived seats and excludes hidden/private data', async () => {
     const detail = await request(`/api/events/${visible}`); expect(detail.status).toBe(200); const dto = (await detail.json()).data;
     expect(dto).toMatchObject({ id: visible, capacity: 2, remainingSeats: 1, organizer: { displayName: `Test ${owner}` } });
-    expect(Object.keys(dto).sort()).toEqual(['capacity', 'description', 'endsAt', 'id', 'location', 'organizer', 'remainingSeats', 'startsAt', 'title']);
+    expect(Object.keys(dto).sort()).toEqual(['capacity', 'description', 'effectiveRegistrationCutoff', 'endsAt', 'id', 'location', 'organizer', 'registrationDeadline', 'remainingSeats', 'startsAt', 'title']);
+    expect(dto.registrationDeadline).toBeNull(); expect(dto.effectiveRegistrationCutoff).toBe(dto.startsAt);
     expect((await request(`/api/events/${hidden}`)).status).toBe(404);
     expect((await request('/api/events/not-a-uuid')).status).toBe(422);
     const list = await request('/api/events?page=1&pageSize=100'); expect(list.status).toBe(200);
