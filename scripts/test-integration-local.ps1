@@ -12,7 +12,9 @@ try {
     docker compose up -d --wait postgres
     if ($LASTEXITCODE -ne 0) { throw 'Local PostgreSQL startup failed. Start Docker Desktop with the Linux engine and retry.' }
 
-    $taskPort = if ($env:REGMEUP_PG_PORT) { $env:REGMEUP_PG_PORT } else { '55432' }
+    $taskPublishedPorts = @(docker compose port postgres 5432)
+    if ($LASTEXITCODE -ne 0 -or $taskPublishedPorts.Count -eq 0) { throw 'Could not read the published PostgreSQL port from the running Compose service.' }
+    $taskPort = ($taskPublishedPorts[-1] -split ':')[-1]
     if ($taskPort -notmatch '^\d+$' -or [int]$taskPort -lt 1 -or [int]$taskPort -gt 65535) {
         throw 'REGMEUP_PG_PORT must be a valid local TCP port.'
     }

@@ -15,12 +15,12 @@ Node22.23.4/npm10.9.9 are pinned; PostgreSQL17.11 is the local/CI target. React/
 | `APP_ORIGIN` | Local `http://localhost:5173`; deployed exact public HTTPS origin |
 | `PORT` | Local3000; Cloud Run runtime port; Playwright API43170 |
 | `TRUST_PROXY_HOPS` | Production1 only for the reviewed single trusted HTTPS proxy |
-| `ALLOW_SYNTHETIC_SEED`, `SEED_PASSWORD` | Explicit local/test synthetic provisioning; existing accounts retain passwords; never seed production |
+| `ALLOW_SYNTHETIC_SEED`, `SEED_PASSWORD` | Explicit local/test synthetic provisioning; reseeding fixed synthetic fixture IDs refreshes their password hashes to this value; never seed production |
 | `E2E_APP_DATABASE_URL` | Separate app DB identity retained while browser app connects to guarded test DB |
 | `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` | Optional existing Chromium path; otherwise installed Playwright Chromium |
 | `FRONTEND_DIR` | Container `/app/client/dist` |
 
-Full optional Compose/Vite/demo variables are documented in the deployment guide. Safe accounts come from the synthetic local seed or private course handoff. Do not publish passwords/cookies/tokens. Existing seeded passwords are preserved on repeat seed; changing a seed input is not a password reset.
+Full optional Compose/Vite/demo variables are documented in the deployment guide. Safe accounts come from the synthetic local seed or private course handoff. Do not publish passwords/cookies/tokens. Repeating the synthetic seed updates password hashes for its fixed fixture IDs to match the current `SEED_PASSWORD`; it does not update their other existing user details.
 
 ## Prepare and run locally
 
