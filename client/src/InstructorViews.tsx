@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 type Instructor = { id: string; displayName: string };
 type OwnerEvent = { id: string; title: string; startsAt: string; endsAt: string; version: number; currentInstructor: Instructor | null };
@@ -24,6 +24,13 @@ export function InstructorManagement({ eventId, expireSession }: { eventId: stri
   const [pending, setPending] = useState(false);
   const [blocked, setBlocked] = useState(false);
   const [retry, setRetry] = useState(0);
+  const alive = useRef(false);
+  const mutating = useRef(false);
+
+  useEffect(() => {
+    alive.current = true;
+    return () => { alive.current = false; };
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -34,6 +41,7 @@ export function InstructorManagement({ eventId, expireSession }: { eventId: stri
           fetch(`/api/organizer/events/${encodeURIComponent(eventId)}`, { cache: 'no-store', signal: controller.signal }),
           fetch(`/api/organizer/instructors?page=${directoryPage}`, { cache: 'no-store', signal: controller.signal }),
         ]);
+        if (controller.signal.aborted) return;
         if (eventResponse.status === 401 || directoryResponse.status === 401) { expireSession(`/organizer/events/${eventId}/instructor`); return; }
         if (eventResponse.status === 404) { setState('missing'); return; }
         if (!eventResponse.ok || !directoryResponse.ok) throw new Error();
@@ -48,31 +56,36 @@ export function InstructorManagement({ eventId, expireSession }: { eventId: stri
 
   async function refresh() { setRetry(value => value + 1); }
   async function mutate(remove: boolean) {
-    if (!event || !directory || pending || blocked) return;
+    if (!event || !directory || pending || blocked || mutating.current) return;
     if (remove && !event.currentInstructor) return;
     if (!remove && !selected) { setMessage('Choose an Instructor first.'); return; }
     const name = event.currentInstructor?.displayName;
     const nextName = directory.data.find(item => item.id === selected)?.displayName ?? event.currentInstructor?.displayName;
     const prompt = remove ? `Remove ${name} from ${event.title}?` : event.currentInstructor && event.currentInstructor.id !== selected ? `Replace ${name} with ${nextName} for ${event.title}?` : `Assign ${nextName} to ${event.title}?`;
     if (!window.confirm(prompt)) return;
-    setPending(true); setMessage('');
+    mutating.current = true; setPending(true); setMessage('');
     try {
       const bootstrap = await fetch('/api/auth/csrf', { cache: 'no-store' });
+      if (!alive.current) return;
       if (!bootstrap.ok) throw new Error();
       const token = (await bootstrap.json()).data.csrfToken as string;
+      if (!alive.current) return;
       const response = await fetch(`/api/organizer/events/${encodeURIComponent(eventId)}/instructor`, {
         method: remove ? 'DELETE' : 'PUT',
         headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': token },
         body: JSON.stringify(remove ? { expectedVersion: event.version } : { expectedVersion: event.version, instructorId: selected }),
       });
+      if (!alive.current) return;
       if (response.status === 401) { setEvent(null); setDirectory(null); expireSession(`/organizer/events/${eventId}/instructor`); return; }
+      if (response.status === 403 || response.status === 404) { setEvent(null); setDirectory(null); setSelected(''); setState('missing'); return; }
       const result = await response.json().catch(() => ({})) as { data?: OwnerEvent; error?: { code?: string; fieldErrors?: Record<string, string> } };
+      if (!alive.current) return;
       if (response.status === 409) { setBlocked(true); setMessage(result.error?.code === 'EVENT_CHANGED' ? 'This event changed. Reload it and review the assignment before trying again.' : result.error?.code === 'EVENT_STARTED' ? 'This event has started, so its Instructor can no longer be changed.' : 'This Instructor is unavailable for the event time.'); return; }
       if (response.status === 422) { setMessage(result.error?.fieldErrors?.instructorId ?? 'Unable to save this assignment. Check your selection.'); return; }
       if (!response.ok || !result.data) throw new Error();
       setEvent(result.data); setSelected(result.data.currentInstructor?.id ?? ''); setMessage(remove ? 'Instructor removed.' : 'Assignment saved.');
-    } catch { setBlocked(true); setMessage('We could not confirm the change. Reload the event before trying again.'); }
-    finally { setPending(false); }
+    } catch { if (alive.current) { setBlocked(true); setMessage('We could not confirm the change. Reload the event before trying again.'); } }
+    finally { mutating.current = false; if (alive.current) setPending(false); }
   }
 
   return <>
@@ -94,7 +107,7 @@ export function InstructorManagement({ eventId, expireSession }: { eventId: stri
             {directory.data.map(item => <option key={item.id} value={item.id}>{item.displayName}</option>)}
           </select>
           <div className="mt-3"><button className={button} disabled={pending || blocked || !selected} onClick={() => void mutate(false)}>{pending ? 'Saving…' : 'Save Instructor'}</button></div>
-          {directory.meta.total > directory.meta.pageSize && <div className="mt-4 flex items-center gap-4"><button className={`${link} min-h-11`} disabled={directoryPage <= 1} onClick={() => setDirectoryPage(value => value - 1)}>Previous Instructors</button><span>Page {directory.meta.page} of {Math.ceil(directory.meta.total / directory.meta.pageSize)}</span><button className={`${link} min-h-11`} disabled={directoryPage * directory.meta.pageSize >= directory.meta.total} onClick={() => setDirectoryPage(value => value + 1)}>Next Instructors</button></div>}
+          {directory.meta.total > directory.meta.pageSize && <div className="mt-4 flex items-center gap-4"><button className={`${link} min-h-11`} disabled={pending || blocked || directoryPage <= 1} onClick={() => setDirectoryPage(value => value - 1)}>Previous Instructors</button><span>Page {directory.meta.page} of {Math.ceil(directory.meta.total / directory.meta.pageSize)}</span><button className={`${link} min-h-11`} disabled={pending || blocked || directoryPage * directory.meta.pageSize >= directory.meta.total} onClick={() => setDirectoryPage(value => value + 1)}>Next Instructors</button></div>}
         </>}
         {event.currentInstructor && <div className="mt-3"><button className={secondary} disabled={pending || blocked} onClick={() => void mutate(true)}>Remove Instructor</button></div>}
         {message && <p role={blocked ? 'alert' : 'status'} className="mt-4">{message}</p>}
@@ -111,6 +124,7 @@ export function MyTeaching({ expireSession }: { expireSession: (returnTo: string
   useEffect(() => {
     const controller = new AbortController(); setState('loading'); setData(null);
     fetch(`/api/me/teaching-events?page=${page}`, { cache: 'no-store', signal: controller.signal }).then(async response => {
+      if (controller.signal.aborted) return null;
       if (response.status === 401) { expireSession('/my-teaching'); return null; }
       if (!response.ok) throw new Error();
       return response.json() as Promise<Page<TeachingEvent>>;
@@ -135,6 +149,7 @@ export function TeachingDetail({ eventId, expireSession }: { eventId: string; ex
   useEffect(() => {
     const controller = new AbortController(); setState('loading'); setData(null);
     fetch(`/api/me/teaching-events/${encodeURIComponent(eventId)}`, { cache: 'no-store', signal: controller.signal }).then(async response => {
+      if (controller.signal.aborted) return null;
       if (response.status === 401) { expireSession(`/my-teaching/${eventId}`); return null; }
       if (response.status === 404) { setState('missing'); return null; }
       if (!response.ok) throw new Error();
