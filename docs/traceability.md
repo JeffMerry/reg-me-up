@@ -1,10 +1,8 @@
 # RegMeUp — Requirements and verification traceability
 
-CI update (27 November 2026, run 45961985966 at commit 2d57965): full unit PASS 93/93; integration 87 passed / 7 failed. This observed CI result supersedes the earlier developer-reported integration PASS. The seven failures were traced to outdated seed user counts, repeated response-body reads, schedule fixtures leaking between cases, and a race fixture missing an existing assignment. Fixes are in the working tree; typecheck passes. Focused integration rerun is blocked by runner EACCES before database connection, so CI confirmation after pushing the fix is pending. No tests were skipped or disabled by this fix.
+CI run [45966205796](https://github.com/JeffMerry/reg-me-up/actions/runs/45966205796) on tested commit `0dd48000cd0b5146ce16aedf5e0f00520ca36de3` completed successfully on 27 November 2026. Unit **93/93**, PostgreSQL integration **94/94**, and browser **62/62** passed, including all five F-09 browser cases; typecheck, client/server build, migrations/seed, and Docker image build passed. These are automated CI results for this SHA; peer merge approval and post-deployment acceptance under #45 remain separate.
 
-Latest F-09 verification (27 November 2026): E2E PASS 5/5; focused unit PASS 6/6; typecheck/build PASS; integration PASS reported by the developer (successful log/counts not supplied). This supersedes earlier F-09 DB/browser NOT RUN entries for that scope. Full unit regression PASS 93/93 tests in 10/10 files, confirmed by the developer-provided Vitest screenshot; release acceptance remains separate. See docs/sprints/sprint-2/f-09-evidence.md.
-
-Latest F-09 implementation update27Nov2026: F-09 uncommitted code candidate is in the working tree on `feature/f-09-instructor`; pure interval rule RED/GREEN and typecheck/build evidence are recorded in [F-09 evidence](sprints/sprint-2/f-09-evidence.md). Guarded PostgreSQL, API/DB migration/race and browser tests are NOT RUN because local DB/loopback access returned EACCES. No F-09 acceptance is inferred as passed.
+For F-09, this verified execution supersedes historical NOT RUN design entries for the automated scope in [STS](sprints/sprint-2/sts.md). FR-10/11, BR-11/12/13 and applicable NFR checks are exercised by the Instructor API, migration, overlap and browser suites. This does not mark unexecuted manual/redeploy checks complete. [Current evidence](sprints/sprint-2/f-09-evidence.md).
 
 Latest F-06 execution update27Nov2026: owner edit API/UI/deadline candidate `4cce15d` now has24 pure-rule,17 API/DB and10 browser cases passing locally (complete regression87 unit/81 integration/57 browser, typecheck/build). [F-06 mapping and actual RED/GREEN](sprints/sprint-2/f-06-evidence.md) supersedes F-06 NOT RUN entries below only for executed scope: AC01–06 and UI/persistence portion of AC07. Instructor overlap/role/assign-vs-edit integration and accepted release remain pending; no historical result is relabeled as a current pass.
 
@@ -148,3 +146,16 @@ This update supersedes only F-05 NOT RUN entries above. Planning approval/merge 
 | NFR-02/06 → S2-F05-AC06 → S2-T05-07 | New app subprocess, persisted browser history, responsive/focus/expiry/pending/unknown-outcome flows | Passed locally; human UAT/cloud retrieval after restart remains under #45 |
 
 Measured selection: 13 cancellation API/DB cases and 10 F-05 browser cases; complete regression 55 unit, 58 integration and 43 browser passed, plus typecheck/build. No coverage percentage is claimed. F-06/F-09/Lab7 requirements, policy and baseline text are not changed by this execution update.
+
+## Historical F-09 status notes (superseded)
+
+<details>
+<summary>Earlier traceability checkpoint</summary>
+
+CI update (27 November 2026, run 45961985966 at commit 2d57965): full unit PASS 93/93; integration 87 passed / 7 failed. This observed CI result supersedes the earlier developer-reported integration PASS. The seven failures were traced to outdated seed user counts, repeated response-body reads, schedule fixtures leaking between cases, and a race fixture missing an existing assignment. Fixes are in the working tree; typecheck passes. Focused integration rerun is blocked by runner EACCES before database connection, so CI confirmation after pushing the fix is pending. No tests were skipped or disabled by this fix.
+
+Latest F-09 verification (27 November 2026): E2E PASS 5/5; focused unit PASS 6/6; typecheck/build PASS; integration PASS reported by the developer (successful log/counts not supplied). This supersedes earlier F-09 DB/browser NOT RUN entries for that scope. Full unit regression PASS 93/93 tests in 10/10 files, confirmed by the developer-provided Vitest screenshot; release acceptance remains separate. See docs/sprints/sprint-2/f-09-evidence.md.
+
+Latest F-09 implementation update27Nov2026: F-09 uncommitted code candidate is in the working tree on `feature/f-09-instructor`; pure interval rule RED/GREEN and typecheck/build evidence are recorded in [F-09 evidence](sprints/sprint-2/f-09-evidence.md). Guarded PostgreSQL, API/DB migration/race and browser tests are NOT RUN because local DB/loopback access returned EACCES. No F-09 acceptance is inferred as passed.
+
+</details>

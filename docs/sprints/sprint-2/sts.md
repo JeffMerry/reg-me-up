@@ -1,10 +1,8 @@
 # Sprint 2 Software Test Specification
 
-CI update (27 November 2026, run 45961985966 at commit 2d57965): full unit PASS 93/93; integration 87 passed / 7 failed. This observed CI result supersedes the earlier developer-reported integration PASS. The seven failures were traced to outdated seed user counts, repeated response-body reads, schedule fixtures leaking between cases, and a race fixture missing an existing assignment. Fixes are in the working tree; typecheck passes. Focused integration rerun is blocked by runner EACCES before database connection, so CI confirmation after pushing the fix is pending. No tests were skipped or disabled by this fix.
+CI run [45966205796](https://github.com/JeffMerry/reg-me-up/actions/runs/45966205796) on tested commit `0dd48000cd0b5146ce16aedf5e0f00520ca36de3` completed successfully on 27 November 2026. Unit **93/93**, PostgreSQL integration **94/94**, and browser **62/62** passed, including all five F-09 browser cases; typecheck, client/server build, migrations/seed, and Docker image build passed. These are automated CI results for this SHA; peer merge approval and post-deployment acceptance under #45 remain separate.
 
-Latest F-09 verification (27 November 2026): E2E PASS 5/5; focused unit PASS 6/6; typecheck/build PASS; integration PASS reported by the developer (successful log/counts not supplied). This supersedes earlier F-09 DB/browser NOT RUN entries for that scope. Full unit regression PASS 93/93 tests in 10/10 files, confirmed by the developer-provided Vitest screenshot; release acceptance remains separate. See docs/sprints/sprint-2/f-09-evidence.md.
-
-Version0.5 — 27 November2026. Refs #40–#43/#51. **F-05 and F-06 candidate verification recorded below; F-09 implementation candidate and partial local evidence recorded, DB/browser acceptance and integrated release remain pending.** [Ownership/review record](review-record.md): Kittithat owns F-05/F-06 and integration race evidence; Thanatip owns F-09/schema/release evidence; the other teammate reviews. Contracts: [F-05](f-05.md), [F-06](f-06.md), [F-09](f-09.md), [shared design](system-design.md). IDs beginning S2- are planned case IDs; only explicit executed mappings establish results.
+Current automated results supersede historical NOT RUN entries only for executed scope. Existing requirement IDs and manual/redeployment checks remain tracked.
 
 ## Setup, time and database safeguards
 
@@ -76,7 +74,7 @@ Integration/browser commands require the existing README guarded isolated DB/ser
 |---|---|---|---|---|
 | S2-T05-01–07 | `server/tests/integration/cancellation.test.ts`; `e2e/f-05.spec.ts` | `npm run test:integration`; `npx playwright test` | 13 API/DB + 10 browser cases passed locally; explicit deadline, Instructor and real F-06 endpoint contention pending | `6042373`; [exact mappings/RED/GREEN](f-05-evidence.md) |
 | S2-T06-01–06/08 | `event-edit-validation.test.ts`; `event-management.test.ts`; `e2e/f-06.spec.ts` | Unit/integration/Playwright commands below | 24 rule /17 API/DB /10 UI passed; Instructor T06-07/role NOT RUN | `4cce15d`; [exact mappings](f-06-evidence.md) |
-| S2-T09-01–08 | `server/tests/unit/instructor-schedule.test.ts`; integration and browser files are present | Focused unit command, typecheck/build; DB/browser commands NOT RUN | Pure interval RED 4 failed/2 passed against stub, then GREEN 6 passed; typecheck/build passed. Integration/browser NOT RUN (local PostgreSQL and loopback blocked with EACCES); 0 acceptance cases claimed passed | [F-09 evidence](f-09-evidence.md); uncommitted working tree on `feature/f-09-instructor` |
+| S2-T09-01–08 automated scope | instructor-schedule.test.ts; instructor.test.ts; instructor-migration.test.ts; e2e/f-09.spec.ts | Unit, integration, Playwright, typecheck/build | CI PASS: 93 unit / 94 integration / 62 browser, including F-09 6 overlap unit / 11 API / 2 migration / 5 browser cases. Remaining manual/redeploy checklist is separate | Tested 0dd4800; [CI 45966205796](https://github.com/JeffMerry/reg-me-up/actions/runs/45966205796); [F-09 evidence](f-09-evidence.md) |
 | Existing regression | Unit suites, all 6 integration files, browser F-01–F-05 | `npm run test:unit`; `npm run test:integration`; `npx playwright test`; typecheck/build | 55 unit / 58 integration / 43 browser passed; typecheck/build passed | `6042373`; [F-05 evidence](f-05-evidence.md) |
 | F-05 migration/restart | Cancellation constraints/old ACTIVE read; new app subprocess, repeat migration | Same integration suite; `npm run db:migrate` | Passed locally; F-06 legacy audit/F-09 migrations/cloud restart NOT RUN | `6042373`; [scope](f-05-evidence.md) |
 | F-06 migration/restart/latest regression | Deadline CHECK/default/legacy read; new app process; all current suites | `npm run db:migrate`; unit/integration/typecheck/build; `npx playwright test` | 87 unit/81 integration/57 browser passed; typecheck/build passed; production audit/cloud NOT RUN | `4cce15d`; [F-06 evidence and earlier timeout](f-06-evidence.md) |
@@ -84,3 +82,18 @@ Integration/browser commands require the existing README guarded isolated DB/ser
 ## Post-deployment checks under #45
 
 Record immutable main SHA→CI/deploy run→image digest→Cloud Run revision and time. Execute selected real create/register/cancel/re-register/owner totals, deadline/capacity rejection and Instructor assignment/denial journeys using authorized synthetic fixtures. Retrieve saved data after restart/redeploy without seed. Capture actual API status/body and authorized reads, not just UI or a green workflow icon. Coordinate public version with Lab7 testers. Generic pipeline health/home smoke alone does not prove these domain paths. Cleanup only specifically authorized synthetic records; do not erase evidence/history silently.
+
+## Historical F-09 execution notes (superseded)
+
+<details>
+<summary>Earlier STS checkpoint</summary>
+
+CI update (27 November 2026, run 45961985966 at commit 2d57965): full unit PASS 93/93; integration 87 passed / 7 failed. This observed CI result supersedes the earlier developer-reported integration PASS. The seven failures were traced to outdated seed user counts, repeated response-body reads, schedule fixtures leaking between cases, and a race fixture missing an existing assignment. Fixes are in the working tree; typecheck passes. Focused integration rerun is blocked by runner EACCES before database connection, so CI confirmation after pushing the fix is pending. No tests were skipped or disabled by this fix.
+
+Latest F-09 verification (27 November 2026): E2E PASS 5/5; focused unit PASS 6/6; typecheck/build PASS; integration PASS reported by the developer (successful log/counts not supplied). This supersedes earlier F-09 DB/browser NOT RUN entries for that scope. Full unit regression PASS 93/93 tests in 10/10 files, confirmed by the developer-provided Vitest screenshot; release acceptance remains separate. See docs/sprints/sprint-2/f-09-evidence.md.
+
+Version0.5 — 27 November2026. Refs #40–#43/#51. **F-05 and F-06 candidate verification recorded below; F-09 implementation candidate and partial local evidence recorded, DB/browser acceptance and integrated release remain pending.** [Ownership/review record](review-record.md): Kittithat owns F-05/F-06 and integration race evidence; Thanatip owns F-09/schema/release evidence; the other teammate reviews. Contracts: [F-05](f-05.md), [F-06](f-06.md), [F-09](f-09.md), [shared design](system-design.md). IDs beginning S2- are planned case IDs; only explicit executed mappings establish results.
+
+| S2-T09-01–08 | `server/tests/unit/instructor-schedule.test.ts`; integration and browser files are present | Focused unit command, typecheck/build; DB/browser commands NOT RUN | Pure interval RED 4 failed/2 passed against stub, then GREEN 6 passed; typecheck/build passed. Integration/browser NOT RUN (local PostgreSQL and loopback blocked with EACCES); 0 acceptance cases claimed passed | [F-09 evidence](f-09-evidence.md); uncommitted working tree on `feature/f-09-instructor` |
+
+</details>

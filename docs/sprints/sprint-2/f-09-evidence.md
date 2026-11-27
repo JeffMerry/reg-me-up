@@ -1,5 +1,39 @@
 # F-09 implementation and verification evidence
 
+## Current verified result
+
+CI run [45966205796](https://github.com/JeffMerry/reg-me-up/actions/runs/45966205796) on tested commit `0dd48000cd0b5146ce16aedf5e0f00520ca36de3` completed successfully on 27 November 2026. Unit **93/93**, PostgreSQL integration **94/94**, and browser **62/62** passed, including all five F-09 browser cases; typecheck, client/server build, migrations/seed, and Docker image build passed. These are automated CI results for this SHA; peer merge approval and post-deployment acceptance under #45 remain separate.
+
+| Scope | Command / CI step | Result |
+|---|---|---|
+| Unit | npm run test:unit | PASS 93/93 in 10 files; includes Instructor overlap 6/6 |
+| Integration | npm run test:integration | PASS 94/94 in 10 files; includes Instructor API, shared schedule race and migration tests |
+| Browser | npx playwright test | PASS 62/62; includes F-09 5/5 |
+| Typecheck/build | npm run typecheck; npm run build | PASS client/server |
+| Database setup | Migrate and seed isolated databases | PASS |
+| Container | Build application image | PASS |
+
+Reviewed PR: #66. JeffMerry submitted COMMENTED at this head with no implementation blocker identified and requested these documentation updates. This is not an APPROVED review or a deployment record. Local numbered screenshots remain in docs/evidence/e2e; the CI log is authoritative for the complete regression counts. No measured coverage percentage is claimed.
+
+## Commit record
+
+| Commit | Contents |
+|---|---|
+| affac31 | Instructor server/schema/provisioning |
+| 22f88f8 | Instructor UI |
+| 0ebff2a | Tests and browser evidence |
+| 2d57965 | Local verification documentation |
+| 1b0a2f1 | Integration fixture and response assertions |
+| d7ed1a0 | Playwright server startup |
+| 0dd4800 | Ubuntu 24.04 CI runner; verified head above |
+
+## Historical checkpoints (superseded)
+
+The following text preserves earlier observations verbatim. References to uncommitted changes, NOT RUN, blocked runs, or waiting for CI describe those earlier checkpoints only. They are not current status.
+
+<details>
+<summary>Earlier local and CI attempts</summary>
+
 Latest CI follow-up: run `45964497962` on `1b0a2f1` passed all 93 unit and 94 integration tests plus typecheck/build. Browser execution stopped before running cases with `Timed out waiting 60000ms from config.webServer`; Docker image build was skipped. The working-tree startup fix uses non-watch backend execution, explicit IPv4 addresses for browser/server/proxy/origin, and piped server output. Playwright discovery still lists 62 cases; CI browser/Docker confirmation remains pending after pushing this fix.
 
 CI update (27 November 2026, run 45961985966 at commit 2d57965): full unit PASS 93/93; integration 87 passed / 7 failed. This observed CI result supersedes the earlier developer-reported integration PASS. The seven failures were traced to outdated seed user counts, repeated response-body reads, schedule fixtures leaking between cases, and a race fixture missing an existing assignment. Fixes are in the working tree; typecheck passes. Focused integration rerun is blocked by runner EACCES before database connection, so CI confirmation after pushing the fix is pending. No tests were skipped or disabled by this fix.
@@ -59,3 +93,5 @@ Candidate code adds the Instructor role lifecycle, assignment history model/migr
 | Commit | Contents | Verification |
 |---|---|---|
 | Not created | `git add` could not write `.git/index.lock` (`Permission denied`; `.git` is mounted read-only) | User authorized commits, but workspace filesystem permission prevented creating them. All changes remain in the working tree; candidate remains unreviewed until commit, teammate review and staging integration |
+
+</details>
