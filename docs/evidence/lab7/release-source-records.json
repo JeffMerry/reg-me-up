@@ -1,0 +1,108 @@
+{
+  "repository": "JeffMerry/reg-me-up",
+  "retrieved_at_utc": "2026-11-26T15:21:48.436Z",
+  "scope": "Lab7-specific allowlist: issues52,53,54; PRs56,60. Not repository-wide totals.",
+  "issues": [
+    {
+      "number": 52,
+      "title": "[Lab7][Contract] Define capacity 1–60 and review affected contracts",
+      "state": "closed",
+      "state_reason": "completed",
+      "closed_at": "2026-11-26T12:55:55Z",
+      "url": "https://github.com/JeffMerry/reg-me-up/issues/52"
+    },
+    {
+      "number": 53,
+      "title": "[Lab7][Maintenance] Enforce publish capacity 1–60 with RED/GREEN and regression",
+      "state": "closed",
+      "state_reason": "completed",
+      "closed_at": "2026-11-26T15:04:07Z",
+      "url": "https://github.com/JeffMerry/reg-me-up/issues/53"
+    },
+    {
+      "number": 54,
+      "title": "[Lab7][Release] Deploy maintenance change and complete metrics/report",
+      "state": "open",
+      "state_reason": null,
+      "closed_at": null,
+      "url": "https://github.com/JeffMerry/reg-me-up/issues/54"
+    }
+  ],
+  "pull_requests": [
+    {
+      "number": 56,
+      "title": "[Lab7][Contract] Define publish capacity 1–60 and legacy compatibility",
+      "state": "closed",
+      "merged": true,
+      "merged_at": "2026-11-26T12:49:59Z",
+      "merged_by": "JeffMerry",
+      "base": "lab7-staging",
+      "head": "docs/lab7-capacity-contract",
+      "head_sha": "339ecd3c0ae31daf31022c290006ad4312e8a1f4",
+      "merge_commit_sha": "370bae07eec9bbc40cc23637b0c9ad837ab4a3ad",
+      "url": "https://github.com/JeffMerry/reg-me-up/pull/56"
+    },
+    {
+      "number": 60,
+      "title": "[Lab7][Maintenance] Enforce publish capacity 1–60 and verify legacy compatibility",
+      "state": "closed",
+      "merged": true,
+      "merged_at": "2026-11-26T14:57:58Z",
+      "merged_by": "JeffMerry",
+      "base": "lab7-staging",
+      "head": "fix/lab7-publish-capacity",
+      "head_sha": "06e89b387caad2028b0299f745ac2ed603bca92d",
+      "merge_commit_sha": "c9fb59992ae8bc7ba9b7762e1b4c49ef4273be40",
+      "url": "https://github.com/JeffMerry/reg-me-up/pull/60"
+    }
+  ],
+  "reviews": [
+    {
+      "pr": 56,
+      "author": "JeffMerry",
+      "state": "APPROVED",
+      "created_at": "2026-11-26T12:49:00Z",
+      "body": "ตรวจ contract และ test design แล้วครับ ขอบเขต publish capacity จำนวนเต็ม 1–60 สอดคล้องกันใน SRS, F-02, SDS, UI และ AC/STS รวมถึงระบุให้กิจกรรมเดิมที่เกิน 60 ยังอ่านและลงทะเบียนตาม stored capacity ได้ โดยไม่เพิ่ม constraint ที่กระทบข้อมูลเดิม จึง approve สำหรับ PR เอกสารนี้ครับ\n\nฝากเก็บรายละเอียดเล็กน้อย:\n- F-03 ปรับ version/date ด้านบนให้ตรงกับ revision history 0.5 / 2026-11-26\n- Traceability ระบุให้ชัดว่า NOT RUN หมายถึงกรณีใหม่ของ Lab7 เพื่อไม่ให้สับสนกับผล Sprint 1 เดิม\n\nส่วน implementation ให้ดำเนินการใน #53 หลัง contract merge พร้อมเก็บ RED/GREEN และ regression ตามแผนครับ",
+      "url": "https://github.com/JeffMerry/reg-me-up/pull/56#pullrequestreview-6074397586"
+    },
+    {
+      "pr": 60,
+      "author": "JeffMerry",
+      "state": "APPROVED",
+      "created_at": "2026-11-26T14:54:09Z",
+      "body": "ตรวจโค้ดและ test ของ PR #60 แล้ว ยังไม่พบปัญหาในส่วนการบังคับ capacity 1–60 หรือการรองรับ event เดิมที่ capacity เกิน 60 ครับ\n\nก่อน merge ขอให้จัดการ CI เพิ่มเติม: ตอนนี้ PR เข้า lab7-staging แต่ workflow ยังตั้งให้รันเฉพาะ PR เข้า main จึงไม่มี CI result บน PR นี้ กรุณาเพิ่ม lab7-staging ใน trigger แล้วรอ CI ผ่าน เพื่อให้มีผลตรวจบน branch ที่จะ merge ครับ",
+      "url": "https://github.com/JeffMerry/reg-me-up/pull/60#pullrequestreview-6076239838"
+    }
+  ],
+  "ci": {
+    "implementation_head": "06e89b387caad2028b0299f745ac2ed603bca92d",
+    "api_url": "https://api.github.com/repos/JeffMerry/reg-me-up/actions/runs?head_sha=06e89b387caad2028b0299f745ac2ed603bca92d&per_page=100",
+    "result": {
+      "total_count": 0,
+      "workflow_runs": []
+    },
+    "contract_pr_triggered_runs": [],
+    "limitation": "No runs returned is not a passing CI outcome; dispatched/merge-SHA runs must be collected separately before release.",
+    "workflow_before": "pull_request branches [lab5-staging, main]",
+    "prepared_change": "Add lab7-staging; no CI run triggered locally."
+  },
+  "uat": {
+    "definition": "New UAT defects recorded in scoped Lab7 change evidence, not automated setup/test failures and not baseline Lab6 defects.",
+    "new_defect_ids": [],
+    "new_defects_recorded": 0,
+    "resolved_new_defects": 0,
+    "limitation": "No post-deployment Lab7 UAT performed yet. Zero recorded defects is not zero defects in product.",
+    "search_query": "repo:JeffMerry/reg-me-up is:issue created:2026-11-26 UAT",
+    "search_returned_issue_ids": [
+      54
+    ]
+  },
+  "release": {
+    "maintenance_integration_sha": "c9fb59992ae8bc7ba9b7762e1b4c49ef4273be40",
+    "main_release_sha": null,
+    "deploy_run_id": null,
+    "image_digest": null,
+    "cloud_run_revision": null,
+    "post_deploy_checks": "NOT RUN"
+  }
+}

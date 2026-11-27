@@ -17,8 +17,13 @@ describe('F-02 publication validation', () => {
     const input: Record<string, unknown> = { ...good }; delete input[field];
     expect(validateEvent(input).errors[field]).toBeTruthy();
   });
-  it.each([0, -1, 1.5, '3', 2147483648, null])('rejects invalid capacity %s', capacity => {
+  it.each([0, -1, 1.5, '3', 61, 2147483647, Number.MAX_SAFE_INTEGER, null, true, [], {}])('rejects invalid capacity %s', capacity => {
     expect(validateEvent({ ...good, capacity }).errors.capacity).toBeTruthy();
+  });
+  it.each([1, 30, 60])('accepts publication capacity %i', capacity => {
+    const result = validateEvent({ ...good, capacity });
+    expect(result.errors.capacity).toBeUndefined();
+    expect(result.data?.capacity).toBe(capacity);
   });
   it.each(['2026-02-30T09:00:00+07:00', '2026-12-01T09:00:00', '2026-13-01T09:00:00Z'])('rejects invalid timestamp %s', startsAt => {
     expect(validateEvent({ ...good, startsAt }).errors.startsAt).toBeTruthy();
@@ -31,7 +36,7 @@ describe('F-02 publication validation', () => {
     expect(validateEvent({ ...good, description: 'x'.repeat(10001) }).errors.description).toBeTruthy();
   });
   it('accepts exact limits, optional null description and past or overnight offset dates', () => {
-    const result = validateEvent({ ...good, title: 't'.repeat(200), location: '😀'.repeat(300), description: 'x'.repeat(10000), capacity: 2147483647, startsAt: '2020-12-31T23:30:00+07:00', endsAt: '2021-01-01T01:00:00+07:00' });
+    const result = validateEvent({ ...good, title: 't'.repeat(200), location: '😀'.repeat(300), description: 'x'.repeat(10000), capacity: 60, startsAt: '2020-12-31T23:30:00+07:00', endsAt: '2021-01-01T01:00:00+07:00' });
     expect(result.errors).toEqual({});
     expect(result.data?.startsAt.toISOString()).toBe('2020-12-31T16:30:00.000Z');
     expect(result.data?.endsAt.toISOString()).toBe('2020-12-31T18:00:00.000Z');

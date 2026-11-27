@@ -1,6 +1,6 @@
 # RegMeUp — System-Level Software Design Specification
 
-Version 0.6 — 2026-11-11 (Asia/Bangkok). Selected design direction adopted by user; **pending teammate review**. This is a pre-implementation design, not an implemented architecture or tested result. [SRS](srs.md) defines requirements/decisions; feature contracts refine endpoint behavior.
+Version 0.7 — 2026-11-26 (Asia/Bangkok). Selected design direction adopted by user; **pending teammate review**. This is a pre-implementation design, not an implemented architecture or tested result. [SRS](srs.md) defines requirements/decisions; feature contracts refine endpoint behavior.
 
 ## 1. Architecture and stack
 
@@ -37,7 +37,7 @@ All domain IDs are UUIDs generated on server; API field names camelCase, DB colu
 | Table | Fields / constraints |
 |---|---|
 | users | `id uuid PK`; `email text NOT NULL UNIQUE`, normalized trim/lowercase; `password_hash text NOT NULL`; `display_name text NOT NULL` length 1–100 after trim; `role text NOT NULL` in PARTICIPANT/ORGANIZER; `created_at timestamptz NOT NULL` server time |
-| events | `id uuid PK`; `organizer_id uuid NOT NULL FK users(id)`; `title text NOT NULL` length 1–200 after trim; `starts_at/ends_at timestamptz NOT NULL`, end > start; `location text NOT NULL` length 1–300 after trim; `capacity integer NOT NULL` > 0; `description text NULL` max 10,000; `publication_status text NOT NULL` in PUBLISHED/UNPUBLISHED; `created_at timestamptz NOT NULL` |
+| events | `id uuid PK`; `organizer_id uuid NOT NULL FK users(id)`; `title text NOT NULL` length 1–200 after trim; `starts_at/ends_at timestamptz NOT NULL`, end > start; `location text NOT NULL` length 1–300 after trim; `capacity integer NOT NULL` > 0 and within PostgreSQL INTEGER storage range; newly created/published events are restricted by BR-01 to 1–60 inclusive; no global `capacity <= 60` constraint, to preserve existing rows; `description text NULL` max 10,000; `publication_status text NOT NULL` in PUBLISHED/UNPUBLISHED; `created_at timestamptz NOT NULL` |
 | registrations | `id uuid PK` also displayed reference; `event_id/participant_id uuid NOT NULL FK`; `status text NOT NULL` = ACTIVE in Sprint 1; `registered_at timestamptz NOT NULL` server time; unique active event/participant pair |
 | sessions | Logical name for the library PostgreSQL store table: `sid` PK, serialized `sess`, indexed `expire`; SYS-01 owns the initial versioned session schema. The shipped `connect-pg-simple` table is named `session` by default; configure its table name if using `sessions` and verify the selected package's exact SQL. No users FK is implied by the serialized user ID. |
 | _prisma_migrations | Prisma Migrate-managed migration history/checksums; do not manually edit the ledger or previously applied migration files |
@@ -48,7 +48,7 @@ FK deletes use RESTRICT for domain history; Sprint 1 has no domain delete endpoi
 
 Text lengths count Unicode code points consistently in UI/server/DB; no automatic Unicode normalization of passwords. Trim title/location/display name; description that is null/omitted/whitespace-only stores null, otherwise preserve plain text within length limit. No HTML rendering of description. Email trim/lowercase is an application account convention, used consistently in seed/login; valid email format, maximum 254 code points. Password is a nonempty string, maximum 1,024 UTF-8 bytes, preserved exactly; these last limits are technical v0.1 details for review, not original course requirements.
 
-Capacity accepts only a JSON number, integer 1–2,147,483,647 matching chosen PostgreSQL integer representation; reject numeric strings/fractions/NaN/overflow. This is a storage boundary, not a stakeholder event-size restriction. Timestamps must be actual valid dates with explicit offset, end strictly after start. No future-start/minimum-duration/start-or-end registration cutoff is introduced in Sprint 1.
+For newly created/published events, capacity accepts only a JSON number that is an integer from 1 through 60 inclusive; reject missing/null values, numeric strings, fractions, values below 1, and values above 60. PostgreSQL INTEGER remains the storage representation (1–2,147,483,647); this is a technical storage range, not the publication rule. Do not impose a global `capacity <= 60` constraint: existing events above 60, their IDs, registrations, and ownership remain readable and unchanged. Timestamps must be actual valid dates with explicit offset, end strictly after start. No future-start/minimum-duration/start-or-end registration cutoff is introduced in Sprint 1.
 
 Later concepts: Instructor assignments link event to Instructor users; Attendance links registration to check-in data. Do not create their tables/status transitions now; Q-04–09 and later contracts decide cardinality/history/eligibility before migrations. Current ACTIVE constraint must be revised explicitly before cancellation is added.
 
@@ -177,6 +177,7 @@ No code/package/schema/test/migration/container deployed or executed by this doc
 | 0.4 | 2026-11-11 | Linked conceptual DBML and assigned the initial session schema to SYS-01 | Pending teammate review; schema not applied |
 | 0.5 | 2026-11-11 | Updated Issue-assignment status while retaining pending team agreement and review | Pending teammate review; NOT RUN |
 | 0.6 | 2026-11-11 | Recorded observed Prisma warning discrepancy and designed guarded migration preflight | Implementation review pending |
+| 0.7 | 2026-11-26 | Defined new-publication capacity 1–60 while retaining PostgreSQL storage range and legacy-row compatibility | Pending teammate review; no schema applied or tests run |
 
 ## 9. Sprint 2 extension — confirmed policy, revised 26 November 2026
 
@@ -186,6 +187,10 @@ The complete [Sprint2 shared system design](sprints/sprint-2/system-design.md) s
 
 Key extensions: all ACTIVE-count/capacity writers retain event row locking; owner edits/assignment changes serialize cross-event scheduling with a proposed transaction advisory mutex before event lock; expectedVersion prevents lost edits; single-role Instructor has current-assignment-only private reads; historical cancellations/assignments persist. Public cutoff fields change explicitly while private fields remain excluded. UI/backend role/returnTo handling must extend together. No applied migration rewrite or automatic live seed is allowed.
 
-Peer-owned Lab7 create capacity rules remain unchanged in this document's original sections. F-06 requires confirmed1–60 only for explicitly supplied capacity edits, under the confirmed legacy policy; omitted legacy capacity is not silently reduced. Do not implement a global DB<=60 constraint from this draft.
+Lab7 create capacity rules from main are now included in this document: new publication accepts integer1–60 and legacy stored capacities are preserved. F-06 requires confirmed1–60 only for explicitly supplied capacity edits, under the confirmed legacy policy; omitted legacy capacity is not silently reduced. Do not implement a global DB<=60 constraint from this draft.
 
 Review scope: [F-05](sprints/sprint-2/f-05.md), [F-06](sprints/sprint-2/f-06.md), [F-09](sprints/sprint-2/f-09.md), [STS](sprints/sprint-2/sts.md). No runtime API/schema/config changes are made by this planning extension.
+
+## 10. Integration checkpoint — 27 November 2026
+
+Lab7 release #62 at main `d490632` is being synchronized with Sprint2 staging `882818d`, containing shared locks #55, F-05 #57 and shared events.version #59. Earlier pending/NOT STARTED statements above describe their original design checkpoint. The user reassigned only events.version to Kittithat; Thanatip retains Instructor schema/combined migration coordination. [Updated ownership](sprints/sprint-2/review-record.md) and [version handoff](sprints/sprint-2/event-version-evidence.md) govern current work. F-06 validation remains on its separate work branch; edit API/UI and F-09 acceptance are not established here. Fresh combined-source results belong to the synchronization PR; an automatic Git merge is not verification of those paths.
