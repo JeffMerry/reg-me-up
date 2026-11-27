@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
+    "start:e2e": "tsx src/index.ts",
     "start": "node dist/src/index.js",
     "build": "prisma generate --config prisma.config.ts && tsc -p tsconfig.build.json",
     "typecheck": "prisma generate --config prisma.config.ts && tsc --noEmit",

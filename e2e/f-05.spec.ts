@@ -159,7 +159,7 @@ test('hides cancellation for a started event and backend rejects bypassing the U
   await expect(dialog.getByRole('button', { name: 'Cancel registration', exact: true })).toHaveCount(0);
   await expect(dialog.getByText('Cancellation is closed because this event has started.')).toBeVisible();
   const token = (await (await page.request.get('/api/auth/csrf')).json()).data.csrfToken as string;
-  const response = await page.request.post(`/api/me/registrations/${registrationId}/cancel`, { headers: { Origin: 'http://localhost:43171', 'X-CSRF-Token': token }, data: {} });
+  const response = await page.request.post(`/api/me/registrations/${registrationId}/cancel`, { headers: { Origin: new URL(page.url()).origin, 'X-CSRF-Token': token }, data: {} });
   expect(response.status()).toBe(409); expect((await response.json()).error.code).toBe('CANCELLATION_CLOSED');
 });
 

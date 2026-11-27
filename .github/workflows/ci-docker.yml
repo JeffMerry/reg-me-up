@@ -16,7 +16,9 @@ concurrency:
 jobs:
   test-and-docker:
     name: test-and-docker
-    runs-on: ubuntu-latest
+    # Pin the runner: Ubuntu 26.04's preconfigured Microsoft APT repository
+    # returned HTTP 403 during Playwright dependency installation.
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     services:
       postgres:
