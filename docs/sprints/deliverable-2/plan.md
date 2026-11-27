@@ -43,8 +43,8 @@ For an authorized deployment record actual migration success, digest/revision/tr
 
 | Scope | State now | Owner / dependency | Proposed target |
 |---|---|---|---|
-| Sprint2 S2-G01–04 | Identified, NOT RUN for missing selections | JeffMerry; existing staging + THN4 review | 27–28Nov |
-| F07 AC01–08 | Contract prepared; code/tests NOT STARTED | JeffMerry; reviewed Q09 contract/schema | D2 workflow28–29Nov, remainder by13Dec |
+| Sprint2 S2-G01–04 | Selected verification and bounded UI fixes merged in #68 at staging3a22a71; CI93/107/73; G05–06 remain | JeffMerry; existing staging + THN4 review | Completed27Nov |
+| F07 AC01–08 | Implemented/local automated selections pass at0faf42a; [exact scope/remaining human/cloud checks](../sprint-3/f-07-evidence.md); feature CI/review/merge pending | JeffMerry; contracts approved #67, THN4 feature review | D2 workflow28–29Nov, remainder by13Dec |
 | F08 AC01–06 | Contract prepared; code/tests NOT STARTED | JeffMerry; F07 schema and unique-person rules | Explicit remaining work through13Dec; earlier if time allows |
 | F10 cross-screen refinement | Existing planned workstream, no completion claimed here | JeffMerry; baseline screens and prioritized findings, THN4 review | Final period before13Dec, without postponing baseline accessibility |
 | Release/post-deploy/PDF | Plan only | JeffMerry; accepted candidate/reviewer/operator access | By29Nov submission checkpoint |
