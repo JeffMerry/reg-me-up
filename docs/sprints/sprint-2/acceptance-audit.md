@@ -24,6 +24,8 @@ Existing evidence: [F-05](f-05-evidence.md), [F-06](f-06-evidence.md), [F-09](f-
 
 ## Closure queue
 
+Implementation branch for S2-G01–04: `test/sprint-2-acceptance`, starting at reviewed staging `13ea49f` after #67. It is tracked under #45 and opens a PR back to staging. Planned/NOT RUN until execution results are recorded; F07 remains separate on `feature/f-07-check-in` under #44.
+
 These are **verification gaps**, not assertions that the implementation is broken. Preserve the existing positive/negative assertions; do not satisfy gaps by renaming unrelated passing tests.
 
 | ID | Owner / action | Expected result / evidence | Gate |
