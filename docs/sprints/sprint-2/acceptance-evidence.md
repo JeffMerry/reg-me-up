@@ -75,4 +75,4 @@ S2-G01–04 selected checks have local evidence above; peer acceptance and the P
 
 ## PR CI
 
-Pending creation/run. Replace this paragraph with the actual run, head/tested merge SHA, counts and limitations after completion.
+[PR #68](https://github.com/JeffMerry/reg-me-up/pull/68), [CI45982996285](https://github.com/JeffMerry/reg-me-up/actions/runs/45982996285), check `test-and-docker`: **SUCCESS**. PR head `56f5b79a3674ee2a7073c73e5c12bc22b53035ff`; checked-out PR merge `b0af4e62da85f29710cd672711f909bd88b06461` (into staging `13ea49f`). Job140451379143 logs record93 unit/107 integration/**73 browser** passed, migrations/seed, offline deployment-script checks, typecheck/production build, and Docker image build. This supersedes local full-browser/Docker pending statements for that tested version. All selected new tests also passed on Linux CI. This is an isolated CI image build, not a deployment. This result update changes documentation only; the PR's latest check must also be green before merge. THN4 review and G05–06 remain pending.

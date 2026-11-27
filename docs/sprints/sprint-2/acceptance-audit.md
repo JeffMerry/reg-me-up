@@ -41,6 +41,8 @@ THN4 reviews bounded changes and final evidence. Do not reopen historical merged
 
 ## Next work order
 
+PR #68 CI45982996285 passes93 unit/107 integration/73 browser plus build/Docker at head `56f5b79`, tested merge `b0af4e6`; [execution record](acceptance-evidence.md#pr-ci). This supersedes the PR-CI-pending checkpoint above for that exact version. Peer review, G05–06 and final release remain pending.
+
 1. Review Sprint3 contracts and confirmed Q09 counting/window policy in [Sprint3 plan](../sprint-3/README.md); preserve the design revision before check-in implementation.
 2. Close S2-G01–04 on a small branch from current staging, with meaningful added checks; resolve actual failures if found. This work is independent of Q09 implementation.
 3. Implement the reviewed F07 workflow under #44; retain RED/GREEN and server-authorized UI→API→DB evidence. F08 contract is complete before implementation; its status remains explicit.
