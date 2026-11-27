@@ -4,6 +4,8 @@ An event registration system for university training sessions and workshops, dev
 
 Sprint 2 F-05 adds own-registration cancellation and retained history. Apply the additive `20261126000000_registration_cancellation` migration with the normal `db:migrate` command before running this code. Existing ACTIVE rows remain valid; own list/detail responses now include `cancelledAt` (null for ACTIVE) and CANCELLED history. Public availability and Organizer totals continue to count ACTIVE only. See [F-05 evidence and integration limits](docs/sprints/sprint-2/f-05-evidence.md).
 
+The F-06 candidate adds Organizer Edit Event, owner GET/PATCH, explicit capacity1–60 with ACTIVE-count checks, management version conflicts and optional registration deadline. Apply `20261127000000_registration_deadline` with `db:migrate` before startup; old events retain null deadline, meaning registration closes at startsAt. Public/nested event DTOs add nullable `registrationDeadline` and `effectiveRegistrationCutoff`; private version is only in owner edit DTO. This migration does not change legacy capacities. [F-06 evidence](docs/sprints/sprint-2/f-06-evidence.md) records tests and the remaining F-09 Instructor overlap/assignment integration requirement.
+
 This branch provides the project foundation, F-01 identity/login, and F-02 event publication/discovery work. Registration remains F-03. See the [documentation index](docs/README.md), [SYS-01 contract](docs/sprints/sprint-1/sys-01.md), and [UI baseline](docs/ui-spec.md).
 
 ## Prerequisites
