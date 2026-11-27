@@ -1,4 +1,4 @@
-import { timestamp, validateEvent, type EventInput } from './events-validation.js';
+import { timestamp, validateStoredEvent, type EventInput } from './events-validation.js';
 
 export type EditableEvent = EventInput & { version: number; registrationDeadline: Date | null; activeRegistrationCount: number };
 export type EventEditResult =
@@ -23,7 +23,7 @@ export function validateEventEdit(value: unknown, current: EditableEvent, decisi
   if (body.expectedVersion !== current.version) return { conflict: 'EVENT_CHANGED' };
   if (current.startsAt.getTime() <= decisionTime) return { conflict: 'EVENT_STARTED' };
   const { expectedVersion: _expectedVersion, registrationDeadline: _deadline, ...patch } = body;
-  const result = validateEvent({ title: current.title, startsAt: current.startsAt.toISOString(), endsAt: current.endsAt.toISOString(), location: current.location, capacity: current.capacity, description: current.description, ...patch });
+  const result = validateStoredEvent({ title: current.title, startsAt: current.startsAt.toISOString(), endsAt: current.endsAt.toISOString(), location: current.location, capacity: current.capacity, description: current.description, ...patch });
   if (!result.data) return { errors: result.errors };
   if (result.data.startsAt.getTime() <= decisionTime) errors.startsAt = 'Start time must be in the future.';
   const registrationDeadline = Object.hasOwn(body, 'registrationDeadline') ? body.registrationDeadline === null ? null : timestamp(body.registrationDeadline) : current.registrationDeadline;

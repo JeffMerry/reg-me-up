@@ -13,7 +13,7 @@ export function timestamp(value: unknown): Date | null {
   return Number.isFinite(date.getTime()) ? date : null;
 }
 
-export function validateEvent(value: unknown): { data?: EventInput; errors: Record<string, string> } {
+function validateEventFields(value: unknown, maximumCapacity: number): { data?: EventInput; errors: Record<string, string> } {
   const errors: Record<string, string> = {};
   const body = value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
   if (Object.keys(body).some(key => !['title', 'startsAt', 'endsAt', 'location', 'capacity', 'description'].includes(key))) errors.form = 'Unexpected field.';
@@ -25,12 +25,18 @@ export function validateEvent(value: unknown): { data?: EventInput; errors: Reco
   if (!startsAt) errors.startsAt = 'Enter a valid start date and time with timezone.';
   if (!endsAt || (startsAt && endsAt <= startsAt)) errors.endsAt = 'End time must be after start time.';
   const capacity = body.capacity;
-  if (typeof capacity !== 'number' || !Number.isInteger(capacity) || capacity < 1 || capacity > 60) errors.capacity = 'Enter a whole number from 1 to 60.';
+  if (typeof capacity !== 'number' || !Number.isInteger(capacity) || capacity < 1 || capacity > maximumCapacity) errors.capacity = maximumCapacity === 60 ? 'Enter a whole number from 1 to 60.' : 'Capacity must be a positive whole number.';
   if (body.description !== undefined && body.description !== null && (typeof body.description !== 'string' || [...body.description].length > 10000)) errors.description = 'Description must be at most 10,000 characters.';
   if (Object.keys(errors).length || !startsAt || !endsAt || typeof capacity !== 'number') return { errors };
   const description = typeof body.description === 'string' && body.description.trim() ? body.description : null;
   return { data: { title, startsAt, endsAt, location, capacity, description }, errors };
 }
+
+export const validateEvent = (value: unknown) => validateEventFields(value, 60);
+
+// Complete merged edit state may retain an omitted legacy capacity. Explicit
+// edit capacity has already been checked against 1–60 by validateEventEdit.
+export const validateStoredEvent = (value: unknown) => validateEventFields(value, 2147483647);
 
 export function validatePagination(query: Record<string, unknown>): { page: number; pageSize: number; skip: number } | null {
   if (Object.keys(query).some(key => key !== 'page' && key !== 'pageSize')) return null;
