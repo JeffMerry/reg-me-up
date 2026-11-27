@@ -1,5 +1,7 @@
 # F-05 cancellation — executed evidence
 
+Current feature chain reconciliation: PR [#57](https://github.com/JeffMerry/reg-me-up/pull/57) was approved by THN4 and merged26Nov2026 into staging as `bd8bf1a97a53e30eaa60a5a0a689b13af0e0f149`. Subsequent #65/#66/#68/#69 integrate deadline, Instructor and selected acceptance cases; combined C69 CI reports cancellation13/13 within integration128/128. This supersedes historical feature review/staging-pending statements for those sources, while final main release/deployment and selected AC06 two-new-registrants-after-cancel coverage remain open. See [per-AC record](../deliverable-2/feature-completion.md) and [readiness](../deliverable-2/readiness.md).
+
 26 November 2026, Asia/Bangkok. Owner: Kittithat (JeffMerry); peer reviewer: Thanatip (THN4). Refs #41. Status: **implemented and locally verified candidate; peer review, staging merge and accepted release pending**.
 
 ## Version and actual RED/GREEN
@@ -29,7 +31,7 @@ Credentials were injected only for synthetic fixtures. API tests clean up their 
 
 ## Requirement → AC → actual tests
 
-API file: [`server/tests/integration/cancellation.test.ts`](../../../../server/tests/integration/cancellation.test.ts). Browser file: [`e2e/f-05.spec.ts`](../../../../e2e/f-05.spec.ts). Existing `events.test.ts` retains the DTO allowlist regression and now expects nullable `cancelledAt` on own responses.
+API file: [`server/tests/integration/cancellation.test.ts`](../../../server/tests/integration/cancellation.test.ts). Browser file: [`e2e/f-05.spec.ts`](../../../e2e/f-05.spec.ts). Existing `events.test.ts` retains the DTO allowlist regression and now expects nullable `cancelledAt` on own responses.
 
 | Requirements / AC / planned STS | Actual executable checks and observed result | Remaining integration |
 |---|---|---|

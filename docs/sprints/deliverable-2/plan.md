@@ -1,5 +1,9 @@
 # Remaining delivery work and release evidence plan
 
+Current checkpoint27Nov2026: [evidence index](evidence-index.md) records #68/#69 actual THN4 approvals and staging integration through `7c85dcc3e762c7f2be62a2285264af8aa4f9a972`. #69 CI45990942080 is SUCCESS; its review records93 unit/128 integration/87 browser plus build/Docker. Historical F07 review/merge-pending rows below are superseded for that source. G05–06, accepted main identity, deployment/human checks, PDF and submission remain pending.
+
+The [current requirement matrix](current-traceability.md), [per-AC completion](feature-completion.md), [actual code excerpts](test-excerpts.md), [two review chains](review-chains.md), [CI logs](ci-excerpt.md) and [setup/release summary](setup-and-release.md) are now compiled. [Candidate results](candidate-verification.md) disclose the fresh local/operator attempts; [readiness](readiness.md) records specific uncovered selections and current dated targets, superseding stale plan-only ledger states below. These Markdown sources are prepared for review; PDF assembly and release/submission are still separate incomplete work.
+
 27Nov2026 (Asia/Bangkok). Refs #44/#45. The user changed allocation in chat: **JeffMerry owns all remaining implementation, integration, migrations/tests, release preparation and release evidence/report**. THN4 remains the different teammate reviewer. Historical F09 implementation credit/approval records are retained. Human LEB2 submission is not performed by this plan; identify the submitter explicitly before submission.
 
 ## Gates and proposed targets

@@ -1,5 +1,7 @@
 # F-09 implementation and verification evidence
 
+Current implementation reconciliation: F09 #66 is reviewed/merged; selected follow-up assignments/restart/access work in #68 and F07 cross-feature check-in in #69 are approved and integrated through staging `7c85dcc3e762c7f2be62a2285264af8aa4f9a972`. Historical pending implementation statements below describe earlier candidate checkpoints. Combined CI C69 includes Instructor11 and acceptance13 integration cases. Final main/deploy/human acceptance remains open; see [AC completion](../deliverable-2/feature-completion.md).
+
 ## Current verified result
 
 CI run [45966205796](https://github.com/JeffMerry/reg-me-up/actions/runs/45966205796) on tested commit `0dd48000cd0b5146ce16aedf5e0f00520ca36de3` completed successfully on 27 November 2026. Unit **93/93**, PostgreSQL integration **94/94**, and browser **62/62** passed, including all five F-09 browser cases; typecheck, client/server build, migrations/seed, and Docker image build passed. These are automated CI results for this SHA; peer merge approval and post-deployment acceptance under #45 remain separate.

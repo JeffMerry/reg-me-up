@@ -78,4 +78,6 @@ F07 selected automated AC evidence does not equal teammate acceptance or the ent
 
 ## PR CI
 
-PR/run not yet created. The PR description will record actual head/checked-out merge SHA, counts and required check result after CI completes.
+[PR #69](https://github.com/JeffMerry/reg-me-up/pull/69) passed [CI45990942080](https://github.com/JeffMerry/reg-me-up/actions/runs/45990942080), head `cc55b4a3761d58c04402ac34793a3a44ddfb4204`; checked-out PR merge `4d4e2740e1ddcf47d1b4dd784c77c70610d99d8a` is reported in the PR execution record. Actual [THN4 APPROVED review6089008375](https://github.com/JeffMerry/reg-me-up/pull/69#pullrequestreview-6089008375),27Nov2026 20:38:55 Asia/Bangkok, records unit93/integration128/browser87 and migrations/typecheck/build/Docker PASS. GitHub run metadata independently confirms SUCCESS. THN4 merged at20:40:25 into staging as `7c85dcc3e762c7f2be62a2285264af8aa4f9a972`.
+
+This supersedes the historical pending-review/CI/merge statements above for this exact checkpoint. Review requested non-blocking delayed-logout callback synchronization improvement and this CI evidence update; the synchronization improvement is still open. G05 combined candidate, G06 cloud/human checks, main release/PDF/submission and F08 implementation remain pending. See the [Deliverable2 evidence index](../deliverable-2/evidence-index.md).
