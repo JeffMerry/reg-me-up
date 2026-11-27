@@ -159,3 +159,17 @@ Latest F-09 verification (27 November 2026): E2E PASS 5/5; focused unit PASS 6/6
 Latest F-09 implementation update27Nov2026: F-09 uncommitted code candidate is in the working tree on `feature/f-09-instructor`; pure interval rule RED/GREEN and typecheck/build evidence are recorded in [F-09 evidence](sprints/sprint-2/f-09-evidence.md). Guarded PostgreSQL, API/DB migration/race and browser tests are NOT RUN because local DB/loopback access returned EACCES. No F-09 acceptance is inferred as passed.
 
 </details>
+
+## Sprint 3 contract mapping — 27 November 2026
+
+Confirmed Q09 and technical reviewable contracts supplement baseline IDs without deleting them. [Sprint2 audit](sprints/sprint-2/acceptance-audit.md) supersedes old Instructor-pending statements only for specifically executed overlap/role/race scope; remaining AC and release are explicit. User-confirmed ownership: JeffMerry implements/tests/integrates and compiles release evidence; THN4 reviews. No Sprint3 test has run.
+
+| Requirement | Feature / responsibility | AC | Planned STS | Actual file/result/version |
+|---|---|---|---|---|
+| FR08; BR09 | F07 owner check-in | S3-F07-AC01–04/06 | S3-T07-01–04/06 | NOT IMPLEMENTED / NOT RUN |
+| BR05; NFR01 | F07/F08 owner-only private access | S3-F07-AC05; S3-F08-AC04 | S3-T07-05; S3-T08-04 | NOT RUN |
+| FR09; BR10 | F08 unique-person/current-state report counts | S3-F08-AC01–03/05 | S3-T08-01–03/05 | NOT IMPLEMENTED / NOT RUN |
+| NFR02 | F07 attendance/F08 saved count retrieval after restart | S3-F07-AC07; S3-F08-AC06 | S3-T07-07; S3-T08-06 | NOT RUN; no deployment/reseed evidence inferred |
+| NFR06 | Check-in/report state/keyboard/responsive UI | S3-F07-AC08; S3-F08-AC06 | S3-T07-08; S3-T08-06 | NOT RUN |
+
+Full [F07](sprints/sprint-3/f-07.md)/[F08](sprints/sprint-3/f-08.md), [STS](sprints/sprint-3/sts.md), [DoD](sprints/sprint-3/dod.md) and [delivery plan](sprints/deliverable-2/plan.md) define remaining work and targets. Intended tests do not establish measured coverage or acceptance.

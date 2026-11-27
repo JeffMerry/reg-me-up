@@ -1,6 +1,8 @@
 # Sprint 2 policy confirmation and ownership
 
-Version 0.3 — 26 November 2026 (Asia/Bangkok). Refs #40/#42/#51.
+Version0.4 — 27 November2026 (Asia/Bangkok). Refs #40/#42/#44/#45/#51.
+
+The26Nov matrix below is historical. [Current responsibilities](#current-responsibilities--27-november-2026) supersede it for remaining work after the user reassignment; completed contributions/reviews remain attributed to their actual authors.
 
 ## Actual review evidence and status boundary
 
@@ -40,3 +42,17 @@ Update26Nov2026 after F-05 PR #57 merged: the user explicitly reassigned the mis
 ## Evidence still pending
 
 F-05 merged in #57; [F-05 evidence](f-05-evidence.md) records its local/CI boundary. F-06 has a separate validation work branch, without exposed edit API/UI yet. F-09 implementation is not established by this update. The [shared lock prerequisite](shared-lock-evidence.md) merged in #55; [version foundation](event-version-evidence.md) records its own verification/review status. No accepted integrated Sprint2 main release is claimed. Historical CI run45651181587 on2093a5a is not evidence of later feature behavior. Every new head needs its own CI/reviewer assessment; deployment and independent retests remain pending.
+
+## Current responsibilities — 27 November 2026
+
+The user stated in chat: “เปลี่ยนเเล้วครับต่อไปผมทำหมดเลยจนถึง release evidence”. This explicitly assigns remaining implementation and release-evidence work to Kittithat (JeffMerry). Thanatip's F09 historical implementation and actual JeffMerry review are preserved; no completed work is reattributed.
+
+| Remaining work | Accountable / implementation / migration / tests / evidence | Different teammate reviewer |
+|---|---|---|
+| Sprint2 gap closure and integration | Kittithat Disthanakornkun (JeffMerry) | Thanatip Nitinantakul (THN4) |
+| F07/F08 contracts and implementation | Kittithat Disthanakornkun (JeffMerry) | Thanatip Nitinantakul (THN4) |
+| Future schema coordination, regression and staging integration | Kittithat Disthanakornkun (JeffMerry), consulting actual merged schema/history | Thanatip Nitinantakul (THN4) |
+| Release preparation, deployment evidence, traceability and #45/PDF | Kittithat Disthanakornkun (JeffMerry) | Thanatip Nitinantakul (THN4) |
+| Human LEB2 submission | Explicit submitter to be recorded before action; not performed by this allocation | Verify receipt/version/time |
+
+F06 #65 and F09 #66 are approved/merged; [audit](acceptance-audit.md) distinguishes passing executed cases from missing acceptance evidence. This allocation authorizes preparation/work, not self-approval or fabricated review/test/deploy/submission. [Plan and targets](../deliverable-2/plan.md).

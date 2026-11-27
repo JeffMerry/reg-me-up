@@ -149,7 +149,7 @@ Text limits ใน SDS เป็น technical design limits จาก proposal �
 | Q-06 | Editable fields และ capacity change policy หลังมี registrants | CONFIRMED — before-start partial edits/version/ACTIVE guard; explicit1–60 and preserved omitted legacy capacity |
 | Q-07 | Instructor count, changes/removal และ assignment history | CONFIRMED — one current Instructor, pre-start changes, retained history |
 | Q-08 | Instructor multi-role และ overlapping teaching events | CONFIRMED — single role, reject overlap, adjacent allowed |
-| Q-09 | Check-in window/corrections และ report counting | OPEN — F-07/08 contracts, Sprint 3 |
+| Q-09 | Check-in window/corrections และ report counting | CONFIRMED by user27Nov2026: ACTIVE only; start≤now<end; repeat no-op/original time; no undo; reports count unique people by current status. [Definitions/example](sprints/sprint-3/README.md); technical contract review pending |
 | ENG-01 | Exact compatible runtime/package versions และ local PostgreSQL provisioning | PARTIAL — existing targets selected, Prisma exact versions/compatibility remain open; see [versions](dependency-versions.md); install/lockfile/provisioning/build validation pending SYS-01 |
 | ENG-02 | Feature authors/reviewers, GitHub board/Issues, branch settings และ actual review findings | PARTIAL — Issues #1, #3–#6 assigned per user direction; teammate agreement, actual feature PR review approvals, board and protection remain pending |
 | ENG-03 | GCP components/resource access/cost/configuration จาก Lab 5 guidance | OPEN — Lab 5; architecture must support durable DB now |
