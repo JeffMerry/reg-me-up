@@ -8,6 +8,7 @@ import { registrationHandlers } from './registrations.js';
 import { organizerRegistrationHandlers } from './organizer-registrations.js';
 import { eventManagementHandlers } from './event-management.js';
 import { instructorHandlers } from './instructors.js';
+import { checkInHandlers } from './check-ins.js';
 
 export function createApp(checkDatabase: () => Promise<void>, auth?: { config: ServerConfig; pool: pg.Pool; prisma: PrismaClient; now?: () => number }, frontendDirectory?: string) {
   const app = express();
@@ -30,6 +31,9 @@ export function createApp(checkDatabase: () => Promise<void>, auth?: { config: S
     const organizerRegistrations = organizerRegistrationHandlers(auth.prisma);
     const management = eventManagementHandlers(auth.prisma, auth.now);
     const instructors = instructorHandlers(auth.prisma, auth.now);
+    const checkIns = checkInHandlers(auth.prisma, auth.now);
+    app.get('/api/organizer/events/:eventId/check-ins', h.requireUser, h.requireRole('ORGANIZER'), checkIns.list);
+    app.post('/api/organizer/events/:eventId/registrations/:registrationId/check-in', h.requireUser, h.requireRole('ORGANIZER'), h.csrf, h.jsonBody, checkIns.create);
     app.get('/api/events', events.publicList);
     app.get('/api/events/:eventId', events.detail);
     app.post('/api/events', h.requireUser, h.requireRole('ORGANIZER'), h.csrf, h.jsonBody, events.publish);
